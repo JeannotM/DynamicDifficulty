@@ -96,10 +96,10 @@ difficulty:
 ```
 ## calculate-exact-percentage
 So if calculate-exact-percentage is disabled the damage chart will look something like this:
-<picture>
+![calculate-exact-percentage-enabled.jpg](docs/calculate-exact-percentage-enabled.jpeg?raw=true "Enabled")
 
 And if it's enabled it will look like this:
-<picture>
+![calculate-exact-percentage-disabled.jpg](docs/calculate-exact-percentage-disabled.jpeg?raw=true "Disabled")
 
 I made this a seperate option so you can decide yourself if you would like to keep the "hard" difficulty spikes or if you want the players to feel more immersed in the difficulty changes over time.
 If you'd like to read more about the psychology behind it: https://en.wikipedia.org/wiki/Flow_(psychology)
