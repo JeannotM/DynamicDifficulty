@@ -1,9 +1,9 @@
 # DynamicDifficulty
 ## Contents:
-#### [About DynamicDifficulty](https://github.com/JeannotM/DynamicDifficulty#About_DynamicDifficulty)
-#### [Settings with explanations](https://github.com/JeannotM/DynamicDifficulty#Settings_with_explanations)
-#### [calculate-exact-percentage](https://github.com/JeannotM/DynamicDifficulty#calculate-exact-percentage)
-#### [Commands, Permissions and explanations](https://github.com/JeannotM/DynamicDifficulty#Commands,_Permissions_and_explanations)
+#### [About DynamicDifficulty](https://github.com/JeannotM/DynamicDifficulty#about-dynamicdifficulty-1)
+#### [Settings with explanations](https://github.com/JeannotM/DynamicDifficulty#settings-with-explanations-1)
+#### [calculate-exact-percentage](https://github.com/JeannotM/DynamicDifficulty#calculate-exact-percentage-1)
+#### [Commands, Permissions and explanations](https://github.com/JeannotM/DynamicDifficulty#commands-permissions-and-explanations-1)
 
 ## About DynamicDifficulty
 I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDifficulty plugin for 1.16, the ones I saw from earlier versions weren't that customizable and I wanted experienced and new Minecraft players to be able to play on the same server without having to worry about it being too hard or too easy for the players.
