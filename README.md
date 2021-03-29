@@ -1,4 +1,10 @@
 # DynamicDifficulty
+## Contents:
+#### [About DynamicDifficulty](https://github.com/JeannotM/DynamicDifficulty#About_DynamicDifficulty)
+#### [Settings with explanations](https://github.com/JeannotM/DynamicDifficulty#Settings_with_explanations)
+#### [calculate-exact-percentage](https://github.com/JeannotM/DynamicDifficulty#calculate-exact-percentage)
+#### [Commands, Permissions and explanations](https://github.com/JeannotM/DynamicDifficulty#Commands,_Permissions_and_explanations)
+
 ## About DynamicDifficulty
 I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDifficulty plugin for 1.16, the ones I saw from earlier versions weren't that customizable and I wanted experienced and new Minecraft players to be able to play on the same server without having to worry about it being too hard or too easy for the players.
 
@@ -96,12 +102,12 @@ difficulty:
 ```
 ## calculate-exact-percentage
 So if calculate-exact-percentage is disabled the damage chart will look something like this:
-![calculate-exact-percentage-enabled.jpg](docs/calculate-exact-percentage-enabled.jpeg?raw=true "Enabled")
-
-And if it's enabled it will look like this:
 ![calculate-exact-percentage-disabled.jpg](docs/calculate-exact-percentage-disabled.jpeg?raw=true "Disabled")
 
-I made this a seperate option so you can decide yourself if you would like to keep the "hard" difficulty spikes or if you want the players to feel more immersed in the difficulty changes over time.
+And if it's enabled it will look like this:
+![calculate-exact-percentage-enabled.jpg](docs/calculate-exact-percentage-enabled.jpeg?raw=true "Enabled")
+
+I made this a seperate option so you can decide yourself if you would like to keep the "hard" difficulty spikes similar to the world difficulties of minecraft or if you want the players to feel more immersed in the difficulty changes over time. You won't notice it as much this way and it will keep the players more into the flow as they get better.
 If you'd like to read more about the psychology behind it: https://en.wikipedia.org/wiki/Flow_(psychology)
 
 ## Commands, Permissions and explanations
