@@ -1,0 +1,73 @@
+# Some settings in the config have been typed shorter so as not to clutter it too much.
+# Please visit https://github.com/JeannotM/DynamicDifficulty for more detailed explanations with examples.
+
+# Affinity Gained or Lost When Doing Certain Things.
+points-on-interval: 4 # How many points to give per interval, if turned on.
+block-mined: 1
+player-hit: -1
+pvp-kill: 10
+pve-kill: 2
+death: -100
+
+# With How Much Affinity a Player Starts When Joining For The First Time.
+starting-affinity: 500
+
+# What The Maximum and Minimum Affinity Are, no one can get more or less than this (even with commands)
+min-affinity: 0
+max-affinity: 1200
+
+# 0 Equals Disabled, timer is in minutes
+interval-timer: 2
+
+# Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+mobs-count-as-pve:
+- ZOMBIE
+- BLAZE
+- CREEPER
+- SKELETON
+- ENDERMAN
+- WITHER_SKELETON
+- SPIDER
+- CAVESPIDER
+- VINDICATOR
+- WITCH
+
+# Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+blocks:
+- DIAMOND_ORE
+- EMERALD_ORE
+
+# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
+silk-touch-allowed: false
+
+# Calculates the percentage between 2 difficulties so the progression will feel more natural.
+calculate-exact-percentage: true
+
+# Will calculate difficulty per player if enabled, will otherwise do that for the whole world (everyone will be on the same difficulty)
+per-player-difficulty: true
+
+# This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
+# Only "effects-when-attacked" affect the Wither and EnderDragon
+# Copy one of the existing difficulty settings to create your own, check the Github page for more info
+difficulty:
+  easy:
+    affinity-required: 0
+    damage-done-by-mobs: 50
+    damage-done-on-mobs: 100
+    experience-multiplier: 70
+    double-loot-chance: 0
+    effects-when-attacked: false
+  normal:
+    affinity-required: 400
+    damage-done-by-mobs: 75
+    damage-done-on-mobs: 100
+    experience-multiplier: 90
+    double-loot-chance: 0
+    effects-when-attacked: true
+  hard:
+    affinity-required: 1000
+    damage-done-by-mobs: 100
+    damage-done-on-mobs: 100
+    experience-multiplier: 125
+    double-loot-chance: 5
+    effects-when-attacked: true

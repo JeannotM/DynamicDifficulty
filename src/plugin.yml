@@ -1,0 +1,10 @@
+main: me.skinnyjeans.gmd.Main
+name: DynamicDifficulty
+version: 1.0
+author: SkinnyJeans
+api-version: 1.13
+
+commands:
+  affinity:
+    description: Settings to change the Affinity of users
+    usage: /affinity
