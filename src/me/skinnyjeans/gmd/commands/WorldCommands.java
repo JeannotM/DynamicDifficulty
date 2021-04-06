@@ -12,7 +12,7 @@ import me.skinnyjeans.gmd.WorldAffinity;
 
 public class WorldCommands implements CommandExecutor{
 	
-	private WorldAffinity affinity = null;
+	private WorldAffinity affinity;
 	
 	public WorldCommands(WorldAffinity wa) {
 		affinity = wa;
@@ -31,7 +31,7 @@ public class WorldCommands implements CommandExecutor{
 				try {
 					switch(args[0].toLowerCase()){
 						case "set":
-							if(args[1].toLowerCase() == "world")
+							if(args[1].equalsIgnoreCase("world"))
 								msg = setAffinity(Integer.parseInt(args[2]));
 							if(args.length == 2)
 								msg = setAffinity(Integer.parseInt(args[1]));
@@ -87,22 +87,20 @@ public class WorldCommands implements CommandExecutor{
 	}
 
 	/**
-	 * Sets the affinity for the player
+	 * Checks the permission of the player
 	 * 
-	 * @param UUID of the user
+	 * @param user is the User that will need to be checked
 	 * @param perm is the permission to check
 	 * @return Boolean whether this player has the permission or not
 	 */
 	private boolean checkPermission(Player user, String perm) {
-		if(user.hasPermission("affinity."+perm) || user.isOp())
-			return true;
-		return false;
+		return user.hasPermission("affinity." + perm) || user.isOp();
 	}
 
 	/**
 	 * Sets the affinity of the world
 	 * 
-	 * @param Amount of affinity that will be set to the world
+	 * @param amount of affinity that will be set to the world
 	 * @return String about how it was executed
 	 */
 	private String setAffinity(int amount) {
@@ -120,7 +118,7 @@ public class WorldCommands implements CommandExecutor{
 	/**
 	 * Gets the affinity of the player
 	 * 
-	 * @param UUID of the user
+	 * @param user is the User who's affinity needs to be returned
 	 * @return Amount of affinity a user has or an error
 	 */
 	private String getAffinity(Player user) {
@@ -154,7 +152,7 @@ public class WorldCommands implements CommandExecutor{
 	/**
 	 * Adds a given amount of affinity to the world
 	 * 
-	 * @param Amount of affinity that will be added to the world
+	 * @param amount of affinity that will be added to the world
 	 * @return String about how it was executed
 	 */
 	private String addAffinity(int amount) {

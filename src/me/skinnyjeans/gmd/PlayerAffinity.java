@@ -1,23 +1,10 @@
 package me.skinnyjeans.gmd;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
-import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Wither;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -27,6 +14,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.*;
 
 public class PlayerAffinity implements Listener {
 	private DataManager data;
@@ -63,7 +52,7 @@ public class PlayerAffinity implements Listener {
 		HashMap<Integer, String> tmpMap = new HashMap<>();
 		ArrayList<String> tmpList = new ArrayList<>();
 		ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
-		
+
 		for (String key : section.getKeys(false)) {
 			tmpList.add(key);
 			difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
@@ -75,14 +64,11 @@ public class PlayerAffinity implements Listener {
 		}
 		
 		// Everything beneath this comment is to sort the difficulties by their affinity requirement
-		for (int i = 0; i < tmpList.size(); i++)
-			tmpMap.put(difficultyAffinity.get(tmpList.get(i)), tmpList.get(i));
+		for (String s : tmpList) tmpMap.put(difficultyAffinity.get(s), s);
 		
 		TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
-		Iterator<Integer> itr = tm.keySet().iterator();
-		
-		while (itr.hasNext()) {
-			int key = itr.next();
+
+		for (int key : tm.keySet()) {
 			difficulties.add(tmpMap.get(key));
 		}
 		tm.clear(); tmpList.clear(); tmpMap.clear();
@@ -134,7 +120,7 @@ public class PlayerAffinity implements Listener {
 			UUID uuid = e.getEntity().getKiller().getUniqueId();
 			e.setDroppedExp( (int) (e.getDroppedExp() * calcPercentage(uuid, "experience-multiplier") / 100.0));
 			double DoubleLoot = calcPercentage(uuid, "double-loot-chance");
-			if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && e.getEntity().getCanPickupItems() == false) {
+			if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems()) {
 				for (int i = 0; i < e.getDrops().size(); i++) {
 					Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
 				}
@@ -162,9 +148,9 @@ public class PlayerAffinity implements Listener {
 				e.setDamage(dam);
 			}
 			if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty(prey.getUniqueId())))
-				for (int i = 0; i < effects.length; i++) {
-					if (((LivingEntity) prey).hasPotionEffect(effects[i]))
-						((LivingEntity) prey).removePotionEffect(effects[i]);
+				for (PotionEffectType effect : effects) {
+					if (((LivingEntity) prey).hasPotionEffect(effect))
+						((LivingEntity) prey).removePotionEffect(effect);
 				}
 		} else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
 			double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs")  / 100.0;
@@ -205,8 +191,8 @@ public class PlayerAffinity implements Listener {
 	/**
 	 * Calculates if the amount exceeds the users Maximum or the servers Minimum/Maximum
 	 * 
-	 * @param UUID of the user
-	 * @param INT the affinity given to calculate
+	 * @param uuid of the user
+	 * @param x is the affinity given to calculate
 	 * @return INT the affinity after it has been checked
 	 */
 	public int calcAffinity(UUID uuid, int x) {
@@ -224,13 +210,13 @@ public class PlayerAffinity implements Listener {
 	/**
 	 * Gets the difficulty of an user
 	 * 
-	 * @param UUID of the user
+	 * @param uuid of the user
 	 * @return String of the difficulty the user is on
 	 */
 	public String calcDifficulty(UUID uuid) {
 		String last = "";
 		for (int i = 0; i < difficulties.size(); i++) {
-			if (last != "" && difficultyAffinity.get(difficulties.get(i)) >= playerAffinity.get(uuid) && difficultyAffinity.get(last) <= playerAffinity.get(uuid))
+			if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= playerAffinity.get(uuid) && difficultyAffinity.get(last) <= playerAffinity.get(uuid))
 				return last;
 			if (i + 1 == difficulties.size())
 				return difficulties.get(i);
@@ -242,8 +228,8 @@ public class PlayerAffinity implements Listener {
 	/**
 	 * Calculates the exact percentage between 2 difficulties
 	 * 
-	 * @param UUID of the user
-	 * @param String mode which is used to select the correct variable
+	 * @param uuid of the user
+	 * @param mode which is used to select the correct variable
 	 * @return Double of the exact or the difficulty based percentage
 	 */
 	private double calcPercentage(UUID uuid, String mode) {
@@ -272,23 +258,18 @@ public class PlayerAffinity implements Listener {
 	/**
 	 * Returns data from the made HashMaps
 	 * 
-	 * @param String mode which is used to select the correct variable
-	 * @param String diff which is the difficulty setting
+	 * @param mode which is used to select the correct variable
+	 * @param diff which is the difficulty setting
 	 * @return INT from the selected variable and difficulty
 	 */
 	private int getHashData(String mode, String diff) {
-		switch(mode) {
-			case "damage-done-by-mobs":
-				return damageDoneByMobs.get(diff);
-			case "damage-done-on-mobs":
-				return damageDoneOnMobs.get(diff);
-			case "experience-multiplier":
-				return experienceMultiplier.get(diff);
-			case "double-loot-chance":
-				return doubleLootChance.get(diff);
-			default:
-				return -1;
-		}
+		return switch (mode) {
+			case "damage-done-by-mobs" -> damageDoneByMobs.get(diff);
+			case "damage-done-on-mobs" -> damageDoneOnMobs.get(diff);
+			case "experience-multiplier" -> experienceMultiplier.get(diff);
+			case "double-loot-chance" -> doubleLootChance.get(diff);
+			default -> -1;
+		};
 		
 	}
 }

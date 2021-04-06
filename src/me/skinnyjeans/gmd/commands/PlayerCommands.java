@@ -13,7 +13,7 @@ import me.skinnyjeans.gmd.PlayerAffinity;
 
 public class PlayerCommands implements CommandExecutor {
 	
-	private PlayerAffinity affinity = null;
+	private PlayerAffinity affinity;
 	
 	public PlayerCommands(PlayerAffinity pa) {
 		affinity = pa;
@@ -22,7 +22,7 @@ public class PlayerCommands implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(label.equalsIgnoreCase("affinity")) {
-			String msg = "";
+			String msg;
 			boolean console = false;
 			
 			if(!(sender instanceof Player))
@@ -30,32 +30,16 @@ public class PlayerCommands implements CommandExecutor {
 			
 			if(checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase()) || console) {
 				try {
-					switch(args[0].toLowerCase()){
-						case "set":
-							msg = setAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
-							break;
-						case "get":
-							msg = getAffinity(Bukkit.getPlayer(args[1]));
-							break;
-						case "add":
-							msg = addAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
-							break;
-						case "remove":
-							msg = addAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2])*-1);
-							break;
-						case "setmax":
-							msg = setMaxAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
-							break;
-						case "removemax":
-							msg = removeMaxAffinity(Bukkit.getPlayer(args[1]));
-							break;
-						case "author":
-							msg = "The author of this plugin is: SkinnyJeans";
-							break;
-						default:
-							msg = "Sorry, I don't recognize the command: " + args[0];
-							break;
-					}
+					msg = switch (args[0].toLowerCase()) {
+						case "set" -> setAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
+						case "get" -> getAffinity(Bukkit.getPlayer(args[1]));
+						case "add" -> addAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
+						case "remove" -> addAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]) * -1);
+						case "setmax" -> setMaxAffinity(Bukkit.getPlayer(args[1]), Integer.parseInt(args[2]));
+						case "removemax" -> removeMaxAffinity(Bukkit.getPlayer(args[1]));
+						case "author" -> "The author of this plugin is: SkinnyJeans";
+						default -> "Sorry, I don't recognize the command: " + args[0];
+					};
 				}
 				catch(NumberFormatException e) {
 					msg = "Third argument requires a number";
@@ -86,21 +70,19 @@ public class PlayerCommands implements CommandExecutor {
 	/**
 	 * Sets the affinity for the player
 	 * 
-	 * @param UUID of the user
+	 * @param user is the User that will need to be checked
 	 * @param perm is the permission to check
 	 * @return Boolean whether this player has the permission or not
 	 */
 	private boolean checkPermission(Player user, String perm) {
-		if(user.hasPermission("affinity."+perm) || user.isOp())
-			return true;
-		return false;
+		return user.hasPermission("affinity." + perm) || user.isOp();
 	}
 	
 	/**
 	 * Sets the affinity for the player
 	 * 
-	 * @param UUID of the user
-	 * @param Amount of affinity that will be set to this user
+	 * @param user is the User who's affinity needs to be changed
+	 * @param amount of affinity that will be set to this user
 	 * @return String about how it was executed
 	 */
 	private String setMaxAffinity(Player user, int amount) {
@@ -122,7 +104,7 @@ public class PlayerCommands implements CommandExecutor {
 	/**
 	 * Removes the max affinity for the player
 	 * 
-	 * @param UUID of the user
+	 * @param user is the User who's affinity needs to be changed
 	 * @return String about how it was executed
 	 */
 	private String removeMaxAffinity(Player user) {
@@ -142,8 +124,8 @@ public class PlayerCommands implements CommandExecutor {
 	/**
 	 * Sets the affinity for the player
 	 * 
-	 * @param UUID of the user
-	 * @param Amount of affinity that will be set to this user
+	 * @param user is the User who's affinity needs to be changed
+	 * @param amount of affinity that will be set to this user
 	 * @return String about how it was executed
 	 */
 	private String setAffinity(Player user, int amount) {
@@ -165,7 +147,7 @@ public class PlayerCommands implements CommandExecutor {
 	/**
 	 * Gets the affinity of the player
 	 * 
-	 * @param UUID of the user
+	 * @param user is the User who's affinity needs to be changed
 	 * @return Amount of affinity a user has or an error
 	 */
 	private String getAffinity(Player user) {
@@ -184,8 +166,8 @@ public class PlayerCommands implements CommandExecutor {
 	/**
 	 * Adds a given amount of affinity to a certain player
 	 * 
-	 * @param UUID of the user
-	 * @param Amount of affinity that will be added to this user
+	 * @param user is the User who's affinity needs to be changed
+	 * @param amount of affinity that will be added to this user
 	 * @return String about how it was executed
 	 */
 	private String addAffinity(Player user, int amount) {

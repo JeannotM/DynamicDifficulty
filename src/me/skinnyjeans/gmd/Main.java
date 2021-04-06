@@ -1,7 +1,7 @@
 /**
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
- * 
+ *
  * @version 1.0
  * @author SkinnyJeans
  */
@@ -60,36 +60,30 @@ public class Main extends JavaPlugin {
 			int timer = data.getConfig().getInt("interval-timer");
 			if(timer > 0) {
 				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-		        scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
-		        	@Override
-					public void run() {
-		        		if (Bukkit.getOnlinePlayers().size() > 0) {
-		        			if(pa != null) {
-		        				pa.saveAllPlayerData();
-		        			}
-		        			else {
-		        				wa.saveAllData();
-		        			}
-		        		}
+		        scheduler.scheduleSyncRepeatingTask(this, () -> {
+					if (Bukkit.getOnlinePlayers().size() > 0) {
+						if(pa != null) {
+							pa.saveAllPlayerData();
+						}
+						else {
+							wa.saveAllData();
+						}
 					}
-				}, 0L, 20L*(60*timer));
+				}, 0L, 20L*(60L *timer));
 			}
 		}
 	}
 	
 	public void saveDataEveryFifteenMinutes() {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-        scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
-        	@Override
-			public void run() {
-        		if (Bukkit.getOnlinePlayers().size() > 0) {
-        			if(pa != null) {
-        				pa.saveAllPlayerData();
-        			}
-        			else {
-        				wa.saveAllData();
-        			}
-        		}
+        scheduler.scheduleSyncRepeatingTask(this, () -> {
+			if (Bukkit.getOnlinePlayers().size() > 0) {
+				if(pa != null) {
+					pa.saveAllPlayerData();
+				}
+				else {
+					wa.saveAllData();
+				}
 			}
 		}, 0L, 20L*(60*15));
 	}
