@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class PlayerAffinity implements Listener {
 	private DataManager data;
@@ -52,6 +53,18 @@ public class PlayerAffinity implements Listener {
 		HashMap<Integer, String> tmpMap = new HashMap<>();
 		ArrayList<String> tmpList = new ArrayList<>();
 		ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
+
+		if(minAffinity > maxAffinity){
+			int tmp = maxAffinity;
+			maxAffinity = minAffinity;
+			minAffinity = tmp;
+			Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity is larger than MaxAffinity, so their values have been switched.");
+		}
+		else if (minAffinity == maxAffinity){
+			maxAffinity = 0;
+			minAffinity = 1200;
+			Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity has the same value as MaxAffinity, so their values have been set to default.");
+		}
 
 		for (String key : section.getKeys(false)) {
 			tmpList.add(key);
@@ -180,13 +193,15 @@ public class PlayerAffinity implements Listener {
 		return playerMaxAffinity.get(uuid);
 	}
 
-	public void setAffinityUser(UUID uuid, int x) {
-		playerAffinity.replace(uuid, calcAffinity(uuid, x));
-	}
+	public void setAffinityUser(UUID uuid, int x) { playerAffinity.replace(uuid, calcAffinity(uuid, x)); }
 
-	public void setMaxAffinityUser(UUID uuid, int x) {
-		playerMaxAffinity.replace(uuid, calcAffinity(uuid, x));
-	}
+	public void setMaxAffinityUser(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(uuid, x)); }
+
+	public boolean hasDifficulty(String x) { return difficulties.contains(x); }
+
+	public int getDifficultyAffinity(String x) { return difficultyAffinity.get(x); }
+
+	public ArrayList<String> getDifficulties() { return difficulties; }
 
 	/**
 	 * Calculates if the amount exceeds the users Maximum or the servers Minimum/Maximum
@@ -216,6 +231,8 @@ public class PlayerAffinity implements Listener {
 	public String calcDifficulty(UUID uuid) {
 		String last = "";
 		for (int i = 0; i < difficulties.size(); i++) {
+			if (playerAffinity.get(uuid) == difficultyAffinity.get(difficulties.get(i)))
+				return difficulties.get(i);
 			if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= playerAffinity.get(uuid) && difficultyAffinity.get(last) <= playerAffinity.get(uuid))
 				return last;
 			if (i + 1 == difficulties.size())
@@ -240,8 +257,8 @@ public class PlayerAffinity implements Listener {
 			
 			if(differencePercentage == 0)
 				return getHashData(mode, difficulties.get(thisDiff));
-						
-			if(differencePercentage < 0) 
+
+			if(differencePercentage < 0)
 				differencePercentage*=-1;
 			
 			int a = difficultyAffinity.get(difficulties.get(thisDiff+1));
@@ -252,7 +269,6 @@ public class PlayerAffinity implements Listener {
 			return (getHashData(mode, difficulties.get(thisDiff)) + extraPercentage);
 		}
 		return getHashData(mode, difficulties.get(thisDiff));
-		
 	}
 	
 	/**
@@ -263,13 +279,10 @@ public class PlayerAffinity implements Listener {
 	 * @return INT from the selected variable and difficulty
 	 */
 	private int getHashData(String mode, String diff) {
-		return switch (mode) {
-			case "damage-done-by-mobs" -> damageDoneByMobs.get(diff);
-			case "damage-done-on-mobs" -> damageDoneOnMobs.get(diff);
-			case "experience-multiplier" -> experienceMultiplier.get(diff);
-			case "double-loot-chance" -> doubleLootChance.get(diff);
-			default -> -1;
-		};
-		
+		if(mode.equalsIgnoreCase("damage-done-by-mobs")){ return damageDoneByMobs.get(diff); }
+		if(mode.equalsIgnoreCase("damage-done-on-mobs")) { return damageDoneOnMobs.get(diff); }
+		if(mode.equalsIgnoreCase("experience-multiplier")) { return experienceMultiplier.get(diff); }
+		if(mode.equalsIgnoreCase("double-loot-chance")) { return doubleLootChance.get(diff); }
+		return -1;
 	}
 }

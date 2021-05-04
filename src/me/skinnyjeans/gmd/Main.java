@@ -24,22 +24,21 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thanks for installing DynamicDifficulty!");
+		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getBoolean("per-player-difficulty")) {
 			pa = new PlayerAffinity(this);
 			getServer().getPluginManager().registerEvents(pa, this);
 			this.getCommand("affinity").setExecutor(new PlayerCommands(pa));
-			this.getCommand("affinity").setTabCompleter(new PlayerTabCompleter());
+			this.getCommand("affinity").setTabCompleter(new PlayerTabCompleter(pa));
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		else {
 			wa = new WorldAffinity(this);
 			getServer().getPluginManager().registerEvents(wa, this);
 			this.getCommand("affinity").setExecutor(new WorldCommands(wa));
-			this.getCommand("affinity").setTabCompleter(new WorldTabCompleter());
+			this.getCommand("affinity").setTabCompleter(new WorldTabCompleter(wa));
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
 		}
-		
 		saveDataEveryFifteenMinutes();
 		onInterval();
 	}
@@ -48,11 +47,13 @@ public class Main extends JavaPlugin {
 	public void onDisable() {
 		if(pa != null) {
 			pa.saveAllPlayerData();
+			pa = null;
 		}
 		else {
 			wa.saveAllData();
+			wa = null;
 		}
-		
+		data = null;
 	}
 	
 	public void onInterval() {

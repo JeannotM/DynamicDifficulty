@@ -1,6 +1,7 @@
 package me.skinnyjeans.gmd.commands;
 
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -22,64 +23,61 @@ public class WorldCommands implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(label.equalsIgnoreCase("affinity")) {
 			String msg = "";
-			boolean console = false;
-			
-			if(!(sender instanceof Player))
-				console = true;
-			
-			if(checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase()) || console) {
-				try {
-					switch(args[0].toLowerCase()){
-						case "set":
-							if(args[1].equalsIgnoreCase("world"))
-								msg = setAffinity(Integer.parseInt(args[2]));
-							if(args.length == 2)
-								msg = setAffinity(Integer.parseInt(args[1]));
-							break;
-						case "get":
-							if(args.length == 1 || args[1].equalsIgnoreCase("world")) {
-								msg = getWorldAffinity();
-							}
-							else {
-								msg = getAffinity(Bukkit.getPlayer(args[1]));
-							}
-							break;
-						case "add":
-							if(args[1].equalsIgnoreCase("world"))
-								msg = addAffinity(Integer.parseInt(args[2]));
-							if(args.length == 2)
-								msg = addAffinity(Integer.parseInt(args[1]));
-							break;
-						case "remove":
-							if(args[1].equalsIgnoreCase("world"))
-								msg = addAffinity(Integer.parseInt(args[2])*-1);
-							if(args.length == 2)
-								msg = addAffinity(Integer.parseInt(args[1])*-1);
-							break;
-						case "author":
-							msg = "The author of this plugin is: SkinnyJeans";
-							break;
-						default:
-							msg = "Sorry, I don't recognize the command: " + args[0];
-							break;
+			Player arg1 = null;
+			int arg2 = -1;
+			boolean console = !(sender instanceof Player);
+
+			if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
+				if(args.length >= 2 && args[1] != null && args[1] != "") {
+					if (Bukkit.getPlayer(args[1]) != null) {
+						if (Bukkit.getPlayer(args[1]).isOnline()) {
+							arg1 = Bukkit.getPlayer(args[1]);
+						} else {
+							msg = args[1] + " needs to be online!";
+						}
+					} else if (console) {
+						arg2 = 0;
+					} else if (affinity.hasDifficulty(args[1])) {
+						arg2 = affinity.getDifficultyAffinity(args[1]);
+					} else if (args[1].equalsIgnoreCase("world")) {
+						arg2 = 0;
+					} else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[1]).find()) {
+						arg2 = Integer.parseInt(args[1]);
+					} else {
+						msg = args[1] + " isn't a recognized difficulty or online player";
 					}
 				}
-				catch(NumberFormatException e) {
-					msg = "Second argument requires a number";
+				if(args.length >= 3 && args[2] != null && args[2] != "") {
+					if (affinity.hasDifficulty(args[2])) {
+						arg2 = affinity.getDifficultyAffinity(args[2]);
+					} else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find()) {
+						arg2 = Integer.parseInt(args[2]);
+					} else if (args[1].equalsIgnoreCase("world")) {
+						arg2 = Integer.parseInt(args[2]);
+					} else {
+						msg = args[2] + " isn't a recognized difficulty or number";
+					}
 				}
-				catch(Exception e) {
-					msg = "Something went wrong, please check the console for more info";
-					System.out.println(e);
+
+				// No switch statement so earlier Java Versions are compatible
+				if(msg == ""){
+					if (args[0].equalsIgnoreCase("set")) { msg = setAffinity(arg2); }
+					else if (args[0].equalsIgnoreCase("get") && arg1 == null && arg2 != -1){ msg = getWorldAffinity(); }
+					else if (args[0].equalsIgnoreCase("get")){ msg =  getAffinity(arg1); }
+					else if (args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg2); }
+					else if (args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg2 * -1); }
+					else if (args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!"; }
+					else { msg = "Sorry, I don't recognize the command: " + args[0]; }
 				}
 			}
 			else {
 				msg = "You don't have permission to do that";
 			}
-			
-			if (sender instanceof Player) {
-				((Player) sender).getPlayer().sendMessage(msg);
-			} else {
+
+			if (console) {
 				Bukkit.getConsoleSender().sendMessage(msg);
+			} else {
+				((Player) sender).getPlayer().sendMessage(msg);
 			}
 			return true;
 		}
@@ -94,7 +92,7 @@ public class WorldCommands implements CommandExecutor{
 	 * @return Boolean whether this player has the permission or not
 	 */
 	private boolean checkPermission(Player user, String perm) {
-		return user.hasPermission("affinity." + perm) || user.isOp();
+		return user.hasPermission("affinity." + perm) || user.isOp() || user.hasPermission("affinity.*") ;
 	}
 
 	/**
@@ -125,8 +123,8 @@ public class WorldCommands implements CommandExecutor{
 		try {
 			return user.getName()+" is on "+affinity.calcDifficultyUser(user.getUniqueId())+" Difficulty with "+affinity.getAffinityUser(user.getUniqueId())+" Affinity points \nmax affinity: "+affinity.getMaxAffinityUser(user.getUniqueId());
 		}
-		catch(NullPointerException e) {
-			return "I'm sorry, this user doesn't exist";
+		catch(NullPointerException e){
+			return "You forgot to include the user!";
 		}
 		catch(Exception e) {
 			Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
@@ -166,5 +164,4 @@ public class WorldCommands implements CommandExecutor{
 			return "Something went wrong, please check the console for more info";
 		}
 	}
-
 }
