@@ -177,3 +177,5 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] Prefixes with Vault.
 - [ ] Placeholder API.
 - [ ] Multiverse Worlds Implementation
+- [ ] Implement BStats
+- [ ] Custom Affinity points for each mobs
