@@ -26,6 +26,10 @@ public class WorldCommands implements CommandExecutor{
 			Player arg1 = null;
 			int arg2 = -1;
 			boolean console = !(sender instanceof Player);
+			if(args.length == 0){
+				args[0] = "get";
+				args[1] = "world";
+			}
 
 			if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
 				if(args.length >= 2 && args[1] != null && args[1] != "") {
@@ -61,7 +65,7 @@ public class WorldCommands implements CommandExecutor{
 
 				// No switch statement so earlier Java Versions are compatible
 				if(msg == ""){
-					if (args[0].equalsIgnoreCase("set")) { msg = setAffinity(arg2); }
+					if (args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg2); }
 					else if (args[0].equalsIgnoreCase("get") && arg1 == null && arg2 != -1){ msg = getWorldAffinity(); }
 					else if (args[0].equalsIgnoreCase("get")){ msg =  getAffinity(arg1); }
 					else if (args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg2); }

@@ -27,6 +27,10 @@ public class PlayerCommands implements CommandExecutor {
 			Player arg1 = null;
 			int arg2 = -1;
 			boolean console = !(sender instanceof Player);
+			if(args.length == 0){
+				args[0] = "get";
+				args[1] = sender.getName();
+			}
 
 			if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
 				if(args.length >= 3 && args[2] != null && args[2] != ""){
@@ -67,7 +71,7 @@ public class PlayerCommands implements CommandExecutor {
 
 				// No switch statement so earlier Java Versions are compatible
 				if(msg == ""){
-					if (args[0].equalsIgnoreCase("set")) { msg = setAffinity(arg1, arg2); }
+					if (args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
 					else if (args[0].equalsIgnoreCase("get")){ msg =  getAffinity(arg1); }
 					else if (args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg1, arg2); }
 					else if (args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg1, arg2 * -1); }

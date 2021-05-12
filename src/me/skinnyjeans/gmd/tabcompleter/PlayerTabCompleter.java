@@ -19,7 +19,7 @@ public class PlayerTabCompleter implements TabCompleter {
 
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
 		if(label.equalsIgnoreCase("affinity")) {
-			if (args.length==1)
+			if (args.length<=1)
 				return new ArrayList<>(Arrays.asList(
 						"set","get","add","remove",
 						"setmax","removemax","author"
@@ -31,7 +31,7 @@ public class PlayerTabCompleter implements TabCompleter {
 					return l;
 				}
 			}
-			if (args.length==3 && !twoArgs.contains(args[0].toLowerCase())){
+			if (args.length>=3 && !twoArgs.contains(args[0].toLowerCase())){
 				if(args[0].equalsIgnoreCase("set"))
 					return difficulties;
 				return new ArrayList<>(Arrays.asList("1","2","3","4","5"));
