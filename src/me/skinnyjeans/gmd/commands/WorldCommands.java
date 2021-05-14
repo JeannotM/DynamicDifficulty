@@ -1,5 +1,7 @@
 package me.skinnyjeans.gmd.commands;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -26,12 +28,20 @@ public class WorldCommands implements CommandExecutor{
 			Player arg1 = null;
 			int arg2 = -1;
 			boolean console = !(sender instanceof Player);
-			if(args.length == 0){
-				args[0] = "get";
-				args[1] = "world";
+			if(args.length==0){
+				msg = "You forgot to include any arguments!";
+				if (console) {
+					Bukkit.getConsoleSender().sendMessage(msg);
+				} else {
+					((Player) sender).getPlayer().sendMessage(msg);
+				}
+				return false;
 			}
 
 			if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
+				if(!args[0].equalsIgnoreCase("author") && args.length==1)
+					msg = "You forgot to include a user!";
+
 				if(args.length >= 2 && args[1] != null && args[1] != "") {
 					if (Bukkit.getPlayer(args[1]) != null) {
 						if (Bukkit.getPlayer(args[1]).isOnline()) {

@@ -172,6 +172,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Automatically sorts difficulties by affinity requirement.
 - [x] Double Loot does not work on mobs that can pickup items.
 - [x] Per player and World difficulties
+- [x] Permissions on Luckperms and other management tools
 
 ## Possible Future Updates
 - [ ] Prefixes with Vault.
@@ -179,4 +180,3 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] Multiverse Worlds Implementation
 - [ ] Implement BStats
 - [ ] Custom Affinity points for each mobs
-- [ ] Permissions on Luckperms and other management tools
