@@ -121,21 +121,27 @@ public class WorldAffinity implements Listener{
 
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
-		if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
-			if (e.getEntity() instanceof Player) {
-				worldAffinity = calcAffinity(worldAffinity + onPVPKill);
-			} else if (mobsPVE.contains(e.getEntityType().toString())) {
-				worldAffinity = calcAffinity(worldAffinity + onPVEKill);
+		try{
+			if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
+				if (e.getEntity() instanceof Player) {
+					worldAffinity = calcAffinity(worldAffinity + onPVPKill);
+				} else if (mobsPVE.contains(e.getEntityType().toString())) {
+					worldAffinity = calcAffinity(worldAffinity + onPVEKill);
+				}
+			}
+
+			if (!(e.getEntity() instanceof Player) && !(e.getEntity() instanceof EnderDragon) && !(e.getEntity() instanceof Wither) && e.getEntity().getKiller() instanceof Player) {
+				e.setDroppedExp( (int) (e.getDroppedExp() * calcPercentage("experience-multiplier") / 100.0));
+				double DoubleLoot = calcPercentage("double-loot-chance");
+				if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems()) {
+					for (int i = 0; i < e.getDrops().size(); i++)
+						Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
+				}
 			}
 		}
-		
-		if (!(e.getEntity() instanceof Player) && !(e.getEntity() instanceof EnderDragon) && !(e.getEntity() instanceof Wither) && e.getEntity().getKiller() instanceof Player) {
-			e.setDroppedExp( (int) (e.getDroppedExp() * calcPercentage("experience-multiplier") / 100.0));
-			double DoubleLoot = calcPercentage("double-loot-chance");
-			if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems()) {
-				for (int i = 0; i < e.getDrops().size(); i++)
-					Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
-			}
+		catch(NullPointerException error){
+			Bukkit.getConsoleSender().sendMessage("NullPointerException. Enemytype Attack: "+e.getEntity().getKiller().getType()+" Enemytype Hit: "+e.getEntity().getType());
+			// Ugly tmp fix
 		}
 	}
 
@@ -150,20 +156,26 @@ public class WorldAffinity implements Listener{
 	public void onHit(EntityDamageByEntityEvent e) {
 		Entity prey = e.getEntity();
 		Entity hunter = e.getDamager();
-		if (prey instanceof Player) {
-			if (!(hunter instanceof Player) && !(hunter instanceof EnderDragon) && !(hunter instanceof Wither)) {
-				worldAffinity = calcAffinity(worldAffinity + onPlayerHit);
-				double dam = e.getFinalDamage() * calcPercentage("damage-done-by-mobs") / 100.0;
+		try{
+			if (prey instanceof Player) {
+				if (!(hunter instanceof Player) && !(hunter instanceof EnderDragon) && !(hunter instanceof Wither)) {
+					worldAffinity = calcAffinity(worldAffinity + onPlayerHit);
+					double dam = e.getFinalDamage() * calcPercentage("damage-done-by-mobs") / 100.0;
+					e.setDamage(dam);
+				}
+				if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty()))
+					for (PotionEffectType effect : effects) {
+						if (((LivingEntity) prey).hasPotionEffect(effect))
+							((LivingEntity) prey).removePotionEffect(effect);
+					}
+			} else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
+				double dam = e.getFinalDamage() * calcPercentage("damage-done-on-mobs") / 100.0;
 				e.setDamage(dam);
 			}
-			if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty()))
-				for (PotionEffectType effect : effects) {
-					if (((LivingEntity) prey).hasPotionEffect(effect))
-						((LivingEntity) prey).removePotionEffect(effect);
-				}
-		} else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
-			double dam = e.getFinalDamage() * calcPercentage("damage-done-on-mobs") / 100.0;
-			e.setDamage(dam);
+		}
+		catch(NullPointerException error){
+			Bukkit.getConsoleSender().sendMessage("NullPointerException. Enemytype Attack: "+hunter+" Enemytype Hit: "+prey);
+			// Ugly tmp fix
 		}
 	}
 	
