@@ -125,9 +125,6 @@ public class Affinity implements Listener {
     public int getMaxAffinity(UUID uuid) { return playerMaxAffinity.get(uuid); }
     public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(uuid, x)); }
 
-    public int getAffinityWorld() { return worldAffinity; }
-    public void setAffinityWorld(int x) { worldAffinity = calcAffinity(x); }
-
     public int getVariableMaxAffinity(){ return maxAffinity; }
     public int getVariableMinAffinity(){ return minAffinity; }
 
@@ -167,15 +164,6 @@ public class Affinity implements Listener {
         return x;
     }
 
-    public int calcAffinity(int x) {
-        if (x > maxAffinity) {
-            x = maxAffinity;
-        } else if (x < minAffinity) {
-            x = minAffinity;
-        }
-        return x;
-    }
-
     /**
      * Gets the difficulty of an user or the world
      *
@@ -207,29 +195,12 @@ public class Affinity implements Listener {
      * @return Double of the exact or the difficulty based percentage
      */
     public double calcPercentage(UUID uuid, String mode) {
-        int thisDiff = difficulties.indexOf(calcDifficulty(uuid));
-
-        if (thisDiff + 1 != difficulties.size() && calcExactPercentage) {
-            int differencePercentage = getHashData(mode, difficulties.get(thisDiff+1)) - getHashData(mode, difficulties.get(thisDiff));
-
-            if(differencePercentage == 0)
-                return getHashData(mode, difficulties.get(thisDiff));
-
-            if(differencePercentage < 0)
-                differencePercentage*=-1;
-
-            int a = difficultyAffinity.get(difficulties.get(thisDiff+1));
-            int b = difficultyAffinity.get(difficulties.get(thisDiff));
-            double c = (100.0 / (a - b) * (playerAffinity.get(uuid) - b));
-            double extraPercentage = (differencePercentage / 100.0) * c;
-
-            return (getHashData(mode, difficulties.get(thisDiff)) + extraPercentage);
-        }
-        return getHashData(mode, difficulties.get(thisDiff));
-    }
-
-    public double calcPercentage(String mode) {
         int thisDiff = difficulties.indexOf(calcDifficulty(null));
+        int affinity = worldAffinity;
+        if(uuid != null){
+            thisDiff = difficulties.indexOf(calcDifficulty(uuid));
+            affinity = playerAffinity.get(uuid);
+        }
 
         if (thisDiff + 1 != difficulties.size() && calcExactPercentage) {
             int differencePercentage = getHashData(mode, difficulties.get(thisDiff+1)) - getHashData(mode, difficulties.get(thisDiff));
@@ -242,7 +213,7 @@ public class Affinity implements Listener {
 
             int a = difficultyAffinity.get(difficulties.get(thisDiff+1));
             int b = difficultyAffinity.get(difficulties.get(thisDiff));
-            double c = (100.0 / (a - b) * (worldAffinity - b));
+            double c = (100.0 / (a - b) * (affinity - b));
             double extraPercentage = (differencePercentage / 100.0) * c;
 
             return (getHashData(mode, difficulties.get(thisDiff)) + extraPercentage);

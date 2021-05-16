@@ -226,7 +226,7 @@ public class AffinityCommands implements CommandExecutor {
                 uuid = Bukkit.getPlayer(user).getUniqueId();
             }
 
-            int x = affinity.calcAffinity(affinity.getAffinity(uuid) + amount);
+            int x = affinity.calcAffinity(null,affinity.getAffinity(uuid) + amount);
             affinity.setAffinity(uuid, x);
             return "World is on "+affinity.calcDifficulty(uuid)+" Difficulty with "+affinity.getAffinity(uuid)+" Affinity points";
         }

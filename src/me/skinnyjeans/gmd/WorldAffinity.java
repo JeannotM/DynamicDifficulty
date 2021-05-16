@@ -20,7 +20,7 @@ public class WorldAffinity extends Affinity {
 	@EventHandler
 	public void onDeath(PlayerRespawnEvent e) {
 		if (onDeath != 0) {
-			worldAffinity = calcAffinity(worldAffinity + onDeath);
+			worldAffinity = calcAffinity(null,worldAffinity + onDeath);
 		}
 	}
 
@@ -29,9 +29,9 @@ public class WorldAffinity extends Affinity {
 		try{
 			if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
 				if (e.getEntity() instanceof Player) {
-					worldAffinity = calcAffinity(worldAffinity + onPVPKill);
+					worldAffinity = calcAffinity(null,worldAffinity + onPVPKill);
 				} else if (mobsPVE.contains(e.getEntityType().toString())) {
-					worldAffinity = calcAffinity(worldAffinity + onPVEKill);
+					worldAffinity = calcAffinity(null,worldAffinity + onPVEKill);
 				}
 			}
 
@@ -53,7 +53,7 @@ public class WorldAffinity extends Affinity {
 	@EventHandler
 	public void onMined(BlockBreakEvent e) {
 		if (onMined != 0 && blocks.contains(e.getBlock().getBlockData().getMaterial().name()) && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed ) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-			worldAffinity = calcAffinity(worldAffinity + onMined);
+			worldAffinity = calcAffinity(null, worldAffinity + onMined);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class WorldAffinity extends Affinity {
 		try{
 			if (prey instanceof Player) {
 				if (!(hunter instanceof Player) && !(hunter instanceof EnderDragon) && !(hunter instanceof Wither)) {
-					worldAffinity = calcAffinity(worldAffinity + onPlayerHit);
+					worldAffinity = calcAffinity(null, worldAffinity + onPlayerHit);
 					double dam = e.getFinalDamage() * calcPercentage("damage-done-by-mobs") / 100.0;
 					e.setDamage(dam);
 				}
@@ -87,6 +87,6 @@ public class WorldAffinity extends Affinity {
 	// To increase/decrease score every few minutes
 	@Override
     public void onInterval() {
-        worldAffinity = calcAffinity(worldAffinity + onInterval);
+        worldAffinity = calcAffinity(null, worldAffinity + onInterval);
     }
 }
