@@ -37,6 +37,10 @@ blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
 
+# whether to hook into some other plugins or not.
+plugin-support:
+  allow-papi: false # Check the Github or Spigot page for the commands
+
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
 

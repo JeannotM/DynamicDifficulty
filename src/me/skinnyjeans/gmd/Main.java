@@ -7,52 +7,45 @@
  */
 package me.skinnyjeans.gmd;
 
+import me.clip.placeholderapi.PlaceholderHook;
+import me.skinnyjeans.gmd.commands.AffinityCommands;
+import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
+import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import me.skinnyjeans.gmd.commands.PlayerCommands;
-import me.skinnyjeans.gmd.commands.WorldCommands;
-import me.skinnyjeans.gmd.tabcompleter.PlayerTabCompleter;
-import me.skinnyjeans.gmd.tabcompleter.WorldTabCompleter;
-
 public class Main extends JavaPlugin {
 	
 	public DataManager data = new DataManager(this);
-	public WorldAffinity wa = null;
-	public PlayerAffinity pa = null;
+	public Affinity af = null;
 	
 	@Override
 	public void onEnable() {
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getBoolean("per-player-difficulty")) {
-			pa = new PlayerAffinity(this);
-			getServer().getPluginManager().registerEvents(pa, this);
-			this.getCommand("affinity").setExecutor(new PlayerCommands(pa));
-			this.getCommand("affinity").setTabCompleter(new PlayerTabCompleter(pa));
+			af = new PlayerAffinity(this);
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		else {
-			wa = new WorldAffinity(this);
-			getServer().getPluginManager().registerEvents(wa, this);
-			this.getCommand("affinity").setExecutor(new WorldCommands(wa));
-			this.getCommand("affinity").setTabCompleter(new WorldTabCompleter(wa));
+			af = new WorldAffinity(this);
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
 		}
+		getServer().getPluginManager().registerEvents(af, this);
+		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
+		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
+
+		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
+			new PlaceholderAPIExpansion(this, af).register();
+
 		saveDataEveryFifteenMinutes();
 		onInterval();
 	}
 	
 	@Override
 	public void onDisable() {
-		if(pa != null) {
-			pa.saveAllPlayerData();
-			pa = null;
-		}
-		else {
-			wa.saveAllData();
-			wa = null;
-		}
+		af.saveData();
+		af = null;
 		data = null;
 	}
 	
@@ -63,12 +56,7 @@ public class Main extends JavaPlugin {
 				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		        scheduler.scheduleSyncRepeatingTask(this, () -> {
 					if (Bukkit.getOnlinePlayers().size() > 0) {
-						if(pa != null) {
-							pa.saveAllPlayerData();
-						}
-						else {
-							wa.saveAllData();
-						}
+						af.onInterval();
 					}
 				}, 0L, 20L*(60L *timer));
 			}
@@ -79,12 +67,7 @@ public class Main extends JavaPlugin {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
         scheduler.scheduleSyncRepeatingTask(this, () -> {
 			if (Bukkit.getOnlinePlayers().size() > 0) {
-				if(pa != null) {
-					pa.saveAllPlayerData();
-				}
-				else {
-					wa.saveAllData();
-				}
+				af.saveData();
 			}
 		}, 0L, 20L*(60*15));
 	}

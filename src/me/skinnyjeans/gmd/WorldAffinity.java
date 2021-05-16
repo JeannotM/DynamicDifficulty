@@ -2,115 +2,20 @@ package me.skinnyjeans.gmd;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
-import java.util.logging.Level;
 
-public class WorldAffinity implements Listener{
-	private DataManager data;
-	private int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
-	private HashMap<UUID, Integer> playerAffinity = new HashMap<>();
-	private HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
-	private boolean silkTouchAllowed, calcExactPercentage;
-	private List<String> mobsPVE, blocks;
-	private HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
-	private HashMap<String, Integer> experienceMultiplier = new HashMap<>();
-	private HashMap<String, Integer> damageDoneOnMobs = new HashMap<>();
-	private HashMap<String, Integer> difficultyAffinity = new HashMap<>();
-	private HashMap<String, Integer> doubleLootChance = new HashMap<>();
-	private HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
-	private ArrayList<String> difficulties = new ArrayList<>();
-	private PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
-			PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
-	
-	public WorldAffinity(Main m) {
-		data = new DataManager(m);
-		startAffinity = data.getConfig().getInt("starting-affinity");
-		
-		if(data.getDataFile().getString("world.affinity") == null)
-			data.getDataFile().set("world.affinity", startAffinity);
-		
-		silkTouchAllowed = data.getConfig().getBoolean("silk-touch-allowed");
-		minAffinity = data.getConfig().getInt("min-affinity");
-		maxAffinity = data.getConfig().getInt("max-affinity");
-		onDeath = data.getConfig().getInt("death");
-		onPVEKill = data.getConfig().getInt("pve-kill");
-		onPVPKill = data.getConfig().getInt("pvp-kill");
-		onMined = data.getConfig().getInt("block-mined");
-		mobsPVE = data.getConfig().getStringList("mobs-count-as-pve");
-		blocks = data.getConfig().getStringList("blocks");
-		onInterval = data.getConfig().getInt("points-on-interval");
-		onPlayerHit = data.getConfig().getInt("player-hit");
-		worldAffinity = data.getDataFile().getInt("world.affinity");
-		calcExactPercentage = data.getConfig().getBoolean("calculate-exact-percentage");
-		HashMap<Integer, String> tmpMap = new HashMap<>();
-		ArrayList<String> tmpList = new ArrayList<>();
-		ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
+public class WorldAffinity extends Affinity {
 
-		for (String key : section.getKeys(false)) {
-			tmpList.add(key);
-			difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
-			experienceMultiplier.put(key, section.getInt(key + ".experience-multiplier"));
-			doubleLootChance.put(key, section.getInt(key + ".double-loot-chance"));
-			damageDoneByMobs.put(key, section.getInt(key + ".damage-done-by-mobs"));
-			damageDoneOnMobs.put(key, section.getInt(key + ".damage-done-on-mobs"));
-			effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked"));
-		}
-
-		// Everything beneath this comment is to sort the difficulties by their affinity requirement
-		for (String s : tmpList) tmpMap.put(difficultyAffinity.get(s), s);
-
-		TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
-
-		for (int key : tm.keySet()) {
-			difficulties.add(tmpMap.get(key));
-		}
-		tm.clear(); tmpList.clear(); tmpMap.clear();
-
-		if(minAffinity > maxAffinity){
-			int tmp = maxAffinity;
-			maxAffinity = minAffinity;
-			minAffinity = tmp;
-			Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity is larger than MaxAffinity, so their values have been switched.");
-		}
-		else if (minAffinity == maxAffinity){
-			maxAffinity = 0;
-			minAffinity = 1200;
-			Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity has the same value as MaxAffinity, so their values have been set to default.");
-		}
-	}
-	
-	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		UUID uuid = e.getPlayer().getUniqueId();
-		if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
-			data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
-			data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
-			data.getDataFile().set("players." + uuid + ".max-affinity", -1);
-			data.saveData();
-		}
-		playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
-		playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
-	}
-
-	@EventHandler
-	public void onLeave(PlayerQuitEvent e) {
-		UUID uuid = e.getPlayer().getUniqueId();
-		playerAffinity.remove(uuid);
-		playerMaxAffinity.remove(uuid);
-	}
+	public WorldAffinity(Main m) { super(m); }
 
 	@EventHandler
 	public void onDeath(PlayerRespawnEvent e) {
@@ -163,7 +68,7 @@ public class WorldAffinity implements Listener{
 					double dam = e.getFinalDamage() * calcPercentage("damage-done-by-mobs") / 100.0;
 					e.setDamage(dam);
 				}
-				if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty()))
+				if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty(null)))
 					for (PotionEffectType effect : effects) {
 						if (((LivingEntity) prey).hasPotionEffect(effect))
 							((LivingEntity) prey).removePotionEffect(effect);
@@ -178,134 +83,10 @@ public class WorldAffinity implements Listener{
 			// Ugly tmp fix
 		}
 	}
-	
-	// Save world affinity every few minutes to insure less data loss if the server crashes
-	public void saveAllData() {
-		data.getDataFile().set("world.affinity", worldAffinity);
-	}
-	
+
 	// To increase/decrease score every few minutes
-	public void onInterval() {
-		worldAffinity = calcAffinity(worldAffinity + onInterval);
-	}
-	
-	public int getAffinityUser(UUID uuid) {
-		return playerAffinity.get(uuid);
-	}
-	
-	public int getAffinityWorld() {
-		return worldAffinity;
-	}
-
-	public int getMaxAffinityUser(UUID uuid) {
-		return playerMaxAffinity.get(uuid);
-	}
-
-	public void setAffinityWorld(int x) {
-		worldAffinity = calcAffinity(x);
-	}
-
-	public boolean hasDifficulty(String x) { return difficulties.contains(x); }
-
-	public int getDifficultyAffinity(String x) { return difficultyAffinity.get(x); }
-
-	public ArrayList<String> getDifficulties() { return difficulties; }
-	
-	/**
-	 * Calculates if the amount exceeds the servers Minimum/Maximum
-	 * 
-	 * @param x the affinity given to calculate
-	 * @return INT the affinity after it has been checked
-	 */
-	public int calcAffinity(int x) {
-		if (x > maxAffinity) {
-			x = maxAffinity;
-		} else if (x < minAffinity) {
-			x = minAffinity;
-		}
-		return x;
-	}
-
-	/**
-	 * Gets the difficulty of the world
-	 * 
-	 * @return String of the difficulty the world is on
-	 */
-	public String calcDifficulty() {
-		String last = "";
-		for (int i = 0; i < difficulties.size(); i++) {
-			if (worldAffinity == difficultyAffinity.get(difficulties.get(i)))
-				return difficulties.get(i);
-			if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= worldAffinity && difficultyAffinity.get(last) <= worldAffinity)
-				return last;
-			if (i + 1 == difficulties.size())
-				return difficulties.get(i);
-			last = difficulties.get(i);
-		}
-		return difficulties.get(0);
-	}
-	
-	/**
-	 * Gets the difficulty of an user
-	 * 
-	 * @param uuid of the user
-	 * @return String of the difficulty the user is on
-	 */
-	public String calcDifficultyUser(UUID uuid) {
-		String last = "";
-		for (int i = 0; i < difficulties.size(); i++) {
-			if (playerAffinity.get(uuid) == difficultyAffinity.get(difficulties.get(i)))
-				return difficulties.get(i);
-			if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= playerAffinity.get(uuid) && difficultyAffinity.get(last) <= playerAffinity.get(uuid))
-				return last;
-			if (i + 1 == difficulties.size())
-				return difficulties.get(i);
-			last = difficulties.get(i);
-		}
-		return difficulties.get(0);
-	}
-	
-	/**
-	 * Calculates the exact percentage between 2 difficulties
-	 * 
-	 * @param mode which is used to select the correct variable
-	 * @return Double of the exact or the difficulty based percentage
-	 */
-	private double calcPercentage(String mode) {
-		int thisDiff = difficulties.indexOf(calcDifficulty());
-		
-		if (thisDiff + 1 != difficulties.size() && calcExactPercentage) {
-			int differencePercentage = getHashData(mode, difficulties.get(thisDiff+1)) - getHashData(mode, difficulties.get(thisDiff));
-			
-			if(differencePercentage == 0)
-				return getHashData(mode, difficulties.get(thisDiff));
-						
-			if(differencePercentage < 0) 
-				differencePercentage*=-1;
-			
-			int a = difficultyAffinity.get(difficulties.get(thisDiff+1));
-			int b = difficultyAffinity.get(difficulties.get(thisDiff));
-			double c = (100.0 / (a - b) * (worldAffinity - b));
-			double extraPercentage = (differencePercentage / 100.0) * c;
-
-			return (getHashData(mode, difficulties.get(thisDiff)) + extraPercentage);
-		}
-		return getHashData(mode, difficulties.get(thisDiff));
-		
-	}
-	
-	/**
-	 * Returns data from the made HashMaps
-	 * 
-	 * @param mode which is used to select the correct variable
-	 * @param diff which is the difficulty setting
-	 * @return INT from the selected variable and difficulty
-	 */
-	private int getHashData(String mode, String diff) {
-		if(mode.equalsIgnoreCase("damage-done-by-mobs")) { return damageDoneByMobs.get(diff); }
-		if(mode.equalsIgnoreCase("damage-done-on-mobs")) { return damageDoneOnMobs.get(diff); }
-		if(mode.equalsIgnoreCase("experience-multiplier")) { return experienceMultiplier.get(diff); }
-		if(mode.equalsIgnoreCase("double-loot-chance")) { return doubleLootChance.get(diff); }
-		return -1;
-	}
+	@Override
+    public void onInterval() {
+        worldAffinity = calcAffinity(worldAffinity + onInterval);
+    }
 }

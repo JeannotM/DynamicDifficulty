@@ -4,6 +4,7 @@
 #### [Settings with explanations](https://github.com/JeannotM/DynamicDifficulty#settings-with-explanations-1)
 #### [calculate-exact-percentage](https://github.com/JeannotM/DynamicDifficulty#calculate-exact-percentage-1)
 #### [Commands, Permissions and explanations](https://github.com/JeannotM/DynamicDifficulty#commands-permissions-and-explanations-1)
+#### [Plugin Support](https://github.com/JeannotM/DynamicDifficulty#plugin-support-1)
 #### [Other Small Things](https://github.com/JeannotM/DynamicDifficulty#other-small-things-1)
 #### [Possible Future Updates](https://github.com/JeannotM/DynamicDifficulty#possible-future-updates-1)
 
@@ -116,6 +117,7 @@ If you'd like to read more about the psychology behind it: https://en.wikipedia.
 
 ## Commands, Permissions and explanations
 The Commands aren't case sensitive, meaning both remove and ReMoVe will result in the same function being executed. Also applies to /aFFinIty. This does not work on player names though
+If you want to change the settings of the world you'll need to replace the <user> part with world
 ```
 /Affinity set <user> <number>
 perm: affinity.set
@@ -144,39 +146,39 @@ Sets a maximum Affinity limit for an user.
 /Affinity author
 perm: affinity.author
 Mentions DynamicDifficulty, my name and the Github page.
-
-Or if 'per-player-difficulty' is disabled:
-
-/Affinity set <number>
-perm: affinity.set
-The amount of affinity the world will be set to.
-
-/Affinity get
-perm: affinity.get
-Get current affinity of the world.
-
-/Affinity add <number>
-perm: affinity.add
-Adds an amount of affinity of the world.
-
-/Affinity remove <number>
-perm: affinity.remove
-Removes an amount of affinity of the world.
-
-/Affinity author
-perm: affinity.author
-Mentions DynamicDifficulty, my name and the Github page.
 ```
+## Plugin Support
+#### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]
+```
+%dynamicdifficulty_text_difficulty%
+ - Returns the difficulty of a player
+
+%dynamicdifficulty_affinity_points%
+ - Returns the affinity points of a player
+ 
+%dynamicdifficulty_world_text_difficulty%
+ - Returns the difficulty of the world
+
+%dynamicdifficulty_world_affinity_points%
+ - Returns the affinity points of the world
+
+%dynamicdifficulty_max_affinity%
+ - Returns the maximum affinity you can acquire
+ 
+%dynamicdifficulty_min_affinity%
+ - Returns the minimum affinity you can acquire
+```
+
 ## Other Small Things
 Feel free to contact me if you have any idea's that could expand/improve the DynamicDifficulty plugin or have any trouble getting it to work on your server due to errors
 - [x] Automatically sorts difficulties by affinity requirement.
 - [x] Double Loot does not work on mobs that can pickup items.
 - [x] Per player and World difficulties
 - [x] Permissions on Luckperms and other management tools
+- [x] Placeholder API.
 
 ## Possible Future Updates
 - [ ] Prefixes with Vault.
-- [ ] Placeholder API.
 - [ ] Multiverse Worlds Implementation
 - [ ] Implement BStats
 - [ ] Custom Affinity points for each mobs
