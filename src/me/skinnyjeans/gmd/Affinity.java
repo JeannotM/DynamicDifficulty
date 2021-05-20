@@ -16,7 +16,7 @@ public class Affinity implements Listener {
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
-    protected boolean silkTouchAllowed, calcExactPercentage, loadAllUserData;
+    protected boolean silkTouchAllowed, calcExactPercentage;
     protected List<String> mobsPVE, blocks;
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
@@ -24,6 +24,7 @@ public class Affinity implements Listener {
     protected HashMap<String, Integer> difficultyAffinity = new HashMap<>();
     protected HashMap<String, Integer> doubleLootChance = new HashMap<>();
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
+    protected HashMap<String, String> prefixes = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
     protected PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
@@ -72,6 +73,7 @@ public class Affinity implements Listener {
             damageDoneByMobs.put(key, section.getInt(key + ".damage-done-by-mobs"));
             damageDoneOnMobs.put(key, section.getInt(key + ".damage-done-on-mobs"));
             effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked"));
+            prefixes.put(key, section.getString(key + ".prefix"));
         }
 
         // Everything beneath this comment is to sort the difficulties by their affinity requirement
@@ -132,6 +134,8 @@ public class Affinity implements Listener {
     public int getDifficultyAffinity(String x) { return difficultyAffinity.get(x); }
     public void onInterval(){};
     public ArrayList<String> getDifficulties() { return difficulties; }
+
+    public String getPrefix(UUID uuid){ return prefixes.get(calcDifficulty(uuid)); }
 
     // Saves all player and world data every few minutes.
     public void saveData(){

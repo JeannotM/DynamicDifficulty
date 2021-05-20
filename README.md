@@ -60,6 +60,11 @@ blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
 
+# whether to hook into some other plugins or not. (List may be expanded in the future)
+plugin-support:
+  allow-papi: false 
+  use-prefix: true
+  
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
 
@@ -82,28 +87,32 @@ per-player-difficulty: true
 #   experience-multiplier: <percentage, Experience Multiplier>
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
+#   prefix: <text, prefix to return if PlaceholderAPI is enabled>
 difficulty:
-  easy:
+  Easy:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
     experience-multiplier: 70
     double-loot-chance: 0
     effects-when-attacked: false
-  normal:
+    prefix: '&7&l[&b&lEasy&7&l]&r'
+  Normal:
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
     experience-multiplier: 90
     double-loot-chance: 0
     effects-when-attacked: true
-  hard:
+    prefix: '&7&l[&9&lNormal&7&l]&r'
+  Hard:
     affinity-required: 1000
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
     experience-multiplier: 125
     double-loot-chance: 5
     effects-when-attacked: true
+    prefix: '&7&l[&4&lHard&7&l]&r'
 ```
 ## calculate-exact-percentage
 So if calculate-exact-percentage is disabled the damage chart will look something like this:
@@ -178,7 +187,6 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Placeholder API.
 
 ## Possible Future Updates
-- [ ] Prefixes with Vault.
 - [ ] Multiverse Worlds Implementation
 - [ ] Implement BStats
 - [ ] Custom Affinity points for each mobs

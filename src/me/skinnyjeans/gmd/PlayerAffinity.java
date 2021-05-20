@@ -5,6 +5,7 @@ import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,7 +18,7 @@ public class PlayerAffinity extends Affinity {
 
 	public PlayerAffinity(Main m) { super(m); }
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDeath(PlayerRespawnEvent e) {
 		if (onDeath != 0) {
 			UUID uuid = e.getPlayer().getUniqueId();
@@ -25,7 +26,7 @@ public class PlayerAffinity extends Affinity {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onKill(EntityDeathEvent e) {
 		try {
 			if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
@@ -54,7 +55,7 @@ public class PlayerAffinity extends Affinity {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onMined(BlockBreakEvent e) {
 		if (onMined != 0 && blocks.contains(e.getBlock().getBlockData().getMaterial().name()) && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed ) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
 			UUID uuid = e.getPlayer().getUniqueId();
@@ -62,7 +63,7 @@ public class PlayerAffinity extends Affinity {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onHit(EntityDamageByEntityEvent e) {
 		Entity prey = e.getEntity();
 		Entity hunter = e.getDamager();

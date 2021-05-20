@@ -2,12 +2,11 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.0
+ * @version 1.1
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
 
-import me.clip.placeholderapi.PlaceholderHook;
 import me.skinnyjeans.gmd.commands.AffinityCommands;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
@@ -36,7 +35,7 @@ public class Main extends JavaPlugin {
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
-			new PlaceholderAPIExpansion(this, af).register();
+			new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();
 
 		saveDataEveryFifteenMinutes();
 		onInterval();

@@ -37,9 +37,10 @@ blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
 
-# whether to hook into some other plugins or not.
+# whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
+  use-prefix: true
 
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
@@ -54,24 +55,27 @@ per-player-difficulty: true
 # Only "effects-when-attacked" affect the Wither and EnderDragon
 # Copy one of the existing difficulty settings to create your own, check the Github page for more info
 difficulty:
-  easy:
+  Easy:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
     experience-multiplier: 70
     double-loot-chance: 0
     effects-when-attacked: false
-  normal:
+    prefix: '&7&l[&b&lEasy&7&l]&r'
+  Normal:
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
     experience-multiplier: 90
     double-loot-chance: 0
     effects-when-attacked: true
-  hard:
+    prefix: '&7&l[&9&lNormal&7&l]&r'
+  Hard:
     affinity-required: 1000
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
     experience-multiplier: 125
     double-loot-chance: 5
     effects-when-attacked: true
+    prefix: '&7&l[&4&lHard&7&l]&r'

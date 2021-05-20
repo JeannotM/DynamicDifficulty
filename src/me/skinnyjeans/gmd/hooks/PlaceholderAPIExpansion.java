@@ -1,10 +1,8 @@
 package me.skinnyjeans.gmd.hooks;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -12,10 +10,12 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     private Main plugin;
     private Affinity affinity;
+    private boolean usePrefix;
 
-    public PlaceholderAPIExpansion(Main plugin, Affinity af){
+    public PlaceholderAPIExpansion(Main plugin, Affinity af, boolean pr){
         this.plugin = plugin;
         this.affinity = af;
+        this.usePrefix = pr;
     }
 
     @Override
@@ -45,12 +45,18 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
-        if(identifier.equals("text_difficulty"))
+        if(identifier.equals("text_difficulty")){
+            if(usePrefix)
+                return affinity.getPrefix(player.getUniqueId());
             return affinity.calcDifficulty(player.getUniqueId());
+        }
         if(identifier.equals("affinity_points"))
             return affinity.getAffinity(player.getUniqueId()) + "";
-        if(identifier.equals("world_text_difficulty"))
+        if(identifier.equals("world_text_difficulty")){
+            if(usePrefix)
+                return affinity.getPrefix(null);
             return affinity.calcDifficulty(null);
+        }
         if(identifier.equals("world_affinity_points"))
             return affinity.getAffinity(null)+"";
         if(identifier.equals("max_affinity"))
@@ -66,12 +72,18 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         if(player == null)
             return "";
 
-        if(identifier.equals("text_difficulty"))
+        if(identifier.equals("text_difficulty")){
+            if(usePrefix)
+                return affinity.getPrefix(player.getUniqueId());
             return affinity.calcDifficulty(player.getUniqueId());
+        }
         if(identifier.equals("affinity_points"))
             return affinity.getAffinity(player.getUniqueId()) + "";
-        if(identifier.equals("world_text_difficulty"))
+        if(identifier.equals("world_text_difficulty")){
+            if(usePrefix)
+                return affinity.getPrefix(null);
             return affinity.calcDifficulty(null);
+        }
         if(identifier.equals("world_affinity_points"))
             return affinity.getAffinity(null)+"";
         if(identifier.equals("max_affinity"))

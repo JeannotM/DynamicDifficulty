@@ -5,6 +5,7 @@ import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,14 +18,14 @@ public class WorldAffinity extends Affinity {
 
 	public WorldAffinity(Main m) { super(m); }
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDeath(PlayerRespawnEvent e) {
 		if (onDeath != 0) {
 			worldAffinity = calcAffinity(null,worldAffinity + onDeath);
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onKill(EntityDeathEvent e) {
 		try{
 			if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
@@ -36,8 +37,8 @@ public class WorldAffinity extends Affinity {
 			}
 
 			if (!(e.getEntity() instanceof Player) && !(e.getEntity() instanceof EnderDragon) && !(e.getEntity() instanceof Wither) && e.getEntity().getKiller() instanceof Player) {
-				e.setDroppedExp( (int) (e.getDroppedExp() * calcPercentage("experience-multiplier") / 100.0));
-				double DoubleLoot = calcPercentage("double-loot-chance");
+				e.setDroppedExp( (int) (e.getDroppedExp() * calcPercentage(null,"experience-multiplier") / 100.0));
+				double DoubleLoot = calcPercentage(null,"double-loot-chance");
 				if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems()) {
 					for (int i = 0; i < e.getDrops().size(); i++)
 						Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
@@ -50,14 +51,14 @@ public class WorldAffinity extends Affinity {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onMined(BlockBreakEvent e) {
 		if (onMined != 0 && blocks.contains(e.getBlock().getBlockData().getMaterial().name()) && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed ) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
 			worldAffinity = calcAffinity(null, worldAffinity + onMined);
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onHit(EntityDamageByEntityEvent e) {
 		Entity prey = e.getEntity();
 		Entity hunter = e.getDamager();
@@ -65,7 +66,7 @@ public class WorldAffinity extends Affinity {
 			if (prey instanceof Player) {
 				if (!(hunter instanceof Player) && !(hunter instanceof EnderDragon) && !(hunter instanceof Wither)) {
 					worldAffinity = calcAffinity(null, worldAffinity + onPlayerHit);
-					double dam = e.getFinalDamage() * calcPercentage("damage-done-by-mobs") / 100.0;
+					double dam = e.getFinalDamage() * calcPercentage(null,"damage-done-by-mobs") / 100.0;
 					e.setDamage(dam);
 				}
 				if (!(hunter instanceof Player) && (hunter instanceof LivingEntity || hunter instanceof Arrow) && effectsWhenAttacked.get(calcDifficulty(null)))
@@ -74,7 +75,7 @@ public class WorldAffinity extends Affinity {
 							((LivingEntity) prey).removePotionEffect(effect);
 					}
 			} else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
-				double dam = e.getFinalDamage() * calcPercentage("damage-done-on-mobs") / 100.0;
+				double dam = e.getFinalDamage() * calcPercentage(null,"damage-done-on-mobs") / 100.0;
 				e.setDamage(dam);
 			}
 		}
