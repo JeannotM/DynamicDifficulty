@@ -17,12 +17,13 @@ public class Affinity implements Listener {
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
     protected boolean silkTouchAllowed, calcExactPercentage;
-    protected List<String> mobsPVE, blocks;
+    protected List<String> blocks;
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
     protected HashMap<String, Integer> damageDoneOnMobs = new HashMap<>();
     protected HashMap<String, Integer> difficultyAffinity = new HashMap<>();
     protected HashMap<String, Integer> doubleLootChance = new HashMap<>();
+    protected HashMap<String, Integer> mobsPVE = new HashMap<>();
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
     protected HashMap<String, String> prefixes = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
@@ -39,7 +40,6 @@ public class Affinity implements Listener {
         onPVPKill = data.getConfig().getInt("pvp-kill");
         onMined = data.getConfig().getInt("block-mined");
         startAffinity = data.getConfig().getInt("starting-affinity");
-        mobsPVE = data.getConfig().getStringList("mobs-count-as-pve");
         blocks = data.getConfig().getStringList("blocks");
         onInterval = data.getConfig().getInt("points-on-interval");
         onPlayerHit = data.getConfig().getInt("player-hit");
@@ -50,6 +50,17 @@ public class Affinity implements Listener {
 
         if(data.getDataFile().getInt("world.affinity") == -1)
             data.getDataFile().set("world.affinity", startAffinity);
+
+        Object[] tmpMobs = data.getConfig().getList("mobs-count-as-pve").toArray();
+        for(Object s : tmpMobs){
+            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+            try{
+                mobsPVE.put(sep[0], Integer.parseInt(sep[1]));
+            }
+            catch(Exception e){
+                mobsPVE.put(sep[0], onPVEKill);
+            }
+        }
 
         worldAffinity = data.getDataFile().getInt("world.affinity");
 

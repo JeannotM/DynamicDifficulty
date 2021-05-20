@@ -43,17 +43,21 @@ max-affinity: 1200
 interval-timer: 2
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+# Format:
+# - MOBTYPE: <Affinity points>
+# Will use pve-kill if only MOBTYPE is given
 mobs-count-as-pve:
 - ZOMBIE
 - BLAZE
 - CREEPER
 - SKELETON
-- ENDERMAN
-- WITHER_SKELETON
+- ENDERMAN: 2
+- WITHER_SKELETON: 2
 - SPIDER
 - CAVESPIDER
-- VINDICATOR
+- VINDICATOR: 2
 - WITCH
+- VILLAGER: 50
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:
@@ -184,9 +188,9 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Double Loot does not work on mobs that can pickup items.
 - [x] Per player and World difficulties
 - [x] Permissions on Luckperms and other management tools
+- [x] Custom Affinity points for each mobs
 - [x] Placeholder API.
 
 ## Possible Future Updates
 - [ ] Multiverse Worlds Implementation
 - [ ] Implement BStats
-- [ ] Custom Affinity points for each mobs

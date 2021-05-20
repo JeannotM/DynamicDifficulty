@@ -33,8 +33,8 @@ public class PlayerAffinity extends Affinity {
 				UUID uuid = e.getEntity().getKiller().getUniqueId();
 				if (e.getEntity() instanceof Player) {
 					playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + onPVPKill));
-				} else if (mobsPVE.contains(e.getEntityType().toString()) && e.getEntity() != null) {
-					playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + onPVEKill));
+				} else if (mobsPVE.get(e.getEntityType().toString()) != null) {
+					playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + mobsPVE.get(e.getEntityType().toString())));
 				}
 			}
 

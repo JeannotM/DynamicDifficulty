@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class AffinityCommands implements CommandExecutor {
     private Affinity affinity;
@@ -48,7 +49,7 @@ public class AffinityCommands implements CommandExecutor {
                 if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
                     if (affinity.hasDifficulty(args[2])) {
                         arg2 = affinity.getDifficultyAffinity(args[2]);
-                    } else if (args[1].equalsIgnoreCase("world")) {
+                    } else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find() || args[1].equalsIgnoreCase("world")) {
                         try{
                             arg2 = Integer.parseInt(args[2]);
                         }

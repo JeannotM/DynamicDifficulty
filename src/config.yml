@@ -6,7 +6,7 @@ points-on-interval: 4 # How many points to give per interval, if turned on.
 block-mined: 1
 player-hit: -1
 pvp-kill: 10
-pve-kill: 2
+pve-kill: 1
 death: -100
 
 # With How Much Affinity a Player Starts When Joining For The First Time.
@@ -20,17 +20,21 @@ max-affinity: 1200
 interval-timer: 2
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+# Format:
+# - MOBTYPE: <Affinity points>
+# Will use pve-kill if only MOBTYPE is given
 mobs-count-as-pve:
 - ZOMBIE
 - BLAZE
 - CREEPER
 - SKELETON
-- ENDERMAN
-- WITHER_SKELETON
+- ENDERMAN: 2
+- WITHER_SKELETON: 2
 - SPIDER
 - CAVESPIDER
-- VINDICATOR
+- VINDICATOR: 2
 - WITCH
+- VILLAGER: 50
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:

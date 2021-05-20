@@ -31,8 +31,8 @@ public class WorldAffinity extends Affinity {
 			if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
 				if (e.getEntity() instanceof Player) {
 					worldAffinity = calcAffinity(null,worldAffinity + onPVPKill);
-				} else if (mobsPVE.contains(e.getEntityType().toString())) {
-					worldAffinity = calcAffinity(null,worldAffinity + onPVEKill);
+				} else if (mobsPVE.get(e.getEntityType().toString()) != null) {
+					worldAffinity = calcAffinity(null,worldAffinity + mobsPVE.get(e.getEntityType().toString()));
 				}
 			}
 
