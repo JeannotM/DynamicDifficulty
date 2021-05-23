@@ -8,6 +8,7 @@
 package me.skinnyjeans.gmd;
 
 import me.skinnyjeans.gmd.commands.AffinityCommands;
+import me.skinnyjeans.gmd.hooks.Metrics;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
+
 		if(data.getConfig().getBoolean("per-player-difficulty")) {
 			af = new PlayerAffinity(this);
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
@@ -33,6 +35,8 @@ public class Main extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(af, this);
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
+
+//		Metrics metrics = new Metrics(this, 11417);
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();

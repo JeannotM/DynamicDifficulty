@@ -30,7 +30,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "dynamicdifficulty";
+        return "dd";
     }
 
     @Override

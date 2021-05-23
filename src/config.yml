@@ -1,5 +1,11 @@
-# Some settings in the config have been typed shorter so as not to clutter it too much.
-# Please visit https://github.com/JeannotM/DynamicDifficulty for more detailed explanations with examples.
+# bStats (https://bStats.org) collects some basic information for plugin authors, like how
+# many people use their plugin and their total player count. It's recommended to keep bStats
+# enabled, but if you're not comfortable with this, you can turn this setting off. There is no
+# performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
+
+# Some settings in the config have been typed shorter so as not to clutter it too much. Please visit:
+# https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
+# for more detailed explanations with examples.
 
 # Affinity Gained or Lost When Doing Certain Things.
 points-on-interval: 4 # How many points to give per interval, if turned on.
@@ -34,7 +40,7 @@ mobs-count-as-pve:
 - CAVESPIDER
 - VINDICATOR: 2
 - WITCH
-- VILLAGER: 50
+- VILLAGER: 20
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:
@@ -43,8 +49,14 @@ blocks:
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
-  allow-papi: false # Check the Github or Spigot page for the commands
+  allow-papi: true # Check the Github or Spigot page for the commands
+  allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
+  use-multiverse: false
   use-prefix: true
+
+# You can disable DynamicDifficulty in certain worlds if Multiverse is installed and enabled
+# disabled-worlds:
+# - example_name
 
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false

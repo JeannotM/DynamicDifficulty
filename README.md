@@ -57,7 +57,7 @@ mobs-count-as-pve:
 - CAVESPIDER
 - VINDICATOR: 2
 - WITCH
-- VILLAGER: 50
+- VILLAGER: 20
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:
@@ -66,7 +66,9 @@ blocks:
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
-  allow-papi: false 
+  allow-papi: true 
+  allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
+  use-multiverse: false
   use-prefix: true
   
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
@@ -163,22 +165,22 @@ Mentions DynamicDifficulty, my name and the Github page.
 ## Plugin Support
 #### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]
 ```
-%dynamicdifficulty_text_difficulty%
+%dd_text_difficulty%
  - Returns the difficulty of a player
 
-%dynamicdifficulty_affinity_points%
+%dd_affinity_points%
  - Returns the affinity points of a player
  
-%dynamicdifficulty_world_text_difficulty%
+%dd_world_text_difficulty%
  - Returns the difficulty of the world
 
-%dynamicdifficulty_world_affinity_points%
+%dd_world_affinity_points%
  - Returns the affinity points of the world
 
-%dynamicdifficulty_max_affinity%
+%dd_max_affinity%
  - Returns the maximum affinity you can acquire
  
-%dynamicdifficulty_min_affinity%
+%dd_min_affinity%
  - Returns the minimum affinity you can acquire
 ```
 
@@ -190,7 +192,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Permissions on Luckperms and other management tools
 - [x] Custom Affinity points for each mobs
 - [x] Placeholder API.
+- [x] Multiverse Worlds Implementation
 
 ## Possible Future Updates
-- [ ] Multiverse Worlds Implementation
 - [ ] Implement BStats

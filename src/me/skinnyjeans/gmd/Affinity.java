@@ -16,8 +16,8 @@ public class Affinity implements Listener {
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
-    protected boolean silkTouchAllowed, calcExactPercentage;
-    protected List<String> blocks;
+    protected boolean silkTouchAllowed, calcExactPercentage, multiverseEnabled;
+    protected List<String> blocks, disabledWorlds;
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
     protected HashMap<String, Integer> damageDoneOnMobs = new HashMap<>();
@@ -44,6 +44,8 @@ public class Affinity implements Listener {
         onInterval = data.getConfig().getInt("points-on-interval");
         onPlayerHit = data.getConfig().getInt("player-hit");
         calcExactPercentage = data.getConfig().getBoolean("calculate-exact-percentage");
+        disabledWorlds = data.getConfig().getStringList("disabled-worlds");
+        multiverseEnabled = data.getConfig().getBoolean("plugin-support.use-multiverse");
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");

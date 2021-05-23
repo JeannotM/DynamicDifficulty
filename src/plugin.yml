@@ -3,7 +3,7 @@ name: DynamicDifficulty
 version: 1.0.07
 author: SkinnyJeans
 api-version: 1.13
-softdepend: [PlaceholderAPI]
+softdepend: ['PlaceholderAPI']
 
 permissions:
   affinity.*:
