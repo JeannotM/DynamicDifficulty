@@ -51,7 +51,7 @@ blocks:
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
-  allow-papi: true # Check the Github or Spigot page for the commands
+  allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
   use-multiverse: false
   use-prefix: true

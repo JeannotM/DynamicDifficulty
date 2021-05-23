@@ -44,7 +44,8 @@ public class Main extends JavaPlugin {
 		Metrics metrics = new Metrics(this, 11417);
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
-			new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();
+			if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+				new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();
 
 		saveDataEveryFifteenMinutes();
 		onInterval();
