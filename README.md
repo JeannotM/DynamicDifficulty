@@ -193,6 +193,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Custom Affinity points for each mobs
 - [x] Placeholder API.
 - [x] Multiverse Worlds Implementation
+- [x] Implement BStats
 
 ## Possible Future Updates
-- [ ] Implement BStats
+Nothing new planned.

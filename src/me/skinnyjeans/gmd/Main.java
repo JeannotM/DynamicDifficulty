@@ -12,6 +12,7 @@ import me.skinnyjeans.gmd.hooks.Metrics;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -22,6 +23,10 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
+		if (!getConfig().getString("version").equals(Bukkit.getPluginManager().getPlugin("DynamicDifficulty").getDescription().getVersion()) || !getConfig().contains("version",true)) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] Your configuration file is not up to date. Please remove it or update it yourself, because I don't know how to do it with Java without deleting existing configs. Sorry :'(");
+		}
+
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 
 		if(data.getConfig().getBoolean("per-player-difficulty")) {
@@ -36,7 +41,7 @@ public class Main extends JavaPlugin {
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
 
-//		Metrics metrics = new Metrics(this, 11417);
+		Metrics metrics = new Metrics(this, 11417);
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();

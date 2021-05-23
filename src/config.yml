@@ -3,6 +3,8 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
+version: 1.1
+
 # Some settings in the config have been typed shorter so as not to clutter it too much. Please visit:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
 # for more detailed explanations with examples.
@@ -54,7 +56,7 @@ plugin-support:
   use-multiverse: false
   use-prefix: true
 
-# You can disable DynamicDifficulty in certain worlds if Multiverse is installed and enabled
+# You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
 # disabled-worlds:
 # - example_name
 
