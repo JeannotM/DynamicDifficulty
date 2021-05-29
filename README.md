@@ -196,4 +196,8 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Implement BStats
 
 ## Possible Future Updates
-Nothing new planned.
+- [ ] MySQL support
+- [ ] Disco Difficulty mode
+- [ ] /reload command
+- [ ] change settings ingame
+- [ ] Event to stop certain mobs from following players on certain difficulties

@@ -19,18 +19,16 @@ public class AffinityTabCompleter implements TabCompleter {
     public AffinityTabCompleter(Affinity af){ numbers.addAll(af.getDifficulties()); }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
-        if(label.equalsIgnoreCase("affinity")) {
-            if (args.length == 1) { return commands; }
-            if (args.length == 2) {
-                if (!args[1].equalsIgnoreCase("author")) {
-                    ArrayList<String> l = new ArrayList<String>(Arrays.asList("world"));
-                    Bukkit.getOnlinePlayers().forEach(name -> { l.add(name.getName()); });
-                    return l;
-                }
-            } else if (args.length == 3) {
-                if (!(twoArgs.contains(args[1])))
-                    return numbers;
+        if (args.length == 1) { return commands; }
+        if (args.length == 2) {
+            if (!args[1].equalsIgnoreCase("author")) {
+                ArrayList<String> l = new ArrayList<String>(Arrays.asList("world"));
+                Bukkit.getOnlinePlayers().forEach(name -> { l.add(name.getName()); });
+                return l;
             }
+        } else if (args.length == 3) {
+            if (!(twoArgs.contains(args[1])))
+                return numbers;
         }
         return null;
     }

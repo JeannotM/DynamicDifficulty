@@ -19,69 +19,66 @@ public class AffinityCommands implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(label.equalsIgnoreCase("affinity")) {
-            boolean console = !(sender instanceof Player);
-            String arg1 = "";
-            String msg = "";
-            int arg2 = -1;
+        boolean console = !(sender instanceof Player);
+        String arg1 = "";
+        String msg = "";
+        int arg2 = -1;
 
-            if(args.length==0)
-                return sendMSG("You forgot to include any arguments!", sender, false);
+        if(args.length==0)
+            return sendMSG("You forgot to include any arguments!", sender, false);
 
-            if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
-                if(!args[0].equalsIgnoreCase("author") && args.length==1)
-                    msg = "You forgot to include a user!";
+        if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
+            if(!args[0].equalsIgnoreCase("author") && args.length==1)
+                msg = "You forgot to include a user!";
 
-                if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
-                    if (args[1].equalsIgnoreCase("world")) {
-                        arg1 = "world";
-                    } else if (Bukkit.getPlayer(args[1]) != null) {
-                        if (Bukkit.getPlayer(args[1]).isOnline()) {
-                            arg1 = Bukkit.getPlayer(args[1]).getName();
-                        } else {
-                            msg = args[1] + " needs to be online!";
-                        }
+            if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
+                if (args[1].equalsIgnoreCase("world")) {
+                    arg1 = "world";
+                } else if (Bukkit.getPlayer(args[1]) != null) {
+                    if (Bukkit.getPlayer(args[1]).isOnline()) {
+                        arg1 = Bukkit.getPlayer(args[1]).getName();
                     } else {
-                        msg = args[1] + " isn't a recognized online player";
+                        msg = args[1] + " needs to be online!";
                     }
+                } else {
+                    msg = args[1] + " isn't a recognized online player";
                 }
+            }
 
-                if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
-                    if (affinity.hasDifficulty(args[2])) {
-                        arg2 = affinity.getDifficultyAffinity(args[2]);
-                    } else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find() || args[1].equalsIgnoreCase("world")) {
-                        try{
-                            arg2 = Integer.parseInt(args[2]);
-                        }
-                        catch(Exception e){
-                            msg = args[2] + " isn't a recognized difficulty or number";
-                        }
-
-                    } else {
+            if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
+                if (affinity.hasDifficulty(args[2])) {
+                    arg2 = affinity.getDifficultyAffinity(args[2]);
+                } else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find() || args[1].equalsIgnoreCase("world")) {
+                    try{
+                        arg2 = Integer.parseInt(args[2]);
+                    }
+                    catch(Exception e){
                         msg = args[2] + " isn't a recognized difficulty or number";
                     }
-                }
 
-                // No switch statement so earlier Java Versions are compatible
-                if(msg == ""){
-                    if(args[0].equalsIgnoreCase("get")){ msg = getAffinity(arg1); }
-                    else if(args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
-                    else if(args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg1, arg2); }
-                    else if(args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg1, arg2*-1); }
-                    else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
-                    else if(args[0].equalsIgnoreCase("removemax")){ msg = removeMaxAffinity(arg1); }
-                    else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!";; }
-                    else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
                 } else {
-                    return sendMSG(msg,sender,false);
+                    msg = args[2] + " isn't a recognized difficulty or number";
                 }
-                return sendMSG(msg,sender,true);
             }
-            else {
-                return sendMSG("You don't have permission to do that",sender,true);
+
+            // No switch statement so earlier Java Versions are compatible
+            if(msg == ""){
+                if(args[0].equalsIgnoreCase("get")){ msg = getAffinity(arg1); }
+                else if(args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
+                else if(args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg1, arg2); }
+                else if(args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg1, arg2*-1); }
+                else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
+                else if(args[0].equalsIgnoreCase("removemax")){ msg = removeMaxAffinity(arg1); }
+                else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!";; }
+                else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
+            } else {
+                return sendMSG(msg,sender,false);
             }
+            return sendMSG(msg,sender,true);
         }
-        return false;
+        else {
+            return sendMSG("You don't have permission to do that",sender,true);
+        }
     }
 
     /**
