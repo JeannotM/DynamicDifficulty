@@ -12,8 +12,8 @@ import java.util.List;
 
 public class AffinityTabCompleter implements TabCompleter {
 
-    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("removemax","get","author"));
-    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","removemax","author"));
+    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("removemax","get","author", "reload"));
+    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","removemax","author", "reload"));
     private ArrayList<String> numbers = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5"));
 
     public AffinityTabCompleter(Affinity af){ numbers.addAll(af.getDifficulties()); }
@@ -21,7 +21,7 @@ public class AffinityTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
         if (args.length == 1) { return commands; }
         if (args.length == 2) {
-            if (!args[1].equalsIgnoreCase("author")) {
+            if (!args[1].equalsIgnoreCase("author") && !args[1].equalsIgnoreCase("reload")) {
                 ArrayList<String> l = new ArrayList<String>(Arrays.asList("world"));
                 Bukkit.getOnlinePlayers().forEach(name -> { l.add(name.getName()); });
                 return l;

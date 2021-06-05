@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class Affinity implements Listener {
+    protected Main m;
     protected DataManager data;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
@@ -38,8 +39,22 @@ public class Affinity implements Listener {
     protected PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
 
-    public Affinity(Main m) {
+    public Affinity(Main ma) {
+        data = new DataManager(ma);
+        m=ma;
+        loadConfig();
+    }
+
+    public void reloadConfig(){
+        saveData();
         data = new DataManager(m);
+        difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
+        doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear();
+        difficulties.clear(); blocks.clear(); disabledWorlds.clear();
+        loadConfig();
+    }
+
+    public void loadConfig(){
         silkTouchAllowed = data.getConfig().getBoolean("silk-touch-allowed");
         minAffinity = data.getConfig().getInt("min-affinity");
         maxAffinity = data.getConfig().getInt("max-affinity");

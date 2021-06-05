@@ -28,7 +28,7 @@ public class AffinityCommands implements CommandExecutor {
             return sendMSG("You forgot to include any arguments!", sender, false);
 
         if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
-            if(!args[0].equalsIgnoreCase("author") && args.length==1)
+            if(!args[0].equalsIgnoreCase("author") && !args[0].equalsIgnoreCase("reload") && args.length==1)
                 msg = "You forgot to include a user!";
 
             if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
@@ -69,6 +69,7 @@ public class AffinityCommands implements CommandExecutor {
                 else if(args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg1, arg2*-1); }
                 else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
                 else if(args[0].equalsIgnoreCase("removemax")){ msg = removeMaxAffinity(arg1); }
+                else if(args[0].equalsIgnoreCase("reload")){ msg = reloadConfig(); }
                 else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!";; }
                 else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
             } else {
@@ -209,7 +210,11 @@ public class AffinityCommands implements CommandExecutor {
         }
     }
 
-
+    // Reloads the config
+    private String reloadConfig(){
+        affinity.reloadConfig();
+        return "Succesfully reloaded the config!";
+    }
 
     private boolean sendMSG(String msg, CommandSender sender, boolean r){
         if (sender instanceof Player) {
