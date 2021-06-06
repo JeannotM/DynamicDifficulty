@@ -14,7 +14,7 @@ I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDif
 ## Settings with explanations
 ```
 # points-on-interval is made to give the user points every few minutes. Pairs up with interval-timer
-points-on-interval: 4
+points-on-interval: 5
 
 # The amount of affinity a user or the world increases (or decreases):
 # when a block from the blocks list is mined.
@@ -30,7 +30,7 @@ pvp-kill: 10
 pve-kill: 1
 
 # When a player dies.
-death: -100
+death: -80
 
 # The amount of affinity a user has when joining the server for the first time (or the first time after installing DynamicDifficulty)
 starting-affinity: 500
@@ -40,7 +40,7 @@ min-affinity: 0
 max-affinity: 1200
 
 # 0 Equals Disabled, timer is in minutes
-interval-timer: 2
+interval-timer: 1
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # Format:
@@ -48,14 +48,14 @@ interval-timer: 2
 # Will use pve-kill if only MOBTYPE is given
 mobs-count-as-pve:
 - ZOMBIE
-- BLAZE
-- CREEPER
+- BLAZE: 2
+- CREEPER: 2
 - SKELETON
-- ENDERMAN: 2
-- WITHER_SKELETON: 2
+- ENDERMAN: 3
+- WITHER_SKELETON: 3
 - SPIDER
-- CAVESPIDER
-- VINDICATOR: 2
+- CAVESPIDER: 2
+- VINDICATOR: 3
 - WITCH
 - VILLAGER: 20
 
@@ -68,8 +68,19 @@ blocks:
 plugin-support:
   allow-papi: true 
   allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
-  use-multiverse: false
   use-prefix: true
+
+saving-data:
+  type: file # Supported : file, mysql
+#  port: "3306"
+#  host: "localhost"
+#  username: "root"
+#  password: ""
+#  database: "dynamicdifficulty"
+
+# You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
+# disabled-worlds:
+# - example_name
   
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
@@ -161,6 +172,10 @@ Sets a maximum Affinity limit for an user.
 /Affinity author
 perm: affinity.author
 Mentions DynamicDifficulty, my name and the Github page.
+
+/Affinity reload
+perm: affinity.reload
+Reloads the config.
 ```
 ## Plugin Support
 #### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]
@@ -194,10 +209,11 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Placeholder API.
 - [x] Multiverse Worlds Implementation
 - [x] Implement BStats
+- [x] /reload command
+- [x] MySQL support
 
 ## Possible Future Updates
-- [ ] MySQL support
-- [ ] Disco Difficulty mode
-- [ ] /reload command
+
+- [ ] Random Difficulty mode
 - [ ] change settings ingame
 - [ ] Event to stop certain mobs from following players on certain difficulties

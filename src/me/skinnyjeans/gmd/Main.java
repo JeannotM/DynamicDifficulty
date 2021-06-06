@@ -2,13 +2,14 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.1.01
+ * @version 1.1.03
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
 
 import me.skinnyjeans.gmd.commands.AffinityCommands;
 import me.skinnyjeans.gmd.hooks.Metrics;
+import me.skinnyjeans.gmd.hooks.MySQL;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
@@ -20,19 +21,23 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class Main extends JavaPlugin {
 	
 	public DataManager data = new DataManager(this);
-	public Affinity af = new Affinity(this);
+	public Affinity af;
+	public MySQL SQL;
 	
 	@Override
 	public void onEnable() {
 		checkData();
+		if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql")){
+			SQL = new MySQL(data);
+		}
+
+		af = new Affinity(this, SQL);
 
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getBoolean("per-player-difficulty")) {
-//			af = new PlayerAffinity(this);
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		else {
-//			af = new WorldAffinity(this);
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
 		}
 		getServer().getPluginManager().registerEvents(af, this);
@@ -46,6 +51,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		af.saveData();
+		if(SQL != null && SQL.isConnected()) {SQL.disconnect(); }
 		af = null;
 		data = null;
 	}
@@ -56,9 +62,8 @@ public class Main extends JavaPlugin {
 			if(timer > 0) {
 				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		        scheduler.scheduleSyncRepeatingTask(this, () -> {
-					if (Bukkit.getOnlinePlayers().size() > 0) {
+					if (Bukkit.getOnlinePlayers().size() > 0)
 						af.onInterval();
-					}
 				}, 0L, 20L*(60L *timer));
 			}
 		}
@@ -66,10 +71,9 @@ public class Main extends JavaPlugin {
 	
 	public void saveDataEveryFifteenMinutes() {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-        scheduler.scheduleSyncRepeatingTask(this, () -> {
-			if (Bukkit.getOnlinePlayers().size() > 0) {
+		scheduler.scheduleSyncRepeatingTask(this, () -> {
+			if (Bukkit.getOnlinePlayers().size() > 0)
 				af.saveData();
-			}
 		}, 0L, 20L*(60*15));
 	}
 

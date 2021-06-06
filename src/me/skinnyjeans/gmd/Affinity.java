@@ -1,5 +1,6 @@
 package me.skinnyjeans.gmd;
 
+import me.skinnyjeans.gmd.hooks.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
@@ -21,6 +22,7 @@ import java.util.logging.Level;
 
 public class Affinity implements Listener {
     protected Main m;
+    protected MySQL SQL;
     protected DataManager data;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
@@ -39,15 +41,23 @@ public class Affinity implements Listener {
     protected PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
 
-    public Affinity(Main ma) {
-        data = new DataManager(ma);
-        m=ma;
+    public Affinity(Main ma, MySQL s) {
+        m = ma;
+        SQL = s;
+        try {
+            if(SQL != null){
+                SQL.connect();
+                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to the database!");
+                SQL.createTable();
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
         loadConfig();
     }
 
-    public void reloadConfig(){
+    public void reloadConfig() {
         saveData();
-        data = new DataManager(m);
         difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
         doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear();
         difficulties.clear(); blocks.clear(); disabledWorlds.clear();
@@ -55,6 +65,7 @@ public class Affinity implements Listener {
     }
 
     public void loadConfig(){
+        data = new DataManager(m);
         silkTouchAllowed = data.getConfig().getBoolean("silk-touch-allowed");
         minAffinity = data.getConfig().getInt("min-affinity");
         maxAffinity = data.getConfig().getInt("max-affinity");
@@ -74,8 +85,15 @@ public class Affinity implements Listener {
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
-        if(data.getDataFile().getInt("world.affinity") == -1)
-            data.getDataFile().set("world.affinity", startAffinity);
+        if(SQL != null && SQL.isConnected()){
+            if(SQL.getAffinity("world") == -1)
+                SQL.updatePlayer("world", startAffinity, -1);
+            worldAffinity = SQL.getAffinity("world");
+        } else {
+            if(data.getDataFile().getInt("world.affinity") == -1)
+                data.getDataFile().set("world.affinity", startAffinity);
+            worldAffinity = data.getDataFile().getInt("world.affinity");
+        }
 
         Object[] tmpMobs = data.getConfig().getList("mobs-count-as-pve").toArray();
         for(Object s : tmpMobs){
@@ -87,8 +105,6 @@ public class Affinity implements Listener {
                 mobsPVE.put(sep[0], onPVEKill);
             }
         }
-
-        worldAffinity = data.getDataFile().getInt("world.affinity");
 
         if(minAffinity > maxAffinity){
             int tmp = maxAffinity;
@@ -119,7 +135,7 @@ public class Affinity implements Listener {
         TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
 
         for (int key : tm.keySet()) {
-            difficulties.add(tmpMap.get(key));
+            difficulties.add(tmpMap.get(key).replace(" ", "_"));
         }
         tm.clear(); tmpList.clear(); tmpMap.clear();
     }
@@ -127,21 +143,34 @@ public class Affinity implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
-            data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
-            data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
-            data.getDataFile().set("players." + uuid + ".max-affinity", -1);
-            data.saveData();
+        if(SQL != null && SQL.isConnected()){
+            if (SQL.getAffinity(uuid.toString()) == -1) {
+                SQL.updatePlayer(uuid.toString(), startAffinity, -1);
+            }
+            playerAffinity.put(uuid, SQL.getAffinity(uuid.toString()));
+            playerMaxAffinity.put(uuid, SQL.getMaxAffinity(uuid.toString()));
+        } else {
+            if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
+                data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
+                data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
+                data.getDataFile().set("players." + uuid + ".max-affinity", -1);
+                data.saveData();
+            }
+            playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
+            playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
         }
-        playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
-        playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
+
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        data.getDataFile().set("players." + uuid + ".affinity", playerAffinity.get(uuid));
-        data.getDataFile().set("players." + uuid + ".max-affinity", playerMaxAffinity.get(uuid));
+        if(SQL != null && SQL.isConnected()) {
+            SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid));
+        } else {
+            data.getDataFile().set("players." + uuid + ".affinity", playerAffinity.get(uuid));
+            data.getDataFile().set("players." + uuid + ".max-affinity", playerMaxAffinity.get(uuid));
+        }
         data.saveData();
         playerAffinity.remove(uuid);
         playerMaxAffinity.remove(uuid);
@@ -175,10 +204,14 @@ public class Affinity implements Listener {
 
     // Saves all player and world data every few minutes.
     public void saveData(){
-        for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet())
-            data.getDataFile().set("players." + e.getKey() + ".affinity", e.getValue());
-
-        data.getDataFile().set("world.affinity", worldAffinity);
+        for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet()){
+            if(SQL != null && SQL.isConnected()){
+                SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()));
+            } else {
+                data.getDataFile().set("players." + e.getKey() + ".affinity", e.getValue());
+                data.getDataFile().set("world.affinity", worldAffinity);
+            }
+        }
     }
 
     /**
@@ -295,8 +328,6 @@ public class Affinity implements Listener {
             worldAffinity = calcAffinity(null, worldAffinity + onInterval);
         }
     }
-
-
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(PlayerRespawnEvent e) {
