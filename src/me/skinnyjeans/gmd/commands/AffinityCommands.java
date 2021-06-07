@@ -55,7 +55,6 @@ public class AffinityCommands implements CommandExecutor {
                     catch(Exception e){
                         msg = args[2] + " isn't a recognized difficulty or number";
                     }
-
                 } else {
                     msg = args[2] + " isn't a recognized difficulty or number";
                 }
@@ -103,9 +102,8 @@ public class AffinityCommands implements CommandExecutor {
     private String setAffinity(String user, int amount) {
         try {
             UUID uuid = null;
-            if(!user.equalsIgnoreCase("world")) {
+            if(!user.equalsIgnoreCase("world"))
                 uuid = Bukkit.getPlayer(user).getUniqueId();
-            }
 
             amount = affinity.calcAffinity(uuid, amount);
             affinity.setAffinity(uuid, amount);
@@ -126,9 +124,8 @@ public class AffinityCommands implements CommandExecutor {
     private String getAffinity(String user) {
         try {
             UUID uuid = null;
-            if(!user.equalsIgnoreCase("world")) {
+            if(!user.equalsIgnoreCase("world"))
                 uuid = Bukkit.getPlayer(user).getUniqueId();
-            }
 
             String msg = user+" is on "+affinity.calcDifficulty(uuid)+" Difficulty with "+affinity.getAffinity(uuid)+" Affinity points ";
             if(uuid != null)
@@ -174,11 +171,9 @@ public class AffinityCommands implements CommandExecutor {
      */
     private String setMaxAffinity(String user, int amount) {
         try {
-            if(user.equalsIgnoreCase("world")) {
+            if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a max Affinity!";
-            }
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
-
             amount = affinity.calcAffinity(uuid, amount);
             affinity.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
@@ -197,9 +192,8 @@ public class AffinityCommands implements CommandExecutor {
      */
     private String removeMaxAffinity(String user) {
         try {
-            if(user.equalsIgnoreCase("world")) {
+            if(user.equalsIgnoreCase("world"))
                 return "The world doesn't have a max Affinity!";
-            }
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
             affinity.setMaxAffinity(uuid, -1);
             return "Removed the Max Affinity for "+user;

@@ -27,7 +27,8 @@ public class Affinity implements Listener {
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
-    protected boolean silkTouchAllowed, calcExactPercentage, multiverseEnabled, difficultyType;
+    protected boolean silkTouchAllowed, calcExactPercentage, randomizer;
+    protected String difficultyType;
     protected List<String> blocks, disabledWorlds;
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
@@ -66,6 +67,7 @@ public class Affinity implements Listener {
 
     public void loadConfig(){
         data = new DataManager(m);
+        randomizer = data.getConfig().getBoolean("difficulty-modifiers.randomize");
         silkTouchAllowed = data.getConfig().getBoolean("silk-touch-allowed");
         minAffinity = data.getConfig().getInt("min-affinity");
         maxAffinity = data.getConfig().getInt("max-affinity");
@@ -77,10 +79,9 @@ public class Affinity implements Listener {
         blocks = data.getConfig().getStringList("blocks");
         onInterval = data.getConfig().getInt("points-on-interval");
         onPlayerHit = data.getConfig().getInt("player-hit");
-        difficultyType = data.getConfig().getBoolean("per-player-difficulty");
+        difficultyType = data.getConfig().getString("difficulty-modifiers.type");
         calcExactPercentage = data.getConfig().getBoolean("calculate-exact-percentage");
         disabledWorlds = data.getConfig().getStringList("disabled-worlds");
-        multiverseEnabled = data.getConfig().getBoolean("plugin-support.use-multiverse");
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
@@ -100,8 +101,7 @@ public class Affinity implements Listener {
             String[] sep = s.toString().replaceAll("[{|}]","").split("=");
             try{
                 mobsPVE.put(sep[0], Integer.parseInt(sep[1]));
-            }
-            catch(Exception e){
+            } catch(Exception e){
                 mobsPVE.put(sep[0], onPVEKill);
             }
         }
@@ -111,8 +111,7 @@ public class Affinity implements Listener {
             maxAffinity = minAffinity;
             minAffinity = tmp;
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity is larger than MaxAffinity, so their values have been switched.");
-        }
-        else if (minAffinity == maxAffinity){
+        } else if (minAffinity == maxAffinity){
             maxAffinity = 0;
             minAffinity = 1200;
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity has the same value as MaxAffinity, so their values have been set to default.");
@@ -121,10 +120,10 @@ public class Affinity implements Listener {
         for (String key : section.getKeys(false)) {
             tmpList.add(key);
             difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
-            experienceMultiplier.put(key, section.getInt(key + ".experience-multiplier"));
-            doubleLootChance.put(key, section.getInt(key + ".double-loot-chance"));
-            damageDoneByMobs.put(key, section.getInt(key + ".damage-done-by-mobs"));
-            damageDoneOnMobs.put(key, section.getInt(key + ".damage-done-on-mobs"));
+            experienceMultiplier.put(key, (int) (section.getDouble(key + ".experience-multiplier") * data.getConfig().getDouble("difficulty-modifiers.experience-multiplier")));
+            doubleLootChance.put(key, (int) (section.getDouble(key + ".double-loot-chance") * data.getConfig().getDouble("difficulty-modifiers.double-loot-chance-multiplier")));
+            damageDoneByMobs.put(key, (int) (section.getDouble(key + ".damage-done-by-mobs") * data.getConfig().getDouble("difficulty-modifiers.damage-done-by-mobs-multiplier")));
+            damageDoneOnMobs.put(key, (int) (section.getDouble(key + ".damage-done-on-mobs") * data.getConfig().getDouble("difficulty-modifiers.damage-done-on-mobs-multiplier")));
             effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked"));
             prefixes.put(key, section.getString(key + ".prefix"));
         }
@@ -144,9 +143,8 @@ public class Affinity implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
         if(SQL != null && SQL.isConnected()){
-            if (SQL.getAffinity(uuid.toString()) == -1) {
+            if (SQL.getAffinity(uuid.toString()) == -1)
                 SQL.updatePlayer(uuid.toString(), startAffinity, -1);
-            }
             playerAffinity.put(uuid, SQL.getAffinity(uuid.toString()));
             playerMaxAffinity.put(uuid, SQL.getMaxAffinity(uuid.toString()));
         } else {
@@ -184,7 +182,7 @@ public class Affinity implements Listener {
 
     public void setAffinity(UUID uuid, int x) {
         if (uuid == null) {
-            worldAffinity = calcAffinity(uuid, x);
+            worldAffinity = calcAffinity(null, x);
         } else {
             playerAffinity.replace(uuid, calcAffinity(uuid, x));
         }
@@ -202,7 +200,7 @@ public class Affinity implements Listener {
 
     public String getPrefix(UUID uuid){ return prefixes.get(calcDifficulty(uuid)); }
 
-    // Saves all player and world data every few minutes.
+    /* Saves all player and world data every few minutes. */
     public void saveData(){
         for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet()){
             if(SQL != null && SQL.isConnected()){
@@ -243,6 +241,7 @@ public class Affinity implements Listener {
      * @return String of the difficulty the world/user is on
      */
     public String calcDifficulty(UUID uuid) {
+        if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
         String last = "";
         int af = worldAffinity;
         if(uuid != null) { af = playerAffinity.get(uuid); }
@@ -309,29 +308,28 @@ public class Affinity implements Listener {
     }
 
     private void addAmountOfAffinity(UUID uuid, int x){
-        if (difficultyType) {
-            playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + x));
-        } else {
+        if (difficultyType.equalsIgnoreCase("world")) {
             worldAffinity = calcAffinity(null, worldAffinity + x);
+        } else {
+            playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + x));
         }
     }
 
-    // To increase/decrease players score every few minutes
+    /* To increase/decrease players score every few minutes */
     public void onInterval() {
-        if(difficultyType){
+        if(difficultyType.equalsIgnoreCase("world")){
+            worldAffinity = calcAffinity(null, worldAffinity + onInterval);
+        } else {
             Bukkit.getOnlinePlayers().forEach(name -> {
                 UUID uuid = name.getUniqueId();
                 playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + onInterval));
             });
         }
-        else {
-            worldAffinity = calcAffinity(null, worldAffinity + onInterval);
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(PlayerRespawnEvent e) {
-        if(!(disabledWorlds.contains(e.getPlayer().getWorld().getName())) || !(multiverseEnabled)){
+        if(!(disabledWorlds.contains(e.getPlayer().getWorld().getName()))){
             if (onDeath != 0)
                 addAmountOfAffinity(e.getPlayer().getUniqueId(), onDeath);
         }
@@ -339,7 +337,7 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKill(EntityDeathEvent e) {
-        if(!(disabledWorlds.contains(e.getEntity().getWorld().getName())) || !(multiverseEnabled)) {
+        if(!(disabledWorlds.contains(e.getEntity().getWorld().getName()))) {
             try {
                 if ((onPVPKill != 0 || onPVEKill != 0) && e.getEntity().getKiller() instanceof Player) {
                     UUID uuid = e.getEntity().getKiller().getUniqueId();
@@ -369,7 +367,7 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onMined(BlockBreakEvent e) {
-        if(!(disabledWorlds.contains(e.getPlayer().getWorld().getName())) || !(multiverseEnabled)) {
+        if(!(disabledWorlds.contains(e.getPlayer().getWorld().getName()))) {
             if (onMined != 0 && blocks.contains(e.getBlock().getBlockData().getMaterial().name()) && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 UUID uuid = e.getPlayer().getUniqueId();
                 addAmountOfAffinity(uuid, onMined);
@@ -379,7 +377,7 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onHit(EntityDamageByEntityEvent e) {
-        if(!(disabledWorlds.contains(e.getEntity().getWorld().getName())) || !(multiverseEnabled)) {
+        if(!(disabledWorlds.contains(e.getEntity().getWorld().getName()))) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
             try {

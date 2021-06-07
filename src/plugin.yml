@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.1.03
+version: 1.1.04
 author: SkinnyJeans
 api-version: 1.13
 softdepend: ['PlaceholderAPI']

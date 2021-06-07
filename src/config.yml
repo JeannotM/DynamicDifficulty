@@ -3,9 +3,9 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.1.03
+version: 1.1.04
 
-# Some settings in the config have been typed shorter so as not to clutter it too much. Please visit:
+# Some info blobs in the config have been typed shorter so as not to clutter it too much. Please visit:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
 # for more detailed explanations with examples.
 
@@ -24,7 +24,7 @@ starting-affinity: 500
 min-affinity: 0
 max-affinity: 1200
 
-# 0 Equals Disabled, timer is in minutes
+# 0 = Disabled, timer is in minutes
 interval-timer: 1
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
@@ -42,12 +42,17 @@ mobs-count-as-pve:
 - CAVESPIDER: 2
 - VINDICATOR: 3
 - WITCH
+- WITHER: 100
+- ENDER_DRAGON: 100
 - VILLAGER: 20
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
+
+# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
+silk-touch-allowed: false
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
@@ -56,25 +61,28 @@ plugin-support:
   use-prefix: true
 
 saving-data:
-  type: file # Supported : file, mysql
-#  port: "3306"
-#  host: "localhost"
-#  username: "root"
-#  password: ""
-#  database: "dynamicdifficulty"
+  type: file # Supported: file, mysql
+#  port: 3306
+#  host: localhost
+#  username: root
+#  password:
+#  database: dynamicdifficulty
 
 # You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
 # disabled-worlds:
 # - example_name
 
-# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
-silk-touch-allowed: false
-
 # Calculates the percentage between 2 difficulties so the progression will feel more natural.
 calculate-exact-percentage: true
 
-# Will calculate difficulty per player if enabled, will otherwise do that for the whole world (everyone will be on the same difficulty)
-per-player-difficulty: true
+difficulty-modifiers:
+  type: player # Supported: player, world
+  randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
+  damage-done-by-mobs-multiplier: 1.0
+  damage-done-on-mobs-multiplier: 1.0
+  double-loot-chance-multiplier: 1.0
+  experience-multiplier: 1.0
 
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
 # Only "effects-when-attacked" affect the Wither and EnderDragon

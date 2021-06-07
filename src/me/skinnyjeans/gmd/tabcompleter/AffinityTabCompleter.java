@@ -21,7 +21,7 @@ public class AffinityTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
         if (args.length == 1) { return commands; }
         if (args.length == 2) {
-            if (!args[1].equalsIgnoreCase("author") && !args[1].equalsIgnoreCase("reload")) {
+            if (!args[0].equalsIgnoreCase("author") && !args[0].equalsIgnoreCase("reload")) {
                 ArrayList<String> l = new ArrayList<String>(Arrays.asList("world"));
                 Bukkit.getOnlinePlayers().forEach(name -> { l.add(name.getName()); });
                 return l;

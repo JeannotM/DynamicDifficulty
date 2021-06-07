@@ -2,7 +2,7 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.1.03
+ * @version 1.1.04
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
@@ -27,18 +27,16 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		checkData();
-		if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql")){
+		if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql"))
 			SQL = new MySQL(data);
-		}
 
 		af = new Affinity(this, SQL);
 
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
-		if(data.getConfig().getBoolean("per-player-difficulty")) {
-			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
-		}
-		else {
+		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
+		} else {
+			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		getServer().getPluginManager().registerEvents(af, this);
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
@@ -51,7 +49,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		af.saveData();
-		if(SQL != null && SQL.isConnected()) {SQL.disconnect(); }
+		if(SQL != null && SQL.isConnected()) { SQL.disconnect(); }
 		af = null;
 		data = null;
 	}
@@ -64,7 +62,7 @@ public class Main extends JavaPlugin {
 		        scheduler.scheduleSyncRepeatingTask(this, () -> {
 					if (Bukkit.getOnlinePlayers().size() > 0)
 						af.onInterval();
-				}, 0L, 20L*(60L *timer));
+				}, 0L, 20L*(60L * timer));
 			}
 		}
 	}
@@ -77,18 +75,18 @@ public class Main extends JavaPlugin {
 		}, 0L, 20L*(60*15));
 	}
 
-	// To check a few settings and hooks
+	/* To check a few settings and hooks */
 	public void checkData(){
 		if (!getConfig().getString("version").equals(Bukkit.getPluginManager().getPlugin("DynamicDifficulty").getDescription().getVersion()) || !getConfig().contains("version",true))
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] Your configuration file is not up to date. Please remove it or update it yourself, because I don't know how to do it with Java without deleting existing configs. Sorry :'(");
 
 		String worldNames = "";
 		for(int x=0;x<Bukkit.getWorlds().size();x++)
-			if(Bukkit.getWorlds().get(x).getDifficulty() != Difficulty.HARD )
+			if(Bukkit.getWorlds().get(x).getDifficulty() != Difficulty.HARD)
 				worldNames += Bukkit.getWorlds().get(x).getName() + ", ";
 
 		if(worldNames != "")
-			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] The following worlds do not have their difficulty on Hard mode: "+worldNames);
+			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] The following worlds do not have their difficulty on Hard mode: "+worldNames);
 
 		if(data.getConfig().getBoolean("plugin-support.allow-bstats"))
 			new Metrics(this, 11417);

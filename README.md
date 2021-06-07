@@ -57,12 +57,17 @@ mobs-count-as-pve:
 - CAVESPIDER: 2
 - VINDICATOR: 3
 - WITCH
+- WITHER: 100
+- ENDER_DRAGON: 100
 - VILLAGER: 20
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
+  
+# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
+silk-touch-allowed: false
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
@@ -71,7 +76,7 @@ plugin-support:
   use-prefix: true
 
 saving-data:
-  type: file # Supported : file, mysql
+  type: file # Supported: file, mysql
 #  port: "3306"
 #  host: "localhost"
 #  username: "root"
@@ -81,18 +86,20 @@ saving-data:
 # You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
 # disabled-worlds:
 # - example_name
-  
-# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
-silk-touch-allowed: false
 
 # Calculates the percentage between 2 difficulties so the progression will feel more natural.
 # A better explanation is given underneath the settings explanation tab
 calculate-exact-percentage: true
 
-# Will calculate difficulty per player if enabled (equity)
-# And will calculate the difficulty for all players the same way if disabled (equality)
-per-player-difficulty: true
-
+difficulty-modifiers:
+  type: player # Supported difficulty types: player, world
+  randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
+  damage-done-by-mobs-multiplier: 1.0
+  damage-done-on-mobs-multiplier: 1.0
+  double-loot-chance-multiplier: 1.0
+  experience-multiplier: 1.0
+  
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
 # Only "effects-when-attacked" affect the Wither and EnderDragon
 # To see mob damage: https://minecraft.gamepedia.com/Mob#Damage_dealt_by_hostile_and_neutral_mobs
@@ -211,9 +218,8 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Implement BStats
 - [x] /reload command
 - [x] MySQL support
+- [x] Randomize Difficulty mode
 
 ## Possible Future Updates
-
-- [ ] Random Difficulty mode
 - [ ] change settings ingame
 - [ ] Event to stop certain mobs from following players on certain difficulties
