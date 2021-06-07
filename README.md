@@ -112,6 +112,7 @@ difficulty-modifiers:
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
+#   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
 difficulty:
   Easy:
     affinity-required: 0
@@ -121,6 +122,8 @@ difficulty:
     double-loot-chance: 0
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
+    mobs-ignore-player:
+    - CREEPER
   Normal:
     affinity-required: 400
     damage-done-by-mobs: 75
@@ -219,7 +222,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] /reload command
 - [x] MySQL support
 - [x] Randomize Difficulty mode
+- [x] Stop certain mobs from following players on chosen difficulties
 
 ## Possible Future Updates
 - [ ] change settings ingame
-- [ ] Event to stop certain mobs from following players on certain difficulties

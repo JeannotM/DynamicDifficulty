@@ -12,10 +12,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -30,6 +32,7 @@ public class Affinity implements Listener {
     protected boolean silkTouchAllowed, calcExactPercentage, randomizer;
     protected String difficultyType;
     protected List<String> blocks, disabledWorlds;
+    protected ArrayList<Integer> mobsOverrideIgnore = new ArrayList<>();
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
     protected HashMap<String, Integer> damageDoneOnMobs = new HashMap<>();
@@ -38,6 +41,7 @@ public class Affinity implements Listener {
     protected HashMap<String, Integer> mobsPVE = new HashMap<>();
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
     protected HashMap<String, String> prefixes = new HashMap<>();
+    protected HashMap<String, List<String>> mobsIgnorePlayers = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
     protected PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
@@ -54,6 +58,7 @@ public class Affinity implements Listener {
         } catch(Exception e){
             e.printStackTrace();
         }
+        emptyHitMobsList();
         loadConfig();
     }
 
@@ -61,7 +66,7 @@ public class Affinity implements Listener {
         saveData();
         difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
         doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear();
-        difficulties.clear(); blocks.clear(); disabledWorlds.clear();
+        difficulties.clear(); blocks.clear(); disabledWorlds.clear(); mobsOverrideIgnore.clear();
         loadConfig();
     }
 
@@ -116,7 +121,6 @@ public class Affinity implements Listener {
             minAffinity = 1200;
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity has the same value as MaxAffinity, so their values have been set to default.");
         }
-
         for (String key : section.getKeys(false)) {
             tmpList.add(key);
             difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
@@ -126,6 +130,7 @@ public class Affinity implements Listener {
             damageDoneOnMobs.put(key, (int) (section.getDouble(key + ".damage-done-on-mobs") * data.getConfig().getDouble("difficulty-modifiers.damage-done-on-mobs-multiplier")));
             effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked"));
             prefixes.put(key, section.getString(key + ".prefix"));
+            mobsIgnorePlayers.put(key, section.getStringList(key + ".mobs-ignore-player"));
         }
 
         // Everything beneath this comment is to sort the difficulties by their affinity requirement
@@ -266,6 +271,7 @@ public class Affinity implements Listener {
      * @return Double of the exact or the difficulty based percentage
      */
     public double calcPercentage(UUID uuid, String mode) {
+        if(randomizer) { return getHashData(mode, calcDifficulty(uuid)); }
         int thisDiff = difficulties.indexOf(calcDifficulty(null));
         int affinity = worldAffinity;
         if(uuid != null){
@@ -396,11 +402,31 @@ public class Affinity implements Listener {
                 } else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
                     double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
                     e.setDamage(dam);
+                    if(!mobsOverrideIgnore.contains(prey.getEntityId()))
+                        mobsOverrideIgnore.add(prey.getEntityId());
                 }
             } catch (NullPointerException error) {
                 Bukkit.getConsoleSender().sendMessage("NullPointerException. Enemytype Attack: " + hunter + " Enemytype Hit: " + prey);
                 // Ugly tmp fix
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
+        if(e.getTarget() instanceof Player) {
+            if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString())){
+                if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
+                    e.setCancelled(true);
+            }
+        }
+    }
+
+    private void emptyHitMobsList(){
+        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        scheduler.scheduleSyncRepeatingTask(m, () -> {
+            if(mobsOverrideIgnore.size() > 0)
+                mobsOverrideIgnore.clear();
+        }, 0L, 20L*60);
     }
 }
