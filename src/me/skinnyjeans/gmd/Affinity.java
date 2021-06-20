@@ -46,9 +46,13 @@ public class Affinity implements Listener {
     protected PotionEffectType[] effects = new PotionEffectType[] { PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW };
 
-    public Affinity(Main ma, MySQL s) {
+    public Affinity(Main ma) {
         m = ma;
-        SQL = s;
+        data = new DataManager(m);
+
+        if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql"))
+            SQL = new MySQL(ma, data);
+
         try {
             if(SQL != null){
                 SQL.connect();
@@ -58,6 +62,7 @@ public class Affinity implements Listener {
         } catch(Exception e){
             e.printStackTrace();
         }
+
         emptyHitMobsList();
         loadConfig();
     }
@@ -82,19 +87,27 @@ public class Affinity implements Listener {
         onMined = data.getConfig().getInt("block-mined");
         startAffinity = data.getConfig().getInt("starting-affinity");
         blocks = data.getConfig().getStringList("blocks");
-        onInterval = data.getConfig().getInt("points-on-interval");
+        onInterval = data.getConfig().getInt("points-per-minute");
         onPlayerHit = data.getConfig().getInt("player-hit");
         difficultyType = data.getConfig().getString("difficulty-modifiers.type");
-        calcExactPercentage = data.getConfig().getBoolean("calculate-exact-percentage");
+        calcExactPercentage = data.getConfig().getBoolean("difficulty-modifiers.exact-percentage");
         disabledWorlds = data.getConfig().getStringList("disabled-worlds");
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
         if(SQL != null && SQL.isConnected()){
-            if(SQL.getAffinity("world") == -1)
-                SQL.updatePlayer("world", startAffinity, -1);
-            worldAffinity = SQL.getAffinity("world");
+            SQL.getAffinityValues("world", new findIntegerCallback() {
+                @Override
+                public void onQueryDone(List<Integer> r) {
+                    if(r.get(0) == -1){
+                        SQL.updatePlayer("world", startAffinity, -1);
+                        worldAffinity = startAffinity;
+                    } else {
+                        worldAffinity = r.get(0);
+                    }
+                }
+            });
         } else {
             if(data.getDataFile().getInt("world.affinity") == -1)
                 data.getDataFile().set("world.affinity", startAffinity);
@@ -135,12 +148,8 @@ public class Affinity implements Listener {
 
         // Everything beneath this comment is to sort the difficulties by their affinity requirement
         for (String s : tmpList) tmpMap.put(difficultyAffinity.get(s), s);
-
         TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
-
-        for (int key : tm.keySet()) {
-            difficulties.add(tmpMap.get(key).replace(" ", "_"));
-        }
+        for (int key : tm.keySet()) difficulties.add(tmpMap.get(key).replace(" ", "_"));
         tm.clear(); tmpList.clear(); tmpMap.clear();
     }
 
@@ -148,10 +157,19 @@ public class Affinity implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
         if(SQL != null && SQL.isConnected()){
-            if (SQL.getAffinity(uuid.toString()) == -1)
-                SQL.updatePlayer(uuid.toString(), startAffinity, -1);
-            playerAffinity.put(uuid, SQL.getAffinity(uuid.toString()));
-            playerMaxAffinity.put(uuid, SQL.getMaxAffinity(uuid.toString()));
+            SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
+                @Override
+                public void onQueryDone(List<Integer> r) {
+                    if (r.get(0) == -1){
+                        playerAffinity.put(uuid, startAffinity);
+                        playerMaxAffinity.put(uuid, -1);
+                        SQL.updatePlayer(uuid.toString(), startAffinity, -1);
+                    } else {
+                        playerAffinity.put(uuid, r.get(0));
+                        playerMaxAffinity.put(uuid, r.get(1));
+                    }
+                }
+            });
         } else {
             if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
                 data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
@@ -162,7 +180,6 @@ public class Affinity implements Listener {
             playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
             playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
         }
-
     }
 
     @EventHandler
@@ -195,15 +212,13 @@ public class Affinity implements Listener {
 
     public int getMaxAffinity(UUID uuid) { return playerMaxAffinity.get(uuid); }
     public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(uuid, x)); }
-
     public int getVariableMaxAffinity(){ return maxAffinity; }
     public int getVariableMinAffinity(){ return minAffinity; }
-
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
     public int getDifficultyAffinity(String x) { return difficultyAffinity.get(x); }
     public ArrayList<String> getDifficulties() { return difficulties; }
-
     public String getPrefix(UUID uuid){ return prefixes.get(calcDifficulty(uuid)); }
+    public interface findIntegerCallback { void onQueryDone(List<Integer> r); }
 
     /* Saves all player and world data every few minutes. */
     public void saveData(){
@@ -237,6 +252,12 @@ public class Affinity implements Listener {
             x = minAffinity;
         }
         return x;
+    }
+
+    /** Closes all databases and saves data */
+    public void exitProgram() {
+        saveData();
+        if(SQL != null) { SQL.disconnect(); }
     }
 
     /**
@@ -399,7 +420,7 @@ public class Affinity implements Listener {
                             if (((LivingEntity) prey).hasPotionEffect(effect))
                                 ((LivingEntity) prey).removePotionEffect(effect);
                         }
-                } else if (hunter instanceof Player && !(prey instanceof Player) && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
+                } else if (hunter instanceof Player && !(prey instanceof EnderDragon) && !(prey instanceof Wither)) {
                     double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
                     e.setDamage(dam);
                     if(!mobsOverrideIgnore.contains(prey.getEntityId()))
@@ -414,7 +435,7 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        if(e.getTarget() instanceof Player) {
+        if(e.getEntity() != null && e.getTarget() instanceof Player) {
             if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString())){
                 if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
                     e.setCancelled(true);

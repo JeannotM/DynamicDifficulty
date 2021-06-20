@@ -3,29 +3,25 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.1.05
+version: 1.3
 
-# Some info blobs in the config have been typed shorter so as not to clutter it too much. Please visit:
+# Some info in the config have been typed shorter so as not to clutter it too much. Please visit for more detailed explanations with examples:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
-# for more detailed explanations with examples.
 
 # Affinity Gained or Lost When Doing Certain Things.
-points-on-interval: 5 # How many points to give per interval, if turned on.
+points-per-minute: 5
 block-mined: 1
 player-hit: -1
 pvp-kill: 20
 pve-kill: 1
 death: -80
 
-# With How Much Affinity a Player Starts When Joining For The First Time.
+# How Much Affinity a Player Starts With When Joining For The First Time.
 starting-affinity: 500
 
 # What The Maximum and Minimum Affinity Are, no one can get more or less than this (even with commands)
 min-affinity: 0
 max-affinity: 1200
-
-# 0 = Disabled, timer is in minutes
-interval-timer: 1
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # Format:
@@ -57,7 +53,7 @@ silk-touch-allowed: false
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
-  allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
+  allow-bstats: true # To Only Disable BStats on DynamicDifficulty
   use-prefix: true
 
 saving-data:
@@ -68,16 +64,14 @@ saving-data:
 #  password:
 #  database: dynamicdifficulty
 
-# You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
+# You can disable DynamicDifficulty in certain worlds
 # disabled-worlds:
 # - example_name
-
-# Calculates the percentage between 2 difficulties so the progression will feel more natural.
-calculate-exact-percentage: true
 
 difficulty-modifiers:
   type: player # Supported: player, world
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
   # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
   damage-done-by-mobs-multiplier: 1.0
   damage-done-on-mobs-multiplier: 1.0

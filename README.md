@@ -13,10 +13,10 @@ I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDif
 
 ## Settings with explanations
 ```
-# points-on-interval is made to give the user points every few minutes. Pairs up with interval-timer
-points-on-interval: 5
-
 # The amount of affinity a user or the world increases (or decreases):
+# points-on-interval is made to give the user points every minute.
+points-per-minute: 5
+
 # when a block from the blocks list is mined.
 block-mined: 1
 
@@ -38,9 +38,6 @@ starting-affinity: 500
 # What The Minimum and Maximum Affinity Are, no one can get more or less than this (even with commands)
 min-affinity: 0
 max-affinity: 1200
-
-# 0 Equals Disabled, timer is in minutes
-interval-timer: 1
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # Format:
@@ -83,17 +80,14 @@ saving-data:
 #  password: ""
 #  database: "dynamicdifficulty"
 
-# You can disable DynamicDifficulty in certain worlds if Multiverse is enabled
+# You can disable DynamicDifficulty in certain worlds
 # disabled-worlds:
 # - example_name
-
-# Calculates the percentage between 2 difficulties so the progression will feel more natural.
-# A better explanation is given underneath the settings explanation tab
-calculate-exact-percentage: true
 
 difficulty-modifiers:
   type: player # Supported difficulty types: player, world
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
   # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
   damage-done-by-mobs-multiplier: 1.0
   damage-done-on-mobs-multiplier: 1.0
@@ -226,3 +220,9 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 
 ## Possible Future Updates
 - [ ] change settings ingame
+- [ ] per biome difficulty
+- [ ] promoted/demoted message
+- [ ] Disable for certain mobs
+- [ ] SQLite
+- [ ] MongoDB
+- [ ] No save type

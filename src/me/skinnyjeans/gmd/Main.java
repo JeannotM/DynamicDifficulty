@@ -2,14 +2,13 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.1.05
+ * @version 1.3
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
 
 import me.skinnyjeans.gmd.commands.AffinityCommands;
 import me.skinnyjeans.gmd.hooks.Metrics;
-import me.skinnyjeans.gmd.hooks.MySQL;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
@@ -22,16 +21,11 @@ public class Main extends JavaPlugin {
 	
 	public DataManager data = new DataManager(this);
 	public Affinity af;
-	public MySQL SQL;
-	
+
 	@Override
 	public void onEnable() {
 		checkData();
-		if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql"))
-			SQL = new MySQL(data);
-
-		af = new Affinity(this, SQL);
-
+		af = new Affinity(this);
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
@@ -48,22 +42,18 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		af.saveData();
-		if(SQL != null && SQL.isConnected()) { SQL.disconnect(); }
+		af.exitProgram();
 		af = null;
 		data = null;
 	}
 	
 	public void onInterval() {
-		if(data.getConfig().getInt("on-interval") != 0) {
-			int timer = data.getConfig().getInt("interval-timer");
-			if(timer > 0) {
-				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-		        scheduler.scheduleSyncRepeatingTask(this, () -> {
-					if (Bukkit.getOnlinePlayers().size() > 0)
-						af.onInterval();
-				}, 0L, 20L*(60L * timer));
-			}
+		if(data.getConfig().getInt("points-per-minute") != 0) {
+			BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+			scheduler.scheduleSyncRepeatingTask(this, () -> {
+				if (Bukkit.getOnlinePlayers().size() > 0)
+					af.onInterval();
+			}, 0L, 20L*60L);
 		}
 	}
 	
