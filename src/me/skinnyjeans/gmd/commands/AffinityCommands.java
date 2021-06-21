@@ -69,6 +69,7 @@ public class AffinityCommands implements CommandExecutor {
                 else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
                 else if(args[0].equalsIgnoreCase("removemax")){ msg = removeMaxAffinity(arg1); }
                 else if(args[0].equalsIgnoreCase("reload")){ msg = reloadConfig(); }
+                else if(args[0].equalsIgnoreCase("force-save")){ msg = forceSave(); }
                 else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!";; }
                 else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
             } else {
@@ -108,8 +109,7 @@ public class AffinityCommands implements CommandExecutor {
             amount = affinity.calcAffinity(uuid, amount);
             affinity.setAffinity(uuid, amount);
             return user+"'s set to "+affinity.calcDifficulty(uuid)+" Difficulty with "+amount+" Affinity points";
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return "Something went wrong, please check the console for more info";
         }
@@ -131,8 +131,7 @@ public class AffinityCommands implements CommandExecutor {
             if(uuid != null)
                 msg+="\nmax affinity: "+affinity.getMaxAffinity(uuid);
             return msg;
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return "Something went wrong, please check the console for more info";
         }
@@ -155,8 +154,7 @@ public class AffinityCommands implements CommandExecutor {
             int x = affinity.calcAffinity(null,affinity.getAffinity(uuid) + amount);
             affinity.setAffinity(uuid, x);
             return "World is on "+affinity.calcDifficulty(uuid)+" Difficulty with "+affinity.getAffinity(uuid)+" Affinity points";
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return "Something went wrong, please check the console for more info";
         }
@@ -174,14 +172,18 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a max Affinity!";
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
-            amount = affinity.calcAffinity(uuid, amount);
+            amount = affinity.calcAffinity(null, amount);
             affinity.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return "Something went wrong, please check the console for more info";
         }
+    }
+
+    private String forceSave(){
+        affinity.saveData();
+        return "saved Succesfully";
     }
 
     /**

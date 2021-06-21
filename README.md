@@ -210,10 +210,9 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Per player and World difficulties
 - [x] Permissions on Luckperms and other management tools
 - [x] Custom Affinity points for each mobs
-- [x] Placeholder API.
-- [x] Multiverse Worlds Implementation
-- [x] Implement BStats
-- [x] /reload command
+- [x] Implemented BStats & Placeholder API.
+- [x] Disable certain worlds
+- [x] /reload command & /force-save
 - [x] MySQL support
 - [x] Randomize Difficulty mode
 - [x] Stop certain mobs from following players on chosen difficulties
@@ -226,3 +225,4 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] SQLite
 - [ ] MongoDB
 - [ ] No save type
+- [ ] Export to DB / File

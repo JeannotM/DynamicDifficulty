@@ -2,7 +2,7 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.3
+ * @version 1.2.02
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
@@ -24,8 +24,8 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		checkData();
 		af = new Affinity(this);
+		checkData();
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
@@ -36,7 +36,7 @@ public class Main extends JavaPlugin {
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
 
-		saveDataEveryFifteenMinutes();
+		saveDataEveryFiveMinutes();
 		onInterval();
 	}
 	
@@ -53,16 +53,16 @@ public class Main extends JavaPlugin {
 			scheduler.scheduleSyncRepeatingTask(this, () -> {
 				if (Bukkit.getOnlinePlayers().size() > 0)
 					af.onInterval();
-			}, 0L, 20L*60L);
+			}, 0L, 1200L);
 		}
 	}
 	
-	public void saveDataEveryFifteenMinutes() {
+	public void saveDataEveryFiveMinutes() {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		scheduler.scheduleSyncRepeatingTask(this, () -> {
 			if (Bukkit.getOnlinePlayers().size() > 0)
 				af.saveData();
-		}, 0L, 20L*(60*15));
+		}, 0L, 6000L);
 	}
 
 	/* To check a few settings and hooks */

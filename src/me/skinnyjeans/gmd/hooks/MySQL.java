@@ -20,15 +20,19 @@ public class MySQL {
     private final String tbName = "dynamicdifficulty";
     private Connection connection;
 
-    public MySQL(Main m, DataManager data){
+    public MySQL(Main m, DataManager data) throws SQLException {
         plugin = m;
         host = data.getConfig().getString("saving-data.host");
         port = data.getConfig().getString("saving-data.port");
         database = data.getConfig().getString("saving-data.database");
         username = data.getConfig().getString("saving-data.username");
         password = data.getConfig().getString("saving-data.password");
+        connect();
+        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to the database!");
+        createTable();
     }
 
+    public Connection getConnection(){ return connection; }
     public boolean isConnected(){ return connection != null; }
     public interface findBooleanCallback { void onQueryDone(boolean r); }
 
@@ -149,6 +153,4 @@ public class MySQL {
             }
         }
     }
-
-    public Connection getConnection(){ return connection; }
 }

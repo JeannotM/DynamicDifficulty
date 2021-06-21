@@ -31,7 +31,7 @@ public class Affinity implements Listener {
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
     protected boolean silkTouchAllowed, calcExactPercentage, randomizer;
     protected String difficultyType;
-    protected List<String> blocks, disabledWorlds;
+    protected List<String> disabledWorlds, disabledMobs;
     protected ArrayList<Integer> mobsOverrideIgnore = new ArrayList<>();
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
     protected HashMap<String, Integer> experienceMultiplier = new HashMap<>();
@@ -39,6 +39,7 @@ public class Affinity implements Listener {
     protected HashMap<String, Integer> difficultyAffinity = new HashMap<>();
     protected HashMap<String, Integer> doubleLootChance = new HashMap<>();
     protected HashMap<String, Integer> mobsPVE = new HashMap<>();
+    protected HashMap<String, Integer> blocks = new HashMap<>();
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
     protected HashMap<String, String> prefixes = new HashMap<>();
     protected HashMap<String, List<String>> mobsIgnorePlayers = new HashMap<>();
@@ -48,21 +49,6 @@ public class Affinity implements Listener {
 
     public Affinity(Main ma) {
         m = ma;
-        data = new DataManager(m);
-
-        if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql"))
-            SQL = new MySQL(ma, data);
-
-        try {
-            if(SQL != null){
-                SQL.connect();
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to the database!");
-                SQL.createTable();
-            }
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-
         emptyHitMobsList();
         loadConfig();
     }
@@ -70,11 +56,12 @@ public class Affinity implements Listener {
     public void reloadConfig() {
         saveData();
         difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
-        doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear();
+        doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear(); blocks.clear();
         difficulties.clear(); blocks.clear(); disabledWorlds.clear(); mobsOverrideIgnore.clear();
         loadConfig();
     }
 
+    /** Load's everything in from the config file and sorts or calculates different data from it */
     public void loadConfig(){
         data = new DataManager(m);
         randomizer = data.getConfig().getBoolean("difficulty-modifiers.randomize");
@@ -86,32 +73,37 @@ public class Affinity implements Listener {
         onPVPKill = data.getConfig().getInt("pvp-kill");
         onMined = data.getConfig().getInt("block-mined");
         startAffinity = data.getConfig().getInt("starting-affinity");
-        blocks = data.getConfig().getStringList("blocks");
         onInterval = data.getConfig().getInt("points-per-minute");
         onPlayerHit = data.getConfig().getInt("player-hit");
         difficultyType = data.getConfig().getString("difficulty-modifiers.type");
         calcExactPercentage = data.getConfig().getBoolean("difficulty-modifiers.exact-percentage");
         disabledWorlds = data.getConfig().getStringList("disabled-worlds");
+        disabledMobs = data.getConfig().getStringList("disabled-mobs");
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
-        if(SQL != null && SQL.isConnected()){
-            SQL.getAffinityValues("world", new findIntegerCallback() {
-                @Override
-                public void onQueryDone(List<Integer> r) {
-                    if(r.get(0) == -1){
-                        SQL.updatePlayer("world", startAffinity, -1);
-                        worldAffinity = startAffinity;
-                    } else {
-                        worldAffinity = r.get(0);
+        try {
+            if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql")){
+                SQL = new MySQL(m, data);
+                SQL.getAffinityValues("world", new findIntegerCallback() {
+                    @Override
+                    public void onQueryDone(List<Integer> r) {
+                        if(r.get(0) == -1){
+                            SQL.updatePlayer("world", startAffinity, -1);
+                            worldAffinity = startAffinity;
+                        } else {
+                            worldAffinity = r.get(0);
+                        }
                     }
-                }
-            });
-        } else {
-            if(data.getDataFile().getInt("world.affinity") == -1)
-                data.getDataFile().set("world.affinity", startAffinity);
-            worldAffinity = data.getDataFile().getInt("world.affinity");
+                });
+            } else {
+                if(data.getDataFile().getInt("world.affinity") == -1)
+                    data.getDataFile().set("world.affinity", startAffinity);
+                worldAffinity = data.getDataFile().getInt("world.affinity");
+            }
+        } catch(Exception e){
+            e.printStackTrace();
         }
 
         Object[] tmpMobs = data.getConfig().getList("mobs-count-as-pve").toArray();
@@ -121,6 +113,16 @@ public class Affinity implements Listener {
                 mobsPVE.put(sep[0], Integer.parseInt(sep[1]));
             } catch(Exception e){
                 mobsPVE.put(sep[0], onPVEKill);
+            }
+        }
+
+        Object[] tmpBlocks = data.getConfig().getList("blocks").toArray();
+        for(Object s : tmpBlocks){
+            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+            try{
+                blocks.put(sep[0], Integer.parseInt(sep[1]));
+            } catch(Exception e){
+                blocks.put(sep[0], onMined);
             }
         }
 
@@ -134,6 +136,7 @@ public class Affinity implements Listener {
             minAffinity = 1200;
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] MinAffinity has the same value as MaxAffinity, so their values have been set to default.");
         }
+
         for (String key : section.getKeys(false)) {
             tmpList.add(key);
             difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
@@ -203,15 +206,12 @@ public class Affinity implements Listener {
     }
 
     public void setAffinity(UUID uuid, int x) {
-        if (uuid == null) {
-            worldAffinity = calcAffinity(null, x);
-        } else {
-            playerAffinity.replace(uuid, calcAffinity(uuid, x));
-        }
+        if (uuid == null) { worldAffinity = calcAffinity(null, x); }
+        else {  playerAffinity.replace(uuid, calcAffinity(uuid, x)); }
     }
 
     public int getMaxAffinity(UUID uuid) { return playerMaxAffinity.get(uuid); }
-    public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(uuid, x)); }
+    public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(null, x)); }
     public int getVariableMaxAffinity(){ return maxAffinity; }
     public int getVariableMinAffinity(){ return minAffinity; }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
@@ -395,7 +395,7 @@ public class Affinity implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onMined(BlockBreakEvent e) {
         if(!(disabledWorlds.contains(e.getPlayer().getWorld().getName()))) {
-            if (onMined != 0 && blocks.contains(e.getBlock().getBlockData().getMaterial().name()) && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            if (onMined != 0 && blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 UUID uuid = e.getPlayer().getUniqueId();
                 addAmountOfAffinity(uuid, onMined);
             }
@@ -435,12 +435,10 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        if(e.getEntity() != null && e.getTarget() instanceof Player) {
-            if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString())){
+        if(e.getEntity() != null && e.getTarget() instanceof Player)
+            if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString()))
                 if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
                     e.setCancelled(true);
-            }
-        }
     }
 
     private void emptyHitMobsList(){

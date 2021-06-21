@@ -3,8 +3,11 @@ package me.skinnyjeans.gmd.hooks;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
@@ -69,16 +72,19 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier){
-        if(player == null)
-            return "";
+        UUID uuid = null;
+        if(player != null)
+            uuid = player.getUniqueId();
+
+        Bukkit.getConsoleSender().sendMessage(uuid.toString());
 
         if(identifier.equals("text_difficulty")){
             if(usePrefix)
-                return affinity.getPrefix(player.getUniqueId());
-            return affinity.calcDifficulty(player.getUniqueId());
+                return affinity.getPrefix(uuid);
+            return affinity.calcDifficulty(uuid);
         }
         if(identifier.equals("affinity_points"))
-            return affinity.getAffinity(player.getUniqueId()) + "";
+            return affinity.getAffinity(uuid) + "";
         if(identifier.equals("world_text_difficulty")){
             if(usePrefix)
                 return affinity.getPrefix(null);

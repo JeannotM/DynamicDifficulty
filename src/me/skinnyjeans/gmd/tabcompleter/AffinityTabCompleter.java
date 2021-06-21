@@ -12,8 +12,8 @@ import java.util.List;
 
 public class AffinityTabCompleter implements TabCompleter {
 
-    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("removemax","get","author", "reload"));
-    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","removemax","author", "reload"));
+    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("removemax","get","author", "reload", "force-save"));
+    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","removemax","author", "reload", "force-save"));
     private ArrayList<String> numbers = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5"));
 
     public AffinityTabCompleter(Affinity af){ numbers.addAll(af.getDifficulties()); }
@@ -27,7 +27,7 @@ public class AffinityTabCompleter implements TabCompleter {
                 return l;
             }
         } else if (args.length == 3) {
-            if (!(twoArgs.contains(args[1])))
+            if (!(twoArgs.contains(args[0])))
                 return numbers;
         }
         return null;
