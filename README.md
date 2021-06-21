@@ -180,6 +180,10 @@ Mentions DynamicDifficulty, my name and the Github page.
 /Affinity reload
 perm: affinity.reload
 Reloads the config.
+
+/Affinity force-save
+perm: affinity.force-save
+Force saves the current data to the yml or database.
 ```
 ## Plugin Support
 #### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]
@@ -205,13 +209,11 @@ Reloads the config.
 
 ## Other Small Things
 Feel free to contact me if you have any idea's that could expand/improve the DynamicDifficulty plugin or have any trouble getting it to work on your server due to errors
-- [x] Automatically sorts difficulties by affinity requirement.
-- [x] Double Loot does not work on mobs that can pickup items.
 - [x] Per player and World difficulties
 - [x] Permissions on Luckperms and other management tools
-- [x] Custom Affinity points for each mobs
+- [x] Custom Affinity points for each mobs and blocks
 - [x] Implemented BStats & Placeholder API.
-- [x] Disable certain worlds
+- [x] Disable DD for certain worlds and Mobs
 - [x] /reload command & /force-save
 - [x] MySQL support
 - [x] Randomize Difficulty mode
@@ -221,7 +223,6 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] change settings ingame
 - [ ] per biome difficulty
 - [ ] promoted/demoted message
-- [ ] Disable for certain mobs
 - [ ] SQLite
 - [ ] MongoDB
 - [ ] No save type

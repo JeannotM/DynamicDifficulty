@@ -54,18 +54,18 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
             return affinity.calcDifficulty(player.getUniqueId());
         }
         if(identifier.equals("affinity_points"))
-            return affinity.getAffinity(player.getUniqueId()) + "";
+            return Integer.toString(affinity.getAffinity(player.getUniqueId()));
         if(identifier.equals("world_text_difficulty")){
             if(usePrefix)
                 return affinity.getPrefix(null);
             return affinity.calcDifficulty(null);
         }
         if(identifier.equals("world_affinity_points"))
-            return affinity.getAffinity(null)+"";
+            return Integer.toString(affinity.getAffinity(null));
         if(identifier.equals("max_affinity"))
-            return affinity.getVariableMaxAffinity()+"";
+            return Integer.toString(affinity.getVariableMaxAffinity());
         if(identifier.equals("min_affinity"))
-            return affinity.getVariableMinAffinity()+"";
+            return Integer.toString(affinity.getVariableMinAffinity());
 
         return null;
     }
@@ -76,26 +76,24 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         if(player != null)
             uuid = player.getUniqueId();
 
-        Bukkit.getConsoleSender().sendMessage(uuid.toString());
-
         if(identifier.equals("text_difficulty")){
             if(usePrefix)
                 return affinity.getPrefix(uuid);
             return affinity.calcDifficulty(uuid);
         }
         if(identifier.equals("affinity_points"))
-            return affinity.getAffinity(uuid) + "";
+            return Integer.toString(affinity.getAffinity(player.getUniqueId()));
         if(identifier.equals("world_text_difficulty")){
             if(usePrefix)
                 return affinity.getPrefix(null);
             return affinity.calcDifficulty(null);
         }
         if(identifier.equals("world_affinity_points"))
-            return affinity.getAffinity(null)+"";
+            return Integer.toString(affinity.getAffinity(null));
         if(identifier.equals("max_affinity"))
-            return affinity.getVariableMaxAffinity()+"";
+            return Integer.toString(affinity.getVariableMaxAffinity());
         if(identifier.equals("min_affinity"))
-            return affinity.getVariableMinAffinity()+"";
+            return Integer.toString(affinity.getVariableMinAffinity());
 
         return null;
     }

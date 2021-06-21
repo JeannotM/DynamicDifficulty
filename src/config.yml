@@ -3,7 +3,7 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.2.02
+version: 1.2.03
 
 # Some info in the config have been typed shorter so as not to clutter it too much. Please visit for more detailed explanations with examples:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
@@ -13,7 +13,7 @@ points-per-minute: 5
 block-mined: 2
 player-hit: -1
 pvp-kill: 20
-pve-kill: 1
+pve-kill: 2
 death: -80
 
 # How Much Affinity a Player Starts With When Joining For The First Time.
@@ -23,37 +23,46 @@ starting-affinity: 500
 min-affinity: 0
 max-affinity: 1200
 
-# Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
-# Format:
+# Mobs That Will Give Points From "pve-kill" when killed and if no custom value is given: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # - MOBTYPE: <Affinity points>
-# Will use pve-kill if only MOBTYPE is given
 mobs-count-as-pve:
-- ZOMBIE
-- BLAZE: 2
-- CREEPER: 2
+- BLAZE: 3
+- CAVESPIDER: 3
+- CREEPER: 3
+- DROWNED
+- ELDER_GUARDIAN: 20
+- ENDER_DRAGON: 100
+- ENDERMAN: 5
+- GUARDIAN: 3
+- HUSK
+- IRON_GOLEM: 50
+- MAGMA_CUBE
+- PIGLIN
+- PIGLIN_BRUTE: 5
+- PHANTOM
 - SKELETON
-- ENDERMAN: 3
-- WITHER_SKELETON: 3
 - SPIDER
-- CAVESPIDER: 2
-- VINDICATOR: 3
+- VILLAGER: 20
+- VINDICATOR: 5
 - WITCH
 - WITHER: 100
-- ENDER_DRAGON: 100
-- VILLAGER: 20
+- WITHER_SKELETON: 5
+- ZOMBIE
 
-# Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# Blocks That Will Give Points From "block-mined" when mined and if no custom value is given: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# - BLOCKTYPE: <Affinity points>
 blocks:
+- ANCIENT_DEBRIS: 4
 - DIAMOND_ORE
 - EMERALD_ORE
 
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
 
-# whether to hook into some other plugins or not. (List may be expanded in the future)
+# Whether to Hook Into certain Plugins or not
 plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
-  allow-bstats: true # To Only Disable BStats on DynamicDifficulty
+  allow-bstats: true # To Only Disable BStats for DynamicDifficulty
   use-prefix: true
 
 saving-data:
