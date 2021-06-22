@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.2.03
+version: 1.2.04
 author: SkinnyJeans
 api-version: 1.13
 softdepend: ['PlaceholderAPI']
@@ -13,9 +13,11 @@ permissions:
       affinity.author: true
       affinity.add: true
       affinity.remove: true
-      affinity.removemax: true
       affinity.set: true
       affinity.setmax: true
+      affinity.delmax: true
+      affinity.setmin: true
+      affinity.delmin: true
       affinity.reload: true
       affinity.force-save: true
 
@@ -37,9 +39,15 @@ permissions:
   affinity.setmax:
     default: op
     description: Allows a player to set a max affinity for someone
-  affinity.removemax:
+  affinity.delmax:
     default: op
     description: Allows a player to remove a max affinity for someone
+  affinity.setmin:
+    default: op
+    description: Allows a player to set a min affinity for someone
+  affinity.delmin:
+    default: op
+    description: Allows a player to remove a min affinity for someone
   affinity.reload:
     default: op
     description: Allows a player to reload the config

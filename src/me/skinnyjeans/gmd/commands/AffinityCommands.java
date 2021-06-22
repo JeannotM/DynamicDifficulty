@@ -67,7 +67,9 @@ public class AffinityCommands implements CommandExecutor {
                 else if(args[0].equalsIgnoreCase("add")){ msg = addAffinity(arg1, arg2); }
                 else if(args[0].equalsIgnoreCase("remove")){ msg = addAffinity(arg1, arg2*-1); }
                 else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
-                else if(args[0].equalsIgnoreCase("removemax")){ msg = removeMaxAffinity(arg1); }
+                else if(args[0].equalsIgnoreCase("delmax")){ msg = removeMaxAffinity(arg1); }
+                else if(args[0].equalsIgnoreCase("setmin")){ msg = setMinAffinity(arg1, arg2); }
+                else if(args[0].equalsIgnoreCase("delmin")){ msg = removeMinAffinity(arg1); }
                 else if(args[0].equalsIgnoreCase("reload")){ msg = reloadConfig(); }
                 else if(args[0].equalsIgnoreCase("force-save")){ msg = forceSave(); }
                 else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!";; }
@@ -76,8 +78,7 @@ public class AffinityCommands implements CommandExecutor {
                 return sendMSG(msg,sender,false);
             }
             return sendMSG(msg,sender,true);
-        }
-        else {
+        } else {
             return sendMSG("You don't have permission to do that",sender,true);
         }
     }
@@ -127,9 +128,12 @@ public class AffinityCommands implements CommandExecutor {
             if(!user.equalsIgnoreCase("world"))
                 uuid = Bukkit.getPlayer(user).getUniqueId();
 
-            String msg = user+" is on "+affinity.calcDifficulty(uuid)+" Difficulty with "+affinity.getAffinity(uuid)+" Affinity points ";
-            if(uuid != null)
-                msg+="\nmax affinity: "+affinity.getMaxAffinity(uuid);
+            String msg = user+" has "+affinity.getAffinity(uuid)+" Affinity points";
+            msg+="\nCurrently on "+affinity.calcDifficulty(uuid)+" Difficulty";
+            if(uuid != null && affinity.getMaxAffinity(uuid) != -1)
+                msg+="\nMax affinity: "+affinity.getMaxAffinity(uuid);
+            if(uuid != null && affinity.getMinAffinity(uuid) != -1)
+                msg+="\nMin affinity: "+affinity.getMinAffinity(uuid);
             return msg;
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
@@ -147,13 +151,12 @@ public class AffinityCommands implements CommandExecutor {
     private String addAffinity(String user, int amount) {
         try {
             UUID uuid = null;
-            if(!user.equalsIgnoreCase("world")) {
+            if(!user.equalsIgnoreCase("world"))
                 uuid = Bukkit.getPlayer(user).getUniqueId();
-            }
 
             int x = affinity.calcAffinity(null,affinity.getAffinity(uuid) + amount);
             affinity.setAffinity(uuid, x);
-            return "World is on "+affinity.calcDifficulty(uuid)+" Difficulty with "+affinity.getAffinity(uuid)+" Affinity points";
+            return user+"'s set to "+affinity.calcDifficulty(uuid)+" Difficulty with "+amount+" Affinity points";
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return "Something went wrong, please check the console for more info";
@@ -161,7 +164,7 @@ public class AffinityCommands implements CommandExecutor {
     }
 
     /**
-     * Sets the affinity for the player
+     * Sets the max affinity for the player
      *
      * @param user is the User who's affinity needs to be changed
      * @param amount of affinity that will be set to this user
@@ -170,7 +173,8 @@ public class AffinityCommands implements CommandExecutor {
     private String setMaxAffinity(String user, int amount) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return "The world doesn't need a max Affinity!";
+                return "The world doesn't need a Max Affinity!";
+
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
             amount = affinity.calcAffinity(null, amount);
             affinity.setMaxAffinity(uuid, amount);
@@ -195,9 +199,9 @@ public class AffinityCommands implements CommandExecutor {
     private String removeMaxAffinity(String user) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return "The world doesn't have a max Affinity!";
+                return "The world doesn't have a Max Affinity!";
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
-            affinity.setMaxAffinity(uuid, -1);
+            affinity.setMinAffinity(uuid, -1);
             return "Removed the Max Affinity for "+user;
         }
         catch(Exception e) {
@@ -206,7 +210,48 @@ public class AffinityCommands implements CommandExecutor {
         }
     }
 
-    // Reloads the config
+    /**
+     * Sets the min affinity for the player
+     *
+     * @param user is the User who's affinity needs to be changed
+     * @param amount of affinity that will be set to this user
+     * @return String about how it was executed
+     */
+    private String setMinAffinity(String user, int amount) {
+        try {
+            if(user.equalsIgnoreCase("world"))
+                return "The world doesn't need a Min Affinity!";
+
+            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            amount = affinity.calcAffinity(null, amount);
+            affinity.setMinAffinity(uuid, amount);
+            return "Set the Min Affinity to "+amount+" for "+user;
+        } catch(Exception e) {
+            Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
+            return "Something went wrong, please check the console for more info";
+        }
+    }
+
+    /**
+     * Removes the min affinity for the player
+     *
+     * @param user is the User who's affinity needs to be changed
+     * @return String about how it was executed
+     */
+    private String removeMinAffinity(String user) {
+        try {
+            if(user.equalsIgnoreCase("world"))
+                return "The world doesn't have a Min Affinity!";
+            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            affinity.setMinAffinity(uuid, -1);
+            return "Removed the Min Affinity for "+user;
+        }
+        catch(Exception e) {
+            Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
+            return "Something went wrong, please check the console for more info";
+        }
+    }
+
     private String reloadConfig(){
         affinity.reloadConfig();
         return "Succesfully reloaded the config!";

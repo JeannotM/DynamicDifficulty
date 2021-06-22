@@ -3,7 +3,7 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.2.03
+version: 1.2.04
 
 # Some info in the config have been typed shorter so as not to clutter it too much. Please visit for more detailed explanations with examples:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
@@ -26,20 +26,20 @@ max-affinity: 1200
 # Mobs That Will Give Points From "pve-kill" when killed and if no custom value is given: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # - MOBTYPE: <Affinity points>
 mobs-count-as-pve:
-- BLAZE: 3
+- BLAZE: 4
 - CAVESPIDER: 3
 - CREEPER: 3
 - DROWNED
 - ELDER_GUARDIAN: 20
-- ENDER_DRAGON: 100
 - ENDERMAN: 5
+- ENDER_DRAGON: 100
 - GUARDIAN: 3
 - HUSK
 - IRON_GOLEM: 50
 - MAGMA_CUBE
+- PHANTOM
 - PIGLIN
 - PIGLIN_BRUTE: 5
-- PHANTOM
 - SKELETON
 - SPIDER
 - VILLAGER: 20
@@ -73,7 +73,7 @@ saving-data:
 #  password:
 #  database: dynamicdifficulty
 
-# You can disable DynamicDifficulty in certain worlds
+# Disable DynamicDifficulty in certain worlds
 # disabled-worlds:
 # - example_name
 

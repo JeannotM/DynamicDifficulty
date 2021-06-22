@@ -29,6 +29,7 @@ public class MySQL {
         password = data.getConfig().getString("saving-data.password");
         connect();
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to the database!");
+        addColumnsNotExists();
         createTable();
     }
 
@@ -39,6 +40,24 @@ public class MySQL {
     public void connect() throws SQLException {
         if(!isConnected())
             connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
+    }
+
+    public void addColumnsNotExists() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
+                                    "ADD COLUMN MinAffinity int(6) DEFAULT -1");
+                            ps.executeUpdate();
+                        } catch(Exception e) {}
+                    }
+                });
+            }
+        });
     }
 
     public void createTable() {
@@ -53,7 +72,8 @@ public class MySQL {
                                     "(UUID VARCHAR(60)," +
                                     "Name VARCHAR(20), " +
                                     "Affinity int(6), " +
-                                    "MaxAffinity int(6), " +
+                                    "MaxAffinity int(6) DEFAULT -1, " +
+                                    "MinAffinity int(6) DEFAULT -1, " +
                                     "PRIMARY KEY(UUID))");
                             ps.executeUpdate();
                         } catch(SQLException e) {
@@ -65,22 +85,22 @@ public class MySQL {
         });
     }
 
-    public void updatePlayer(String uuid, int af, int maxAf) {
+    public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
         playerExists(uuid, new findBooleanCallback() {
             @Override
             public void onQueryDone(boolean r) {
                 PreparedStatement ps;
                 try {
                     if(r){
-                        ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=? WHERE UUID=?");
+                        ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
-                        ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, UUID, Name) VALUES (?, ?, ?, ?)");
-                        ps.setString(4, (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+                        ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
+                        ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
                     }
                     ps.setInt(1, af);
                     ps.setInt(2, maxAf);
-                    ps.setString(3, (uuid.equals("world")  ? "world" : uuid));
-                    Bukkit.getConsoleSender().sendMessage(uuid+": "+af+" - "+maxAf);
+                    ps.setInt(3, minAf);
+                    ps.setString(4, (uuid.equals("world")  ? "world" : uuid));
                     ps.executeUpdate();
                 } catch(SQLException e) {
                     e.printStackTrace();
@@ -98,12 +118,13 @@ public class MySQL {
                     public void run() {
                         List<Integer> tmpArray = new ArrayList<>();
                         try {
-                            PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity FROM "+tbName+" WHERE UUID=?");
+                            PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
                             ps.setString(1, uuid);
                             ResultSet result = ps.executeQuery();
                             if(result.next()){
                                 tmpArray.add(result.getInt("Affinity"));
-                                tmpArray.add(result.getInt("maxAffinity"));
+                                tmpArray.add(result.getInt("MaxAffinity"));
+                                tmpArray.add(result.getInt("MinAffinity"));
                                 callback.onQueryDone(tmpArray);
                                 return;
                             }

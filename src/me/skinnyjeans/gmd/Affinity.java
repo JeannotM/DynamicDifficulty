@@ -31,6 +31,7 @@ public class Affinity implements Listener {
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
+    protected HashMap<UUID, Integer> playerMinAffinity = new HashMap<>();
     protected boolean silkTouchAllowed,calcExactPercentage,randomizer;
     protected String difficultyType;
     protected List<String> disabledWorlds,disabledMobs;
@@ -94,7 +95,7 @@ public class Affinity implements Listener {
                     @Override
                     public void onQueryDone(List<Integer> r) {
                         if(r.get(0) == -1){
-                            SQL.updatePlayer("world", startAffinity, -1);
+                            SQL.updatePlayer("world", startAffinity, -1, -1);
                             worldAffinity = startAffinity;
                         } else {
                             worldAffinity = r.get(0);
@@ -181,6 +182,8 @@ public class Affinity implements Listener {
 
     public int getMaxAffinity(UUID uuid) { return playerMaxAffinity.get(uuid); }
     public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(null, x)); }
+    public int getMinAffinity(UUID uuid) { return playerMinAffinity.get(uuid); }
+    public void setMinAffinity(UUID uuid, int x) { playerMinAffinity.replace(uuid, calcAffinity(null, x)); }
     public int getVariableMaxAffinity(){ return maxAffinity; }
     public int getVariableMinAffinity(){ return minAffinity; }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
@@ -193,12 +196,12 @@ public class Affinity implements Listener {
     public void saveData(){
         for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet()){
             if(SQL != null && SQL.isConnected()){
-                SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()));
+                SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()), playerMinAffinity.get(e.getKey()));
             } else {
                 data.getDataFile().set("players." + e.getKey() + ".affinity", e.getValue());
-                data.getDataFile().set("world.affinity", worldAffinity);
             }
         }
+        data.getDataFile().set("world.affinity", worldAffinity);
     }
 
     /**
@@ -209,10 +212,15 @@ public class Affinity implements Listener {
      * @return INT the affinity after it has been checked
      */
     public int calcAffinity(UUID uuid, int x) {
+        if(x == -1) { return -1; }
         if(uuid != null){
             int userMax = playerMaxAffinity.get(uuid);
-            if (userMax != -1 && x > userMax)
+            int userMin = playerMinAffinity.get(uuid);
+            if (userMax != -1 && x > userMax){
                 x = userMax;
+            } else if (userMin != -1 && x < userMin){
+                x = userMin;
+            }
         }
 
         if (x > maxAffinity) {
@@ -313,10 +321,12 @@ public class Affinity implements Listener {
         if(difficultyType.equalsIgnoreCase("world")){
             worldAffinity = calcAffinity(null, worldAffinity + onInterval);
         } else {
-            Bukkit.getOnlinePlayers().forEach(name -> {
-                UUID uuid = name.getUniqueId();
-                playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + onInterval));
-            });
+            if(Bukkit.getOnlinePlayers().size() > 0){
+                Bukkit.getOnlinePlayers().forEach(name -> {
+                    UUID uuid = name.getUniqueId();
+                    playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + onInterval));
+                });
+            }
         }
     }
 
@@ -349,7 +359,7 @@ public class Affinity implements Listener {
                     }
                 }
             } catch (NullPointerException error) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"NullPointerException. A plugin may be interfering with Dynamic Difficulty");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
     }
@@ -384,7 +394,7 @@ public class Affinity implements Listener {
                         mobsOverrideIgnore.add(prey.getEntityId());
                 }
             } catch (NullPointerException error) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"NullPointerException. A plugin may be interfering with Dynamic Difficulty");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
     }
@@ -416,10 +426,12 @@ public class Affinity implements Listener {
                     if (r.get(0) == -1){
                         playerAffinity.put(uuid, startAffinity);
                         playerMaxAffinity.put(uuid, -1);
-                        SQL.updatePlayer(uuid.toString(), startAffinity, -1);
+                        playerMinAffinity.put(uuid, -1);
+                        SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
                     } else {
                         playerAffinity.put(uuid, r.get(0));
                         playerMaxAffinity.put(uuid, r.get(1));
+                        playerMaxAffinity.put(uuid, r.get(2));
                     }
                 }
             });
@@ -428,10 +440,12 @@ public class Affinity implements Listener {
                 data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
                 data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
                 data.getDataFile().set("players." + uuid + ".max-affinity", -1);
+                data.getDataFile().set("players." + uuid + ".min-affinity", -1);
                 data.saveData();
             }
             playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
             playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
+            playerMinAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".min-affinity"));
         }
     }
 
@@ -439,13 +453,15 @@ public class Affinity implements Listener {
     public void onLeave(PlayerQuitEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
         if(SQL != null && SQL.isConnected()) {
-            SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid));
+            SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid), playerMinAffinity.get(uuid));
         } else {
             data.getDataFile().set("players." + uuid + ".affinity", playerAffinity.get(uuid));
             data.getDataFile().set("players." + uuid + ".max-affinity", playerMaxAffinity.get(uuid));
+            data.getDataFile().set("players." + uuid + ".min-affinity", playerMinAffinity.get(uuid));
         }
         data.saveData();
         playerAffinity.remove(uuid);
         playerMaxAffinity.remove(uuid);
+        playerMinAffinity.remove(uuid);
     }
 }
