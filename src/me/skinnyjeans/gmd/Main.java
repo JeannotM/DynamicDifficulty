@@ -2,7 +2,7 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.2.04
+ * @version 1.2.05
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;

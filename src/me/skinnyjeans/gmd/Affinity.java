@@ -1,6 +1,6 @@
 package me.skinnyjeans.gmd;
 
-import me.skinnyjeans.gmd.hooks.MySQL;
+import me.skinnyjeans.gmd.hooks.SQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -26,14 +26,14 @@ import java.util.logging.Level;
 
 public class Affinity implements Listener {
     protected Main m;
-    protected MySQL SQL;
+    protected me.skinnyjeans.gmd.hooks.SQL SQL;
     protected DataManager data;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMinAffinity = new HashMap<>();
     protected boolean silkTouchAllowed,calcExactPercentage,randomizer;
-    protected String difficultyType;
+    protected String difficultyType, saveType;
     protected List<String> disabledWorlds,disabledMobs;
     protected ArrayList<Integer> mobsOverrideIgnore = new ArrayList<>();
     protected HashMap<String, Integer> damageDoneByMobs = new HashMap<>();
@@ -69,6 +69,7 @@ public class Affinity implements Listener {
     /** Load's everything in from the config file and sorts or calculates different data from it */
     public void loadConfig(){
         data = new DataManager(m);
+        saveType = data.getConfig().getString("saving-data.type");
         randomizer = data.getConfig().getBoolean("difficulty-modifiers.randomize");
         silkTouchAllowed = data.getConfig().getBoolean("silk-touch-allowed");
         minAffinity = data.getConfig().getInt("min-affinity");
@@ -89,8 +90,8 @@ public class Affinity implements Listener {
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
         try {
-            if(data.getConfig().getString("saving-data.type").equalsIgnoreCase("mysql")){
-                SQL = new MySQL(m, data);
+            if(saveType.equalsIgnoreCase("mysql") || saveType.equalsIgnoreCase("sqlite")){
+                SQL = new SQL(m, data);
                 SQL.getAffinityValues("world", new findIntegerCallback() {
                     @Override
                     public void onQueryDone(List<Integer> r) {

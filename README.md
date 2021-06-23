@@ -215,7 +215,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Implemented BStats & Placeholder API.
 - [x] Disable DD for certain worlds and Mobs
 - [x] /reload command & /force-save
-- [x] MySQL support
+- [x] MySQL, SQlite support
 - [x] Randomize Difficulty mode
 - [x] Stop certain mobs from following players on chosen difficulties
 
@@ -223,7 +223,6 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] change settings ingame
 - [ ] per biome difficulty
 - [ ] promoted/demoted message
-- [ ] SQLite
 - [ ] MongoDB
 - [ ] No save type
 - [ ] Export to DB / File

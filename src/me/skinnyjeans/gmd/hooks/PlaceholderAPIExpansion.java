@@ -3,7 +3,6 @@ package me.skinnyjeans.gmd.hooks;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 

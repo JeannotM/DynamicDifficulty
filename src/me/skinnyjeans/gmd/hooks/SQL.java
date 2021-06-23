@@ -10,23 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MySQL {
+public class SQL {
     private Main plugin;
     private String host = "localhost";
     private String port = "3306";
     private String database = "dynamicdifficulty";
     private String username = "root";
     private String password = "";
+    private String saveType = "";
     private final String tbName = "dynamicdifficulty";
     private Connection connection;
 
-    public MySQL(Main m, DataManager data) throws SQLException {
+    public SQL(Main m, DataManager data) throws SQLException {
         plugin = m;
         host = data.getConfig().getString("saving-data.host");
         port = data.getConfig().getString("saving-data.port");
         database = data.getConfig().getString("saving-data.database");
         username = data.getConfig().getString("saving-data.username");
         password = data.getConfig().getString("saving-data.password");
+        saveType = data.getConfig().getString("saving-data.type");
         connect();
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to the database!");
         addColumnsNotExists();
@@ -38,8 +40,13 @@ public class MySQL {
     public interface findBooleanCallback { void onQueryDone(boolean r); }
 
     public void connect() throws SQLException {
-        if(!isConnected())
-            connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
+        if(!isConnected()){
+            if(saveType.equalsIgnoreCase("mysql")) {
+                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false", username, password);
+            } else {
+                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
+            }
+        }
     }
 
     public void addColumnsNotExists() {
