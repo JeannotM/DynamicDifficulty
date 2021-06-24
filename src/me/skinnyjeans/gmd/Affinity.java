@@ -21,6 +21,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -56,6 +58,37 @@ public class Affinity implements Listener {
         m = ma;
         emptyHitMobsList();
         loadConfig();
+        if(Bukkit.getOnlinePlayers().size() > 0) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Reloading or loading DynamicDifficulty with a plugin manager may break it");
+            Bukkit.getOnlinePlayers().forEach(name -> {
+                UUID uuid = name.getUniqueId();
+                if(SQL != null){
+                    SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
+                        @Override
+                        public void onQueryDone(List<Integer> r) {
+                            if (r.get(0) == -1){
+                                playerAffinity.put(uuid, startAffinity);playerMaxAffinity.put(uuid, -1);
+                                playerMinAffinity.put(uuid, -1);SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+                            } else {
+                                playerAffinity.put(uuid, r.get(0));playerMaxAffinity.put(uuid, r.get(1));
+                                playerMaxAffinity.put(uuid, r.get(2));
+                            }
+                        }
+                    });
+                } else {
+                    if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
+                        data.getDataFile().set("players." + uuid + ".name", name);
+                        data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
+                        data.getDataFile().set("players." + uuid + ".max-affinity", -1);
+                        data.getDataFile().set("players." + uuid + ".min-affinity", -1);
+                        data.saveData();
+                    }
+                    playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
+                    playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
+                    playerMinAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".min-affinity"));
+                }
+            });
+        }
     }
 
     public void reloadConfig() {
@@ -90,8 +123,18 @@ public class Affinity implements Listener {
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
         try {
-            if(saveType.equalsIgnoreCase("mysql") || saveType.equalsIgnoreCase("sqlite")){
-                SQL = new SQL(m, data);
+            if(!saveType.equalsIgnoreCase("file")){
+                if(SQL == null) {
+                    try{
+                        SQL = new SQL(m, data);
+                    } catch (Exception e) {
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
+                        saveType = "file";
+                        if(data.getDataFile().getInt("world.affinity") == -1)
+                            data.getDataFile().set("world.affinity", startAffinity);
+                        worldAffinity = data.getDataFile().getInt("world.affinity");
+                    }
+                }
                 SQL.getAffinityValues("world", new findIntegerCallback() {
                     @Override
                     public void onQueryDone(List<Integer> r) {
@@ -196,7 +239,7 @@ public class Affinity implements Listener {
     /** Saves all player and world data every few minutes. */
     public void saveData(){
         for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet()){
-            if(SQL != null && SQL.isConnected()){
+            if(SQL != null){
                 SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()), playerMinAffinity.get(e.getKey()));
             } else {
                 data.getDataFile().set("players." + e.getKey() + ".affinity", e.getValue());
@@ -249,15 +292,28 @@ public class Affinity implements Listener {
         String last = "";
         int af = worldAffinity;
         if(uuid != null) { af = playerAffinity.get(uuid); }
-
-        for (int i = 0; i < difficulties.size(); i++) {
-            if (af == difficultyAffinity.get(difficulties.get(i)))
-                return difficulties.get(i);
-            if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= af && difficultyAffinity.get(last) <= af)
-                return last;
-            if (i + 1 == difficulties.size())
-                return difficulties.get(i);
-            last = difficulties.get(i);
+        try {
+            for (int i = 0; i < difficulties.size(); i++) {
+                if (af == difficultyAffinity.get(difficulties.get(i)))
+                    return difficulties.get(i);
+                if (!last.equals("") && difficultyAffinity.get(difficulties.get(i)) >= af && difficultyAffinity.get(last) <= af)
+                    return last;
+                if (i + 1 == difficulties.size())
+                    return difficulties.get(i);
+                last = difficulties.get(i);
+            }
+            return difficulties.get(0);
+        } catch(IndexOutOfBoundsException e) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] "+e.toString()+": Looks like the difficulties didn't load in properly, will try to load them in again. Unless difficulties is empty...");
+            reloadConfig();
+            if(difficulties.size() == 0) {
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Difficulties still haven't loaded in after reloading, Make sure you have atleast 1 difficulty in the config!");
+                difficulties.add("Normal"); difficultyAffinity.put("Normal", 0);
+                experienceMultiplier.put("Normal",90); doubleLootChance.put("Normal", 0);
+                damageDoneByMobs.put("Normal",75); damageDoneOnMobs.put("Normal", 100);
+                effectsWhenAttacked.put("Normal", true); prefixes.put("Normal", "&7&l[&9&lNormal&7&l]&r");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW+"[DynamicDifficulty] Added the Normal difficulty from the default config");
+            }
         }
         return difficulties.get(0);
     }
@@ -359,7 +415,7 @@ public class Affinity implements Listener {
                         }
                     }
                 }
-            } catch (NullPointerException error) {
+            } catch (NullPointerException er) {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
@@ -367,12 +423,11 @@ public class Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onMined(BlockBreakEvent e) {
-        if(!disabledWorlds.contains(e.getPlayer().getWorld().getName())) {
-            if (onMined != 0 && blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null && (!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed) && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                UUID uuid = e.getPlayer().getUniqueId();
-                addAmountOfAffinity(uuid, onMined);
-            }
-        }
+        if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
+            if (onMined != 0 && blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
+                if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed)
+                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
+                        addAmountOfAffinity(e.getPlayer().getUniqueId(), onMined);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -394,7 +449,7 @@ public class Affinity implements Listener {
                     if(!mobsOverrideIgnore.contains(prey.getEntityId()))
                         mobsOverrideIgnore.add(prey.getEntityId());
                 }
-            } catch (NullPointerException error) {
+            } catch (NullPointerException er) {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
@@ -420,7 +475,7 @@ public class Affinity implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        if(SQL != null && SQL.isConnected()){
+        if(SQL != null){
             SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
                 @Override
                 public void onQueryDone(List<Integer> r) {
@@ -432,7 +487,7 @@ public class Affinity implements Listener {
                     } else {
                         playerAffinity.put(uuid, r.get(0));
                         playerMaxAffinity.put(uuid, r.get(1));
-                        playerMaxAffinity.put(uuid, r.get(2));
+                        playerMinAffinity.put(uuid, r.get(2));
                     }
                 }
             });
@@ -453,7 +508,7 @@ public class Affinity implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        if(SQL != null && SQL.isConnected()) {
+        if(SQL != null) {
             SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid), playerMinAffinity.get(uuid));
         } else {
             data.getDataFile().set("players." + uuid + ".affinity", playerAffinity.get(uuid));

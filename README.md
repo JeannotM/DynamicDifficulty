@@ -44,22 +44,35 @@ max-affinity: 1200
 # - MOBTYPE: <Affinity points>
 # Will use pve-kill if only MOBTYPE is given
 mobs-count-as-pve:
-- ZOMBIE
-- BLAZE: 2
-- CREEPER: 2
+- BLAZE: 4
+- CAVESPIDER: 3
+- CREEPER: 3
+- DROWNED
+- ELDER_GUARDIAN: 20
+- ENDERMAN: 5
+- ENDER_DRAGON: 100
+- GUARDIAN: 3
+- HUSK
+- IRON_GOLEM: 50
+- MAGMA_CUBE
+- PHANTOM
+- PIGLIN
+- PIGLIN_BRUTE: 5
 - SKELETON
-- ENDERMAN: 3
-- WITHER_SKELETON: 3
 - SPIDER
-- CAVESPIDER: 2
-- VINDICATOR: 3
+- VILLAGER: 20
+- VINDICATOR: 5
 - WITCH
 - WITHER: 100
-- ENDER_DRAGON: 100
-- VILLAGER: 20
+- WITHER_SKELETON: 5
+- ZOMBIE
 
 # Blocks That Will Give Points From "block-mined" when mined: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# Format:
+# - BLOCKTYPE: <Affinity points>
+# Will use on-mined if only MOBTYPE is given
 blocks:
+- ANCIENT_DEBRIS: 4
 - DIAMOND_ORE
 - EMERALD_ORE
   
@@ -68,12 +81,12 @@ silk-touch-allowed: false
 
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
-  allow-papi: true 
+  allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
   use-prefix: true
 
 saving-data:
-  type: file # Supported: file, mysql
+  type: file # Supported: file, mysql, sqlite, mongodb
 #  port: "3306"
 #  host: "localhost"
 #  username: "root"
@@ -83,6 +96,11 @@ saving-data:
 # You can disable DynamicDifficulty in certain worlds
 # disabled-worlds:
 # - example_name
+
+# These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
+disabled-mobs:
+- WITHER
+- ENDER_DRAGON
 
 difficulty-modifiers:
   type: player # Supported difficulty types: player, world
@@ -165,13 +183,21 @@ Adds an amount of affinity to an user.
 perm: affinity.remove
 Removes an amount of affinity to an user.
 
-/Affinity removeMax <user> <number>
-perm: affinity.removemax
+/Affinity delMax <user> <number>
+perm: affinity.delmax
 Removes the maximum Affinity limit for an user.
 
 /Affinity setMax <user> <number>
 perm: affinity.setmax
 Sets a maximum Affinity limit for an user.
+
+/Affinity delMin <user> <number>
+perm: affinity.delmin
+Removes the minimum Affinity limit for an user.
+
+/Affinity setMin <user> <number>
+perm: affinity.setmin
+Sets a minimum Affinity limit for an user.
 
 /Affinity author
 perm: affinity.author
@@ -215,7 +241,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Implemented BStats & Placeholder API.
 - [x] Disable DD for certain worlds and Mobs
 - [x] /reload command & /force-save
-- [x] MySQL, SQlite support
+- [x] MySQL, SQlite, MongoDB support
 - [x] Randomize Difficulty mode
 - [x] Stop certain mobs from following players on chosen difficulties
 
@@ -223,6 +249,5 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] change settings ingame
 - [ ] per biome difficulty
 - [ ] promoted/demoted message
-- [ ] MongoDB
 - [ ] No save type
 - [ ] Export to DB / File

@@ -7,12 +7,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public class AffinityCommands implements CommandExecutor {
     private Affinity affinity;
+    private ArrayList<String> oneArg = new ArrayList<>(Arrays.asList("author", "reload", "force-save"));
 
     public AffinityCommands(Affinity af) {
         affinity = af;
@@ -28,7 +31,7 @@ public class AffinityCommands implements CommandExecutor {
             return sendMSG("You forgot to include any arguments!", sender, false);
 
         if(console || checkPermission(Bukkit.getPlayer(sender.getName()), args[0].toLowerCase())) {
-            if(!args[0].equalsIgnoreCase("author") && !args[0].equalsIgnoreCase("reload") && args.length==1)
+            if(!oneArg.contains(args[0]) && args.length==1)
                 msg = "You forgot to include a user!";
 
             if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
