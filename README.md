@@ -240,7 +240,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Custom Affinity points for each mobs and blocks
 - [x] Implemented BStats & Placeholder API.
 - [x] Disable DD for certain worlds and Mobs
-- [x] /reload command & /force-save
+- [x] /reload & /force-save command
 - [x] MySQL, SQlite, MongoDB support
 - [x] Randomize Difficulty mode
 - [x] Stop certain mobs from following players on chosen difficulties
@@ -251,3 +251,4 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] promoted/demoted message
 - [ ] No save type
 - [ ] Export to DB / File
+- [ ] PostGreSQL

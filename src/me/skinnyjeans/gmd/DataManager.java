@@ -63,7 +63,7 @@ public class DataManager {
 		try {
 			this.getDataFile().save(this.dataFile);
 		} catch (IOException e) {
-			plugin.getLogger().log(Level.SEVERE, "rip", e);
+			plugin.getLogger().log(Level.SEVERE, "Couldn't save the data file", e);
 		}
     }
 	
@@ -74,7 +74,7 @@ public class DataManager {
 		try {
 			this.getConfig().save(this.configFile);
 		} catch (IOException e) {
-			plugin.getLogger().log(Level.SEVERE, "rip", e);
+			plugin.getLogger().log(Level.SEVERE, "Couldn't save the config file", e);
 		}
 	}
 	

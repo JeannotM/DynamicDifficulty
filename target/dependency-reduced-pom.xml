@@ -5,10 +5,18 @@
   <artifactId>my-app</artifactId>
   <version>1</version>
   <build>
+    <resources>
+      <resource>
+        <directory>src/</directory>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>

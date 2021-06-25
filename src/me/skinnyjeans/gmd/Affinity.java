@@ -1,6 +1,9 @@
 package me.skinnyjeans.gmd;
 
-import me.skinnyjeans.gmd.hooks.SQL;
+import me.skinnyjeans.gmd.hooks.databases.File;
+import me.skinnyjeans.gmd.hooks.databases.SQL;
+import me.skinnyjeans.gmd.hooks.SaveManager;
+import me.skinnyjeans.gmd.hooks.databases.MongoDB;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -21,14 +24,13 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
 public class Affinity implements Listener {
     protected Main m;
-    protected me.skinnyjeans.gmd.hooks.SQL SQL;
+    protected SaveManager SQL;
     protected DataManager data;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,onPVEKill,onMined,startAffinity,onInterval,onPlayerHit,worldAffinity;
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
@@ -62,31 +64,21 @@ public class Affinity implements Listener {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Reloading or loading DynamicDifficulty with a plugin manager may break it");
             Bukkit.getOnlinePlayers().forEach(name -> {
                 UUID uuid = name.getUniqueId();
-                if(SQL != null){
-                    SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
-                        @Override
-                        public void onQueryDone(List<Integer> r) {
-                            if (r.get(0) == -1){
-                                playerAffinity.put(uuid, startAffinity);playerMaxAffinity.put(uuid, -1);
-                                playerMinAffinity.put(uuid, -1);SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
-                            } else {
-                                playerAffinity.put(uuid, r.get(0));playerMaxAffinity.put(uuid, r.get(1));
-                                playerMaxAffinity.put(uuid, r.get(2));
-                            }
+                SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
+                    @Override
+                    public void onQueryDone(List<Integer> r) {
+                        if (r.get(0) == -1) {
+                            playerAffinity.put(uuid, startAffinity);
+                            playerMaxAffinity.put(uuid, -1);
+                            playerMinAffinity.put(uuid, -1);
+                            SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+                        } else {
+                            playerAffinity.put(uuid, r.get(0));
+                            playerMaxAffinity.put(uuid, r.get(1));
+                            playerMaxAffinity.put(uuid, r.get(2));
                         }
-                    });
-                } else {
-                    if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
-                        data.getDataFile().set("players." + uuid + ".name", name);
-                        data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
-                        data.getDataFile().set("players." + uuid + ".max-affinity", -1);
-                        data.getDataFile().set("players." + uuid + ".min-affinity", -1);
-                        data.saveData();
                     }
-                    playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
-                    playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
-                    playerMinAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".min-affinity"));
-                }
+                });
             });
         }
     }
@@ -122,35 +114,33 @@ public class Affinity implements Listener {
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
 
+        if(SQL == null) {
+            try{
+                if(saveType.equalsIgnoreCase("mysql") || saveType.equalsIgnoreCase("sqlite")){
+                    SQL = new SQL(m, data, saveType);
+                } else if(saveType.equalsIgnoreCase("mongodb")) {
+                    SQL = new MongoDB(m, data);
+                } else {
+                    SQL = new File(m, data);
+                }
+            } catch (Exception e) {
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
+                SQL = new File(m, data);
+            }
+        }
+
         try {
-            if(!saveType.equalsIgnoreCase("file")){
-                if(SQL == null) {
-                    try{
-                        SQL = new SQL(m, data);
-                    } catch (Exception e) {
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
-                        saveType = "file";
-                        if(data.getDataFile().getInt("world.affinity") == -1)
-                            data.getDataFile().set("world.affinity", startAffinity);
-                        worldAffinity = data.getDataFile().getInt("world.affinity");
+            SQL.getAffinityValues("world", new findIntegerCallback() {
+                @Override
+                public void onQueryDone(List<Integer> r) {
+                    if(r.get(0) == -1){
+                        SQL.updatePlayer("world", startAffinity, -1, -1);
+                        worldAffinity = startAffinity;
+                    } else {
+                        worldAffinity = r.get(0);
                     }
                 }
-                SQL.getAffinityValues("world", new findIntegerCallback() {
-                    @Override
-                    public void onQueryDone(List<Integer> r) {
-                        if(r.get(0) == -1){
-                            SQL.updatePlayer("world", startAffinity, -1, -1);
-                            worldAffinity = startAffinity;
-                        } else {
-                            worldAffinity = r.get(0);
-                        }
-                    }
-                });
-            } else {
-                if(data.getDataFile().getInt("world.affinity") == -1)
-                    data.getDataFile().set("world.affinity", startAffinity);
-                worldAffinity = data.getDataFile().getInt("world.affinity");
-            }
+            });
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -238,14 +228,10 @@ public class Affinity implements Listener {
 
     /** Saves all player and world data every few minutes. */
     public void saveData(){
+        SQL.updatePlayer("world", worldAffinity, -1, -1);
         for (Map.Entry<UUID, Integer> e : playerAffinity.entrySet()){
-            if(SQL != null){
-                SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()), playerMinAffinity.get(e.getKey()));
-            } else {
-                data.getDataFile().set("players." + e.getKey() + ".affinity", e.getValue());
-            }
+            SQL.updatePlayer(e.getKey().toString(), e.getValue(), playerMaxAffinity.get(e.getKey()), playerMinAffinity.get(e.getKey()));
         }
-        data.getDataFile().set("world.affinity", worldAffinity);
     }
 
     /**
@@ -275,10 +261,13 @@ public class Affinity implements Listener {
         return x;
     }
 
-    /** Closes all databases and saves data */
+    /** Closes all databases */
     public void exitProgram() {
-        saveData();
-        if(SQL != null) { SQL.disconnect(); }
+        try{
+            SQL.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -475,47 +464,27 @@ public class Affinity implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        if(SQL != null){
-            SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
-                @Override
-                public void onQueryDone(List<Integer> r) {
-                    if (r.get(0) == -1){
-                        playerAffinity.put(uuid, startAffinity);
-                        playerMaxAffinity.put(uuid, -1);
-                        playerMinAffinity.put(uuid, -1);
-                        SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
-                    } else {
-                        playerAffinity.put(uuid, r.get(0));
-                        playerMaxAffinity.put(uuid, r.get(1));
-                        playerMinAffinity.put(uuid, r.get(2));
-                    }
+        SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
+            @Override
+            public void onQueryDone(List<Integer> r) {
+                if (r.get(0) == -1){
+                    playerAffinity.put(uuid, startAffinity);
+                    playerMaxAffinity.put(uuid, -1);
+                    playerMinAffinity.put(uuid, -1);
+                    SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+                } else {
+                    playerAffinity.put(uuid, r.get(0));
+                    playerMaxAffinity.put(uuid, r.get(1));
+                    playerMinAffinity.put(uuid, r.get(2));
                 }
-            });
-        } else {
-            if (data.getDataFile().getString("players." + uuid + ".affinity") == null) {
-                data.getDataFile().set("players." + uuid + ".name", e.getPlayer().getName());
-                data.getDataFile().set("players." + uuid + ".affinity", startAffinity);
-                data.getDataFile().set("players." + uuid + ".max-affinity", -1);
-                data.getDataFile().set("players." + uuid + ".min-affinity", -1);
-                data.saveData();
             }
-            playerAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".affinity"));
-            playerMaxAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".max-affinity"));
-            playerMinAffinity.put(uuid, data.getDataFile().getInt("players." + uuid + ".min-affinity"));
-        }
+        });
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        if(SQL != null) {
-            SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid), playerMinAffinity.get(uuid));
-        } else {
-            data.getDataFile().set("players." + uuid + ".affinity", playerAffinity.get(uuid));
-            data.getDataFile().set("players." + uuid + ".max-affinity", playerMaxAffinity.get(uuid));
-            data.getDataFile().set("players." + uuid + ".min-affinity", playerMinAffinity.get(uuid));
-        }
-        data.saveData();
+        SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid), playerMinAffinity.get(uuid));
         playerAffinity.remove(uuid);
         playerMaxAffinity.remove(uuid);
         playerMinAffinity.remove(uuid);
