@@ -20,7 +20,7 @@ public class SQL implements SaveManager {
     private String tbName = "dynamicdifficulty";
     private Connection connection = null;
 
-    public SQL(Main m, DataManager data, String sT) throws SQLException {
+    public SQL(Main m, DataManager data, String sT) throws SQLException, ClassNotFoundException {
         plugin = m;
         host = data.getConfig().getString("saving-data.host");
         port = data.getConfig().getString("saving-data.port");
@@ -37,7 +37,7 @@ public class SQL implements SaveManager {
     public boolean isConnected() { return connection != null; }
     public Connection getConnection() { return connection; }
 
-    public void connect() throws SQLException {
+    public void connect() throws SQLException, ClassNotFoundException {
         if(!isConnected()){
             if(saveType.equalsIgnoreCase("mysql")) {
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false", user, pwd);
@@ -45,6 +45,10 @@ public class SQL implements SaveManager {
             } else if (saveType.equalsIgnoreCase("sqlite")){
                 connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to SQLite!");
+            } else if (saveType.equalsIgnoreCase("postgresql")) {
+                Class.forName("org.postgresql.Driver");
+                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName, user, pwd);
+                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to PostGreSQL!");
             }
         }
     }
@@ -58,7 +62,7 @@ public class SQL implements SaveManager {
                     public void run() {
                         try {
                             PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
-                                    "ADD COLUMN MinAffinity int(6) DEFAULT -1");
+                                    "ADD COLUMN MinAffinity INT");
                             ps.executeUpdate();
                         } catch(Exception e) {}
                     }
@@ -79,11 +83,11 @@ public class SQL implements SaveManager {
                                 PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
                                         "(UUID VARCHAR(60)," +
                                         "Name VARCHAR(20), " +
-                                        "Affinity int(6), " +
-                                        "MaxAffinity int(6) DEFAULT -1, " +
-                                        "MinAffinity int(6) DEFAULT -1, " +
+                                        "Affinity INT, " +
+                                        "MaxAffinity INT, " +
+                                        "MinAffinity INT, " +
                                         "PRIMARY KEY(UUID))");
-                                ps.executeUpdate();
+                                ps.execute();
                             }
                         } catch(SQLException e) {
                             e.printStackTrace();

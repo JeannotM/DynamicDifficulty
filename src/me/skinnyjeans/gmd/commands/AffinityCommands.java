@@ -204,7 +204,7 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't have a Max Affinity!";
             UUID uuid = Bukkit.getPlayer(user).getUniqueId();
-            affinity.setMinAffinity(uuid, -1);
+            affinity.setMaxAffinity(uuid, -1);
             return "Removed the Max Affinity for "+user;
         }
         catch(Exception e) {

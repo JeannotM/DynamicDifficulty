@@ -116,7 +116,7 @@ public class Affinity implements Listener {
 
         if(SQL == null) {
             try{
-                if(saveType.equalsIgnoreCase("mysql") || saveType.equalsIgnoreCase("sqlite")){
+                if(saveType.equalsIgnoreCase("mysql") || saveType.equalsIgnoreCase("sqlite") || saveType.equalsIgnoreCase("postgresql")){
                     SQL = new SQL(m, data, saveType);
                 } else if(saveType.equalsIgnoreCase("mongodb")) {
                     SQL = new MongoDB(m, data);
@@ -124,6 +124,7 @@ public class Affinity implements Listener {
                     SQL = new File(m, data);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
                 SQL = new File(m, data);
             }
@@ -179,11 +180,11 @@ public class Affinity implements Listener {
         for (String key : section.getKeys(false)) {
             tmpList.add(key);
             difficultyAffinity.put(key, section.getInt(key + ".affinity-required"));
-            experienceMultiplier.put(key, (int) (section.getDouble(key + ".experience-multiplier") * data.getConfig().getDouble("difficulty-modifiers.experience-multiplier")));
-            doubleLootChance.put(key, (int) (section.getDouble(key + ".double-loot-chance") * data.getConfig().getDouble("difficulty-modifiers.double-loot-chance-multiplier")));
-            damageDoneByMobs.put(key, (int) (section.getDouble(key + ".damage-done-by-mobs") * data.getConfig().getDouble("difficulty-modifiers.damage-done-by-mobs-multiplier")));
-            damageDoneOnMobs.put(key, (int) (section.getDouble(key + ".damage-done-on-mobs") * data.getConfig().getDouble("difficulty-modifiers.damage-done-on-mobs-multiplier")));
-            effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked"));
+            experienceMultiplier.put(key, (int) (section.getDouble(key + ".experience-multiplier", 100) * data.getConfig().getDouble("difficulty-modifiers.experience-multiplier", 1)));
+            doubleLootChance.put(key, (int) (section.getDouble(key + ".double-loot-chance", 100) * data.getConfig().getDouble("difficulty-modifiers.double-loot-chance-multiplier", 1)));
+            damageDoneByMobs.put(key, (int) (section.getDouble(key + ".damage-done-by-mobs", 100) * data.getConfig().getDouble("difficulty-modifiers.damage-done-by-mobs-multiplier", 1)));
+            damageDoneOnMobs.put(key, (int) (section.getDouble(key + ".damage-done-on-mobs", 100) * data.getConfig().getDouble("difficulty-modifiers.damage-done-on-mobs-multiplier", 1)));
+            effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked", true));
             prefixes.put(key, section.getString(key + ".prefix"));
             mobsIgnorePlayers.put(key, section.getStringList(key + ".mobs-ignore-player"));
         }
