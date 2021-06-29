@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 public class MongoDB implements SaveManager {
-    private Main plugin;
+    private final String tbName = "dynamicdifficulty";
+    private final Main plugin;
     private String host = "localhost";
     private String port = "3306";
     private String dbName = "dynamicdifficulty";
     private String user = "root";
     private String pwd = "";
-    private String tbName = "dynamicdifficulty";
     private MongoClient connection;
 
     public MongoDB(Main m, DataManager data) throws UnknownHostException {

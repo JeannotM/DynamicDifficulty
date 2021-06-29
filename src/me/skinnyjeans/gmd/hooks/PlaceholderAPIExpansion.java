@@ -62,9 +62,9 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         if(identifier.equals("world_affinity_points"))
             return Integer.toString(affinity.getAffinity(null));
         if(identifier.equals("max_affinity"))
-            return Integer.toString(affinity.getVariableMaxAffinity());
+            return Integer.toString(affinity.getVariable("max-affinity"));
         if(identifier.equals("min_affinity"))
-            return Integer.toString(affinity.getVariableMinAffinity());
+            return Integer.toString(affinity.getVariable("min-affinity"));
 
         return null;
     }
@@ -90,9 +90,9 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         if(identifier.equals("world_affinity_points"))
             return Integer.toString(affinity.getAffinity(null));
         if(identifier.equals("max_affinity"))
-            return Integer.toString(affinity.getVariableMaxAffinity());
+            return Integer.toString(affinity.getVariable("max-affinity"));
         if(identifier.equals("min_affinity"))
-            return Integer.toString(affinity.getVariableMinAffinity());
+            return Integer.toString(affinity.getVariable("min-affinity"));
 
         return null;
     }

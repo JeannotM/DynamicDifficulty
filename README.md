@@ -241,14 +241,16 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Implemented BStats & Placeholder API.
 - [x] Disable DD for certain worlds and Mobs
 - [x] /reload & /force-save command
-- [x] MySQL, SQlite, MongoDB support
+- [x] noSaveType, MySQL, SQlite, MongoDB, PostGreSQL support
 - [x] Randomize Difficulty mode
+- [x] Change player settings with chest GUI
 - [x] Stop certain mobs from following players on chosen difficulties
 
 ## Possible Future Updates
-- [ ] change settings ingame
 - [ ] per biome difficulty
 - [ ] promoted/demoted message
-- [ ] No save type
 - [ ] Export to DB / File
-- [ ] PostGreSQL
+
+## Extra thanks to:
+Noiverre - For testing the Papi functions (Because there were a few issues sometimes)
+Mithran - For submitting several idea's and informing me of a lot of issues

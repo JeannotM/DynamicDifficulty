@@ -16,6 +16,7 @@ public class File implements SaveManager {
     private DataManager data = null;
 
     public File(Main m, DataManager d) {
+        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] using default 'file' mode to save and read data");
         data = d;
         plugin = m;
     }

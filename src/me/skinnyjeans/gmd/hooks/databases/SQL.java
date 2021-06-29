@@ -10,14 +10,14 @@ import java.sql.*;
 import java.util.*;
 
 public class SQL implements SaveManager {
-    private Main plugin;
+    private final String tbName = "dynamicdifficulty";
+    private final Main plugin;
     private String host = "localhost";
     private String port = "3306";
     private String dbName = "dynamicdifficulty";
     private String user = "root";
     private String pwd = "";
     private String saveType = "";
-    private String tbName = "dynamicdifficulty";
     private Connection connection = null;
 
     public SQL(Main m, DataManager data, String sT) throws SQLException, ClassNotFoundException {
@@ -62,7 +62,7 @@ public class SQL implements SaveManager {
                     public void run() {
                         try {
                             PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
-                                    "ADD COLUMN MinAffinity INT");
+                                    "ADD COLUMN MinAffinity INT DEFAULT -1");
                             ps.executeUpdate();
                         } catch(Exception e) {}
                     }
@@ -83,9 +83,9 @@ public class SQL implements SaveManager {
                                 PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
                                         "(UUID VARCHAR(60)," +
                                         "Name VARCHAR(20), " +
-                                        "Affinity INT, " +
-                                        "MaxAffinity INT, " +
-                                        "MinAffinity INT, " +
+                                        "Affinity INT DEFAULT 500, " +
+                                        "MaxAffinity INT DEFAULT -1, " +
+                                        "MinAffinity INT DEFAULT -1, " +
                                         "PRIMARY KEY(UUID))");
                                 ps.execute();
                             }

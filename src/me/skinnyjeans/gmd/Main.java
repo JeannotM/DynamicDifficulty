@@ -2,7 +2,7 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.2.06
+ * @version 1.2.07
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
@@ -14,8 +14,11 @@ import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import java.util.Locale;
 
 public class Main extends JavaPlugin {
 	
@@ -78,8 +81,18 @@ public class Main extends JavaPlugin {
 		if(worldNames != "")
 			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] The following worlds do not have their difficulty on Hard mode: "+worldNames);
 
-		if(data.getConfig().getBoolean("plugin-support.allow-bstats"))
-			new Metrics(this, 11417);
+		if(data.getConfig().getBoolean("plugin-support.allow-bstats")){
+			Metrics m = new Metrics(this, 11417);
+			m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
+				data.getConfig().getString("difficulty-modifiers.type").toLowerCase(Locale.ROOT)
+			));
+			m.addCustomChart(new Metrics.SimplePie("save_type", () ->
+				data.getConfig().getString("saving-data.type").toLowerCase(Locale.ROOT)
+			));
+			m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
+				String.valueOf(data.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
+			));
+		}
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)

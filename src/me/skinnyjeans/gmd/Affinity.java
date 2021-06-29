@@ -1,12 +1,11 @@
 package me.skinnyjeans.gmd;
 
 import me.skinnyjeans.gmd.hooks.databases.File;
+import me.skinnyjeans.gmd.hooks.databases.None;
 import me.skinnyjeans.gmd.hooks.databases.SQL;
 import me.skinnyjeans.gmd.hooks.SaveManager;
 import me.skinnyjeans.gmd.hooks.databases.MongoDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -18,13 +17,18 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -50,6 +54,7 @@ public class Affinity implements Listener {
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
     protected HashMap<String, String> prefixes = new HashMap<>();
     protected HashMap<String, List<String>> mobsIgnorePlayers = new HashMap<>();
+    protected HashMap<String, Inventory> inventorySettings = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
     protected ArrayList<PotionEffectType> effects = new ArrayList<>(Arrays.asList(PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW, PotionEffectType.CONFUSION, PotionEffectType.HUNGER));
@@ -64,19 +69,16 @@ public class Affinity implements Listener {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Reloading or loading DynamicDifficulty with a plugin manager may break it");
             Bukkit.getOnlinePlayers().forEach(name -> {
                 UUID uuid = name.getUniqueId();
-                SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
-                    @Override
-                    public void onQueryDone(List<Integer> r) {
-                        if (r.get(0) == -1) {
-                            playerAffinity.put(uuid, startAffinity);
-                            playerMaxAffinity.put(uuid, -1);
-                            playerMinAffinity.put(uuid, -1);
-                            SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
-                        } else {
-                            playerAffinity.put(uuid, r.get(0));
-                            playerMaxAffinity.put(uuid, r.get(1));
-                            playerMaxAffinity.put(uuid, r.get(2));
-                        }
+                SQL.getAffinityValues(uuid.toString(), r -> {
+                    if (r.get(0) == -1) {
+                        playerAffinity.put(uuid, startAffinity);
+                        playerMaxAffinity.put(uuid, -1);
+                        playerMinAffinity.put(uuid, -1);
+                        SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+                    } else {
+                        playerAffinity.put(uuid, r.get(0));
+                        playerMaxAffinity.put(uuid, r.get(1));
+                        playerMaxAffinity.put(uuid, r.get(2));
                     }
                 });
             });
@@ -87,12 +89,12 @@ public class Affinity implements Listener {
         saveData();
         difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
         doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear(); blocks.clear();
-        difficulties.clear(); disabledWorlds.clear(); mobsOverrideIgnore.clear();
+        difficulties.clear(); disabledWorlds.clear(); mobsOverrideIgnore.clear(); inventorySettings.clear();
         loadConfig();
     }
 
     /** Load's everything in from the config file and sorts or calculates different data from it */
-    public void loadConfig(){
+    private void loadConfig(){
         data = new DataManager(m);
         saveType = data.getConfig().getString("saving-data.type");
         randomizer = data.getConfig().getBoolean("difficulty-modifiers.randomize");
@@ -120,6 +122,8 @@ public class Affinity implements Listener {
                     SQL = new SQL(m, data, saveType);
                 } else if(saveType.equalsIgnoreCase("mongodb")) {
                     SQL = new MongoDB(m, data);
+                } else if(saveType.equalsIgnoreCase("none")){
+                    SQL = new None();
                 } else {
                     SQL = new File(m, data);
                 }
@@ -131,39 +135,16 @@ public class Affinity implements Listener {
         }
 
         try {
-            SQL.getAffinityValues("world", new findIntegerCallback() {
-                @Override
-                public void onQueryDone(List<Integer> r) {
-                    if(r.get(0) == -1){
-                        SQL.updatePlayer("world", startAffinity, -1, -1);
-                        worldAffinity = startAffinity;
-                    } else {
-                        worldAffinity = r.get(0);
-                    }
+            SQL.getAffinityValues("world", r -> {
+                if(r.get(0) == -1){
+                    SQL.updatePlayer("world", startAffinity, -1, -1);
+                    worldAffinity = startAffinity;
+                } else {
+                    worldAffinity = r.get(0);
                 }
             });
         } catch(Exception e){
             e.printStackTrace();
-        }
-
-        Object[] tmpMobs = data.getConfig().getList("mobs-count-as-pve").toArray();
-        for(Object s : tmpMobs){
-            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
-            try{
-                mobsPVE.put(sep[0], Integer.parseInt(sep[1]));
-            } catch(Exception e){
-                mobsPVE.put(sep[0], onPVEKill);
-            }
-        }
-
-        Object[] tmpBlocks = data.getConfig().getList("blocks").toArray();
-        for(Object s : tmpBlocks){
-            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
-            try{
-                blocks.put(sep[0], Integer.parseInt(sep[1]));
-            } catch(Exception e){
-                blocks.put(sep[0], onMined);
-            }
         }
 
         if(minAffinity > maxAffinity){
@@ -189,11 +170,40 @@ public class Affinity implements Listener {
             mobsIgnorePlayers.put(key, section.getStringList(key + ".mobs-ignore-player"));
         }
 
+        loadMobs();
+        loadBlocks();
+        createPlayerInventory();
+        createIndividialPlayerInventory();
+
         // Everything beneath this comment is to sort the difficulties by their affinity requirement
         for (String s : tmpList) tmpMap.put(difficultyAffinity.get(s), s);
         TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
         for (int key : tm.keySet()) difficulties.add(tmpMap.get(key).replace(" ", "_"));
         tm.clear(); tmpList.clear(); tmpMap.clear();
+    }
+
+    private void loadMobs(){
+        Object[] tmpMobs = data.getConfig().getList("mobs-count-as-pve").toArray();
+        for(Object s : tmpMobs){
+            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+            try{
+                mobsPVE.put(sep[0], Integer.parseInt(sep[1]));
+            } catch(Exception e){
+                mobsPVE.put(sep[0], onPVEKill);
+            }
+        }
+    }
+
+    private void loadBlocks(){
+        Object[] tmpBlocks = data.getConfig().getList("blocks").toArray();
+        for(Object s : tmpBlocks){
+            String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+            try{
+                blocks.put(sep[0], Integer.parseInt(sep[1]));
+            } catch(Exception e){
+                blocks.put(sep[0], onMined);
+            }
+        }
     }
 
     public int getAffinity(UUID uuid) {
@@ -219,13 +229,17 @@ public class Affinity implements Listener {
     public void setMaxAffinity(UUID uuid, int x) { playerMaxAffinity.replace(uuid, calcAffinity(null, x)); }
     public int getMinAffinity(UUID uuid) { return playerMinAffinity.get(uuid); }
     public void setMinAffinity(UUID uuid, int x) { playerMinAffinity.replace(uuid, calcAffinity(null, x)); }
-    public int getVariableMaxAffinity(){ return maxAffinity; }
-    public int getVariableMinAffinity(){ return minAffinity; }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
     public int getDifficultyAffinity(String x) { return difficultyAffinity.get(x); }
     public ArrayList<String> getDifficulties() { return difficulties; }
     public String getPrefix(UUID uuid){ return prefixes.get(calcDifficulty(uuid)); }
     public interface findIntegerCallback { void onQueryDone(List<Integer> r); }
+
+    public int getVariable(String x) {
+        if(x.equals("min-affinity")) { return minAffinity; }
+        else if(x.equals("max-affinity")) { return maxAffinity; }
+        return -1;
+    }
 
     /** Saves all player and world data every few minutes. */
     public void saveData(){
@@ -264,7 +278,7 @@ public class Affinity implements Listener {
 
     /** Closes all databases */
     public void exitProgram() {
-        try{
+        try {
             SQL.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
@@ -294,7 +308,7 @@ public class Affinity implements Listener {
             }
             return difficulties.get(0);
         } catch(IndexOutOfBoundsException e) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] "+e.toString()+": Looks like the difficulties didn't load in properly, will try to load them in again. Unless difficulties is empty...");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] "+e+": Looks like the difficulties didn't load in properly, will try to load them in again. Unless difficulties is empty...");
             reloadConfig();
             if(difficulties.size() == 0) {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Difficulties still haven't loaded in after reloading, Make sure you have atleast 1 difficulty in the config!");
@@ -315,7 +329,7 @@ public class Affinity implements Listener {
      * @param mode which is used to select the correct variable
      * @return Double of the exact or the difficulty based percentage
      */
-    public double calcPercentage(UUID uuid, String mode) {
+    private double calcPercentage(UUID uuid, String mode) {
         if(randomizer) { return getHashData(mode, calcDifficulty(uuid)); }
         int thisDiff = difficulties.indexOf(calcDifficulty(null));
         int affinity = worldAffinity;
@@ -358,7 +372,7 @@ public class Affinity implements Listener {
         return -1;
     }
 
-    private void addAmountOfAffinity(UUID uuid, int x){
+    private void addAmountOfAffinity(UUID uuid, int x) {
         if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(null, worldAffinity + x);
         } else { playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + x)); }
     }
@@ -377,13 +391,13 @@ public class Affinity implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerRespawnEvent e) {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()) && onDeath != 0)
             addAmountOfAffinity(e.getPlayer().getUniqueId(), onDeath);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             try {
@@ -411,7 +425,7 @@ public class Affinity implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
             if (onMined != 0 && blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
@@ -420,7 +434,7 @@ public class Affinity implements Listener {
                         addAmountOfAffinity(e.getPlayer().getUniqueId(), onMined);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onHit(EntityDamageByEntityEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
@@ -445,7 +459,7 @@ public class Affinity implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(e.getEntity() instanceof Player)
             if(!effectsWhenAttacked.get(calcDifficulty(e.getEntity().getUniqueId())))
@@ -454,7 +468,7 @@ public class Affinity implements Listener {
                         e.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(e.getTarget() instanceof Player)
             if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString()))
@@ -465,19 +479,16 @@ public class Affinity implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
-        SQL.getAffinityValues(uuid.toString(), new findIntegerCallback() {
-            @Override
-            public void onQueryDone(List<Integer> r) {
-                if (r.get(0) == -1){
-                    playerAffinity.put(uuid, startAffinity);
-                    playerMaxAffinity.put(uuid, -1);
-                    playerMinAffinity.put(uuid, -1);
-                    SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
-                } else {
-                    playerAffinity.put(uuid, r.get(0));
-                    playerMaxAffinity.put(uuid, r.get(1));
-                    playerMinAffinity.put(uuid, r.get(2));
-                }
+        SQL.getAffinityValues(uuid.toString(), r -> {
+            if (r.get(0) == -1){
+                playerAffinity.put(uuid, startAffinity);
+                playerMaxAffinity.put(uuid, -1);
+                playerMinAffinity.put(uuid, -1);
+                SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+            } else {
+                playerAffinity.put(uuid, r.get(0));
+                playerMaxAffinity.put(uuid, r.get(1));
+                playerMinAffinity.put(uuid, r.get(2));
             }
         });
     }
@@ -489,5 +500,137 @@ public class Affinity implements Listener {
         playerAffinity.remove(uuid);
         playerMaxAffinity.remove(uuid);
         playerMinAffinity.remove(uuid);
+    }
+
+    @EventHandler
+    public void onOpenPlayerInventory(InventoryClickEvent e) {
+        if(!e.getView().getTitle().contains("DynamicDifficulty"))
+            return;
+        if (e.getCurrentItem() == null)
+            return;
+        if(e.getCurrentItem().getItemMeta() == null)
+            return;
+
+        Inventory tmp = e.getClickedInventory();
+        if(e.getView().getTitle().equals("DynamicDifficulty - Players")) {
+            ItemStack item = e.getCurrentItem();
+            e.getWhoClicked().closeInventory();
+            if (e.getSlot() == 5 && item.getType().toString() == "IRON_INGOT") {
+                openPlayersInventory((Player)e.getWhoClicked(), Integer.parseInt(item.getItemMeta().getLore().get(0)));
+            } else if (e.getSlot() == 3 && item.getType().toString() == "GOLD_INGOT") {
+                openPlayersInventory((Player)e.getWhoClicked(), Integer.parseInt(item.getItemMeta().getLore().get(0)));
+                Bukkit.getConsoleSender().sendMessage(item.getItemMeta().getLore().get(0));
+            } else if (e.getSlot() != 4) {
+                tmp = inventorySettings.get("iplayer");
+                tmp.setItem(4, item);
+                e.getWhoClicked().openInventory(tmp);
+            }
+        } else if (e.getView().getTitle().equals("DynamicDifficulty - Individual Player")) {
+            UUID uuid = Bukkit.getPlayer(e.getInventory().getItem(4).getItemMeta().getDisplayName()).getUniqueId();
+            ArrayList<String> allowed = new ArrayList<>(Arrays.asList("PINK_WOOL", "MAGENTA_WOOL", "PURPLE_WOOL", "LIME_WOOL", "BLUE_WOOL", "CYAN_WOOL", "LIGHT_BLUE_WOOL", "RED_WOOL"));
+            if(allowed.contains(e.getCurrentItem().getType().toString())) {
+                if (e.getCurrentItem().getType().toString().equals("RED_WOOL")) {
+                    if(e.getSlot() / 9 < 2) { playerAffinity.replace(uuid, startAffinity); }
+                    else if(e.getSlot() / 9 < 3) { playerMaxAffinity.replace(uuid, -1); }
+                    else if(e.getSlot() / 9 < 4) { playerMinAffinity.replace(uuid, -1); }
+                } else {
+                    int add = Integer.parseInt(e.getCurrentItem().getItemMeta().getDisplayName());
+                    if(e.getSlot() / 9 < 2) { playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + add)); }
+                    else if(e.getSlot() / 9 < 3) { playerMaxAffinity.replace(uuid, calcAffinity(null, playerMaxAffinity.get(uuid) + add)); }
+                    else if(e.getSlot() / 9 < 4) { playerMinAffinity.replace(uuid, calcAffinity(null, playerMinAffinity.get(uuid) + add)); }
+                }
+                ItemStack item = e.getInventory().getItem(4);
+                setLore(item, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
+                e.getInventory().setItem(4, item);
+            }
+        }
+        e.setCancelled(true);
+    }
+
+    public void openPlayersInventory(Player user, int page) {
+        Inventory tmp = inventorySettings.get("player");
+        if(Bukkit.getOnlinePlayers().size() < 45) {
+            int i = 0;
+            for(Player player : Bukkit.getOnlinePlayers()) {
+                UUID uuid = player.getUniqueId();
+                ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+                setPlayerHead(skull, player);
+                setItemStackName(skull, player.getName());
+                setLore(skull, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
+                tmp.setItem(i++, skull);
+            }
+        } else {
+            int curr = page * 45;
+            Bukkit.getConsoleSender().sendMessage("page: "+page + " curr: "+curr);
+            Player[] pl = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+            ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT);
+            setLore(goldIngot, new ArrayList<>(Arrays.asList(String.valueOf(page > 0 ? page-1 : 0))));
+            setItemStackName(goldIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Previous page");
+            ItemStack chestPlate = new ItemStack(Material.IRON_CHESTPLATE);
+            setItemStackName(chestPlate, ChatColor.AQUA+""+ChatColor.BOLD+"Current page: "+page);
+            ItemStack ironIngot = new ItemStack(Material.IRON_INGOT);
+            setLore(ironIngot, new ArrayList<>(Arrays.asList(String.valueOf(page+1))));
+            setItemStackName(ironIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Next page");
+            tmp.setItem(3, goldIngot);
+            tmp.setItem(4, chestPlate);
+            tmp.setItem(5, ironIngot);
+            for(int i=0;i<45;i++) {
+                if(i + curr < pl.length) {
+                    String name = pl[i + curr].getName();
+                    UUID uuid = pl[i + curr].getUniqueId();
+                    ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+                    setItemStackName(skull, name);
+                    setPlayerHead(skull, Bukkit.getServer().getPlayer(name));
+                    setLore(skull, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
+                    tmp.setItem(i+9, skull);
+                } else {
+                    break;
+                }
+            }
+        }
+        user.openInventory(tmp);
+    }
+
+    public void createPlayerInventory() {
+        Inventory inv = Bukkit.createInventory(null, 54, "DynamicDifficulty - Players");
+        inventorySettings.put("player", inv);
+    }
+
+    public void createIndividialPlayerInventory() {
+        Inventory tmpinv = Bukkit.createInventory(null, 36, "DynamicDifficulty - Individual Player");
+        List<String> settings = new ArrayList<>(Arrays.asList("Affinity","Min Affinity","Max Affinity"));
+        List<String> changeSettings = new ArrayList<>(Arrays.asList("-100","-10","-1", "", "+1", "+10", "+100", "Default"));
+        List<String> woolColors = new ArrayList<>(Arrays.asList("PINK", "MAGENTA", "PURPLE", "", "BLUE", "CYAN", "LIGHT_BLUE", "RED"));
+        for(int i=9;i<=36;i++) {
+            if(i % 9 != 0) {
+                ItemStack wool;
+                if (i % 9 == 4) {
+                    wool = new ItemStack(Material.LIME_WOOL, 1);
+                    setItemStackName(wool, settings.get((int) (Math.floor(i / 9) - 1)));
+                } else {
+                    if(woolColors.get((i % 9) - 1) == "") { continue; }
+                    wool = new ItemStack(Material.getMaterial(woolColors.get((i % 9) - 1) + "_WOOL"), 1);
+                    setItemStackName(wool, changeSettings.get((i % 9) -1));
+                }
+                tmpinv.setItem(i, wool);
+            }
+        }
+        inventorySettings.put("iplayer",tmpinv);
+    }
+
+    public void setItemStackName(ItemStack renamed, String customName) {
+        ItemMeta renamedMeta = renamed.getItemMeta();
+        renamedMeta.setDisplayName(customName);
+        renamed.setItemMeta(renamedMeta);
+    }
+
+    public void setPlayerHead(ItemStack skull, Player name) {
+        SkullMeta meta = (SkullMeta) skull.getItemMeta();
+        meta.setOwningPlayer(name);
+    }
+    public void setLore(ItemStack item, List<String> loreSet) {
+        ItemMeta meta = item.getItemMeta();
+        meta.setLore(loreSet);
+        item.setItemMeta(meta);
     }
 }

@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.2.06
+version: 1.2.07
 author: SkinnyJeans
 api-version: 1.13
 softdepend: ['PlaceholderAPI']
@@ -20,6 +20,7 @@ permissions:
       affinity.delmin: true
       affinity.reload: true
       affinity.force-save: true
+      affinity.playergui: true
 
   affinity.get:
     default: false
@@ -54,6 +55,9 @@ permissions:
   affinity.force-save:
     default: op
     description: Saves the player data
+  affinity.playergui:
+    default: op
+    description: allows you to the settings of players in chest form
 
 commands:
   affinity:

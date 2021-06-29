@@ -5,8 +5,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.javatpoint.application1</groupId>
-    <artifactId>my-app</artifactId>
-    <version>1</version>
+    <artifactId>DynamicDifficulty</artifactId>
+    <version>v1.2.07</version>
     <build>
         <plugins>
             <plugin>
@@ -51,7 +51,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                     <obfuscate>false</obfuscate>
                     <options>
                         <option>-allowaccessmodification</option>
-                        <option>-keep class com.squareup.haha.perflib.** { *; }</option>
+                        <option>-keep class !me.skinnyjeans.gmd.Main</option>
                         <option>-dontwarn javax.annotation.**</option>
                         <option>-optimizations !code/allocation/variable</option>
                         <option>-keep public class * { *; }</option>
@@ -59,9 +59,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                     </options>
                     <libs>
                         <lib>C:\Program Files\Java\jre1.8.0_291/lib/rt.jar</lib>
-                        <!--lib>${java.bootstrap.classes}</lib>
-                        <lib>${java.cryptographic.extension.classes}</lib>
-                        <lib>${java.secure.socket.extension.classes}</lib-->
                     </libs>
                 </configuration>
                 <dependencies>

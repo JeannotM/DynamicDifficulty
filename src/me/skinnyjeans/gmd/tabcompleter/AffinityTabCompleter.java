@@ -12,9 +12,9 @@ import java.util.List;
 
 public class AffinityTabCompleter implements TabCompleter {
 
-    private ArrayList<String> oneArg = new ArrayList<>(Arrays.asList("author", "reload", "force-save"));
-    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("delmax","get","author", "reload", "force-save","delmin"));
-    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","setmin","delmax","delmin","author","reload","force-save"));
+    private ArrayList<String> oneArg = new ArrayList<>(Arrays.asList("author", "reload", "force-save", "playergui"));
+    private ArrayList<String> twoArgs = new ArrayList<>(Arrays.asList("delmax","get","delmin"));
+    private ArrayList<String> commands = new ArrayList<>(Arrays.asList("set","get","add","remove","setmax","setmin","delmax","delmin","author","reload","force-save","playergui"));
     private ArrayList<String> numbers = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5"));
 
     public AffinityTabCompleter(Affinity af){ numbers.addAll(af.getDifficulties()); }
