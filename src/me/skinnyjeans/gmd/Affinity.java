@@ -522,26 +522,28 @@ public class Affinity implements Listener {
                 Bukkit.getConsoleSender().sendMessage(item.getItemMeta().getLore().get(0));
             } else if (e.getSlot() != 4) {
                 tmp = inventorySettings.get("iplayer");
-                tmp.setItem(4, item);
+                tmp.setItem(13, item);
                 e.getWhoClicked().openInventory(tmp);
             }
         } else if (e.getView().getTitle().equals("DynamicDifficulty - Individual Player")) {
-            UUID uuid = Bukkit.getPlayer(e.getInventory().getItem(4).getItemMeta().getDisplayName()).getUniqueId();
+            UUID uuid = Bukkit.getPlayer(e.getInventory().getItem(13).getItemMeta().getDisplayName()).getUniqueId();
             ArrayList<String> allowed = new ArrayList<>(Arrays.asList("PINK_WOOL", "MAGENTA_WOOL", "PURPLE_WOOL", "LIME_WOOL", "BLUE_WOOL", "CYAN_WOOL", "LIGHT_BLUE_WOOL", "RED_WOOL"));
-            if(allowed.contains(e.getCurrentItem().getType().toString())) {
+            if(allowed.contains(e.getCurrentItem().getType().toString()) && e.getSlot() % 9 != 0 && e.getSlot() % 9 != 4) {
                 if (e.getCurrentItem().getType().toString().equals("RED_WOOL")) {
-                    if(e.getSlot() / 9 < 2) { playerAffinity.replace(uuid, startAffinity); }
+                    if(e.getSlot() / 9 < 1) { playerAffinity.replace(uuid, startAffinity); }
+                    else if(e.getSlot() / 9 < 2) { playerMinAffinity.replace(uuid, -1); }
                     else if(e.getSlot() / 9 < 3) { playerMaxAffinity.replace(uuid, -1); }
-                    else if(e.getSlot() / 9 < 4) { playerMinAffinity.replace(uuid, -1); }
                 } else {
                     int add = Integer.parseInt(e.getCurrentItem().getItemMeta().getDisplayName());
-                    if(e.getSlot() / 9 < 2) { playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + add)); }
+                    if(e.getSlot() / 9 < 1) { playerAffinity.replace(uuid, calcAffinity(uuid, playerAffinity.get(uuid) + add)); }
+                    else if(e.getSlot() / 9 < 2) { playerMinAffinity.replace(uuid, calcAffinity(null, playerMinAffinity.get(uuid) + add)); }
                     else if(e.getSlot() / 9 < 3) { playerMaxAffinity.replace(uuid, calcAffinity(null, playerMaxAffinity.get(uuid) + add)); }
-                    else if(e.getSlot() / 9 < 4) { playerMinAffinity.replace(uuid, calcAffinity(null, playerMinAffinity.get(uuid) + add)); }
                 }
-                ItemStack item = e.getInventory().getItem(4);
-                setLore(item, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
-                e.getInventory().setItem(4, item);
+                ItemStack item = e.getInventory().getItem(13);
+                String c1 = ChatColor.BOLD+""+ChatColor.DARK_GREEN;
+                String c2 = ChatColor.BOLD+""+ChatColor.GREEN;
+                setLore(item, new ArrayList<>(Arrays.asList(c1+"Affinity: "+c2+playerAffinity.get(uuid),c1+"Min Affinity: "+c2+playerMinAffinity.get(uuid),c1+"Max Affinity: "+c2+playerMaxAffinity.get(uuid))));
+                e.getInventory().setItem(13, item);
             }
         }
         e.setCancelled(true);
@@ -556,7 +558,9 @@ public class Affinity implements Listener {
                 ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
                 setPlayerHead(skull, player);
                 setItemStackName(skull, player.getName());
-                setLore(skull, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
+                String c1 = ChatColor.BOLD+""+ChatColor.DARK_GREEN;
+                String c2 = ChatColor.BOLD+""+ChatColor.GREEN;
+                setLore(skull, new ArrayList<>(Arrays.asList(c1+"Affinity: "+c2+playerAffinity.get(uuid),c1+"Min Affinity: "+c2+playerMinAffinity.get(uuid),c1+"Max Affinity: "+c2+playerMaxAffinity.get(uuid))));
                 tmp.setItem(i++, skull);
             }
         } else {
@@ -567,7 +571,8 @@ public class Affinity implements Listener {
             setLore(goldIngot, new ArrayList<>(Arrays.asList(String.valueOf(page > 0 ? page-1 : 0))));
             setItemStackName(goldIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Previous page");
             ItemStack chestPlate = new ItemStack(Material.IRON_CHESTPLATE);
-            setItemStackName(chestPlate, ChatColor.AQUA+""+ChatColor.BOLD+"Current page: "+page);
+            setLore(chestPlate, new ArrayList<>(Arrays.asList(String.valueOf(page))));
+            setItemStackName(chestPlate, ChatColor.AQUA+""+ChatColor.BOLD+"Current page");
             ItemStack ironIngot = new ItemStack(Material.IRON_INGOT);
             setLore(ironIngot, new ArrayList<>(Arrays.asList(String.valueOf(page+1))));
             setItemStackName(ironIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Next page");
@@ -581,7 +586,9 @@ public class Affinity implements Listener {
                     ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
                     setItemStackName(skull, name);
                     setPlayerHead(skull, Bukkit.getServer().getPlayer(name));
-                    setLore(skull, new ArrayList<>(Arrays.asList("Affinity: "+playerAffinity.get(uuid),"Min Affinity: "+playerMinAffinity.get(uuid),"Max Affinity: "+playerMaxAffinity.get(uuid))));
+                    String c1 = ChatColor.BOLD+""+ChatColor.DARK_GREEN;
+                    String c2 = ChatColor.BOLD+""+ChatColor.GREEN;
+                    setLore(skull, new ArrayList<>(Arrays.asList(c1+"Affinity: "+c2+playerAffinity.get(uuid),c1+"Min Affinity: "+c2+playerMinAffinity.get(uuid),c1+"Max Affinity: "+c2+playerMaxAffinity.get(uuid))));
                     tmp.setItem(i+9, skull);
                 } else {
                     break;
@@ -597,20 +604,22 @@ public class Affinity implements Listener {
     }
 
     public void createIndividialPlayerInventory() {
-        Inventory tmpinv = Bukkit.createInventory(null, 36, "DynamicDifficulty - Individual Player");
+        Inventory tmpinv = Bukkit.createInventory(null, 27, "DynamicDifficulty - Individual Player");
         List<String> settings = new ArrayList<>(Arrays.asList("Affinity","Min Affinity","Max Affinity"));
-        List<String> changeSettings = new ArrayList<>(Arrays.asList("-100","-10","-1", "", "+1", "+10", "+100", "Default"));
-        List<String> woolColors = new ArrayList<>(Arrays.asList("PINK", "MAGENTA", "PURPLE", "", "BLUE", "CYAN", "LIGHT_BLUE", "RED"));
-        for(int i=9;i<=36;i++) {
-            if(i % 9 != 0) {
+        List<String> changeSettings = new ArrayList<>(Arrays.asList("","-100","-10","-1", "", "+1", "+10", "+100", "Default"));
+        List<String> woolColors = new ArrayList<>(Arrays.asList("LIME", "PINK", "MAGENTA", "PURPLE", "", "BLUE", "CYAN", "LIGHT_BLUE", "RED"));
+        for(int i=0;i<27;i++) {
+            if(i % 9 != 4) {
                 ItemStack wool;
-                if (i % 9 == 4) {
+                if (i % 9 == 0) {
                     wool = new ItemStack(Material.LIME_WOOL, 1);
-                    setItemStackName(wool, settings.get((int) (Math.floor(i / 9) - 1)));
+                    int tmp = 0;
+                    if(i != 0) { tmp = i / 9; }
+                    setItemStackName(wool, settings.get(tmp));
                 } else {
-                    if(woolColors.get((i % 9) - 1) == "") { continue; }
-                    wool = new ItemStack(Material.getMaterial(woolColors.get((i % 9) - 1) + "_WOOL"), 1);
-                    setItemStackName(wool, changeSettings.get((i % 9) -1));
+                    if(woolColors.get((i % 9)) == "") { continue; }
+                    wool = new ItemStack(Material.getMaterial(woolColors.get((i % 9)) + "_WOOL"), 1);
+                    setItemStackName(wool, changeSettings.get(i % 9));
                 }
                 tmpinv.setItem(i, wool);
             }

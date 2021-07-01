@@ -18,16 +18,16 @@ I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDif
 points-per-minute: 5
 
 # when a block from the blocks list is mined.
-block-mined: 1
+block-mined: 2
 
 # When player is hit by a mob.
 player-hit: -1
 
 # When a player kills another player.
-pvp-kill: 10
+pvp-kill: 20
 
 # When a mob from the mobs-count-as-pve list is killed.
-pve-kill: 1
+pve-kill: 2
 
 # When a player dies.
 death: -80
@@ -48,9 +48,9 @@ mobs-count-as-pve:
 - CAVESPIDER: 3
 - CREEPER: 3
 - DROWNED
+- ENDER_DRAGON: 100
 - ELDER_GUARDIAN: 20
 - ENDERMAN: 5
-- ENDER_DRAGON: 100
 - GUARDIAN: 3
 - HUSK
 - IRON_GOLEM: 50
@@ -210,6 +210,10 @@ Reloads the config.
 /Affinity force-save
 perm: affinity.force-save
 Force saves the current data to the yml or database.
+
+/Affinity playergui
+perm: affinity.playergui
+Allows you to change all player settings in a chestGUI
 ```
 ## Plugin Support
 #### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]
@@ -248,9 +252,11 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 
 ## Possible Future Updates
 - [ ] per biome difficulty
+- [ ] Auto calculate Min Affinity setting
 - [ ] promoted/demoted message
 - [ ] Export to DB / File
 
 ## Extra thanks to:
 Noiverre - For testing the Papi functions (Because there were a few issues sometimes)
 Mithran - For submitting several idea's and informing me of a lot of issues
+CodedRed - For all the Minecraft plugin videos

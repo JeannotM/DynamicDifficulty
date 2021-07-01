@@ -2,7 +2,7 @@
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  * Here all the default values and commands will be processed and/or initialized.
  *
- * @version 1.2.07
+ * @version 1.3
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;
@@ -14,7 +14,6 @@ import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
