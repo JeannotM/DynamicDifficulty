@@ -37,15 +37,19 @@ public class AffinityCommands implements CommandExecutor {
             if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
                 if (args[1].equalsIgnoreCase("world")) {
                     arg1 = "world";
-                } else if (Bukkit.getPlayer(args[1]) != null) {
-                    if (Bukkit.getPlayer(args[1]).isOnline()) {
+                } else if (af.getPlayerUUID(args[1]) != null) {
+                    if(af.getVariable("unload-player") == -1) {
+                        if(af.getAffinity(af.getPlayerUUID(args[1])) != -1) {
+                            arg1 = args[1];
+                        } else {
+                            msg = args[1] + " hasn't been online yet!";
+                        }
+                    } else if (Bukkit.getOfflinePlayer(af.getPlayerUUID(args[1])).isOnline()) {
                         arg1 = Bukkit.getPlayer(args[1]).getName();
-                    } else {
-                        msg = args[1] + " needs to be online!";
                     }
-                } else {
-                    msg = args[1] + " isn't a recognized online player";
                 }
+                if(arg1 == null && msg.equals(""))
+                    msg = args[1] + " needs to be online!";
             }
 
             if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
@@ -64,7 +68,7 @@ public class AffinityCommands implements CommandExecutor {
             }
 
             // No switch statement so earlier Java Versions are compatible
-            if(msg == "") {
+            if(msg.equals("")) {
                 if(args[0].equalsIgnoreCase("get")){ msg = getAffinity(arg1); }
                 else if(args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
                 else if(args[0].equalsIgnoreCase("add")){ msg = setAffinity(arg1, af.getAffinity(Bukkit.getPlayer(arg1).getUniqueId()) + (arg2)); }
@@ -109,7 +113,7 @@ public class AffinityCommands implements CommandExecutor {
         try {
             UUID uuid = null;
             if(!user.equalsIgnoreCase("world"))
-                uuid = Bukkit.getPlayer(user).getUniqueId();
+                uuid = af.getPlayerUUID(user);
 
             amount = af.calcAffinity(uuid, amount);
             af.setAffinity(uuid, amount);
@@ -130,7 +134,7 @@ public class AffinityCommands implements CommandExecutor {
         try {
             UUID uuid = null;
             if(!user.equalsIgnoreCase("world"))
-                uuid = Bukkit.getPlayer(user).getUniqueId();
+                uuid = af.getPlayerUUID(user);
 
             String msg = user+" has "+ af.getAffinity(uuid)+" Affinity points";
             msg+="\nCurrently on "+ af.calcDifficulty(uuid)+" Difficulty";
@@ -157,7 +161,7 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a Max Affinity!";
 
-            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            UUID uuid = af.getPlayerUUID(user);
             amount = af.calcAffinity(null, amount);
             af.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
@@ -182,7 +186,7 @@ public class AffinityCommands implements CommandExecutor {
         try {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't have a Max Affinity!";
-            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            UUID uuid = af.getPlayerUUID(user);
             af.setMaxAffinity(uuid, -1);
             return "Removed the Max Affinity for "+user;
         }
@@ -204,7 +208,7 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a Min Affinity!";
 
-            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            UUID uuid = af.getPlayerUUID(user);
             amount = af.calcAffinity(null, amount);
             af.setMinAffinity(uuid, amount);
             return "Set the Min Affinity to "+amount+" for "+user;
@@ -224,7 +228,7 @@ public class AffinityCommands implements CommandExecutor {
         try {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't have a Min Affinity!";
-            UUID uuid = Bukkit.getPlayer(user).getUniqueId();
+            UUID uuid = af.getPlayerUUID(user);
             af.setMinAffinity(uuid, -1);
             return "Removed the Min Affinity for "+user;
         }

@@ -9,7 +9,7 @@ version: 1.3
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
 
 # Affinity Gained or Lost When Doing Certain Things.
-points-per-minute: 5
+points-per-minute: 3
 block-mined: 2
 player-hit: -1
 pvp-kill: 20
@@ -64,6 +64,7 @@ plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable BStats for DynamicDifficulty
   use-prefix: true
+  unload-leaving-player: true # Disable if you use a Vanish plugin
 
 saving-data:
   type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql

@@ -8,6 +8,7 @@
 package me.skinnyjeans.gmd;
 
 import me.skinnyjeans.gmd.commands.AffinityCommands;
+import me.skinnyjeans.gmd.events.AffinityEvents;
 import me.skinnyjeans.gmd.hooks.Metrics;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
@@ -22,11 +23,11 @@ import java.util.Locale;
 public class Main extends JavaPlugin {
 	
 	public DataManager data = new DataManager(this);
-	public Affinity af;
+	public AffinityEvents af;
 
 	@Override
 	public void onEnable() {
-		af = new Affinity(this);
+		af = new AffinityEvents(this);
 		checkData();
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
