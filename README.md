@@ -255,8 +255,11 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] Auto calculate Min Affinity setting
 - [ ] promoted/demoted message
 - [ ] Export to DB / File
+- [ ] Prepare removal?
+- [ ] selector support (@a, @p etc)
 
 ## Extra thanks to:
 Noiverre - For testing the Papi functions (Because there were a few issues sometimes)
 Mithran - For submitting several idea's and informing me of a lot of issues
 CodedRed - For all the Minecraft plugin videos
+Len76 - For testing Dynamic Difficulty and giving 
