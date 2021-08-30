@@ -7,9 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -23,8 +21,9 @@ public class AffinityCommands implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         boolean console = !(sender instanceof Player);
-        String arg1 = "";
+        HashSet<String> playerList = new HashSet<>();
         String msg = "";
+        String arg1 = "";
         int arg2 = -1;
 
         if(args.length==0)
@@ -34,56 +33,67 @@ public class AffinityCommands implements CommandExecutor {
             if(!oneArg.contains(args[0]) && args.length==1)
                 msg = "You forgot to include a user!";
 
-            if(msg == "" && args.length >= 2 && args[1] != null && args[1] != "") {
-                if (args[1].equalsIgnoreCase("world")) {
-                    arg1 = "world";
-                } else if (af.getPlayerUUID(args[1]) != null) {
-                    if(af.getVariable("unload-player") == -1) {
-                        if(af.getAffinity(af.getPlayerUUID(args[1])) != -1) {
-                            arg1 = args[1];
-                        } else {
-                            msg = args[1] + " hasn't been online yet!";
-                        }
-                    } else if (Bukkit.getOfflinePlayer(af.getPlayerUUID(args[1])).isOnline()) {
-                        arg1 = Bukkit.getPlayer(args[1]).getName();
-                    }
-                }
-                if(arg1 == null && msg.equals(""))
-                    msg = args[1] + " needs to be online!";
-            }
+            if(args[1].equalsIgnoreCase("@a")) { Bukkit.getOnlinePlayers().forEach(pl -> playerList.add(pl.getName()));
+            } else if(args[1].equalsIgnoreCase("@p")) { playerList.add(Bukkit.selectEntities(sender, "@p").get(0).getName());
+            } else if(args[1].equalsIgnoreCase("@r")) { playerList.add(Bukkit.selectEntities(sender, "@r").get(0).getName());
+            } else if(args[1].equalsIgnoreCase("@s")) { if(!console) { playerList.add(sender.getName()); } else { msg = "You can't select the console or an commandBlock!"; }
+            } else { playerList.add(args[1]); }
 
-            if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
-                if (af.hasDifficulty(args[2])) {
-                    arg2 = af.getDifficultyAffinity(args[2]);
-                } else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find() || args[1].equalsIgnoreCase("world")) {
-                    try{
-                        arg2 = Integer.parseInt(args[2]);
+            if(msg != "")
+                return sendMSG(msg,sender,false);
+
+            for(String name : playerList) {
+                if(msg == "" && args.length >= 2 && name != null && name != "") {
+                    if (name.equalsIgnoreCase("world")) {
+                        arg1 = "world";
+                    } else if (af.getPlayerUUID(name) != null) {
+                        if(af.getVariable("unload-player") == -1) {
+                            if(af.getAffinity(af.getPlayerUUID(name)) != -1) {
+                                arg1 = name;
+                            } else {
+                                msg = name + " hasn't been online yet!";
+                            }
+                        } else if (Bukkit.getOfflinePlayer(af.getPlayerUUID(name)).isOnline()) {
+                            arg1 = Bukkit.getPlayer(name).getName();
+                        }
                     }
-                    catch(Exception e){
+                    if(arg1 == null && msg.equals(""))
+                        msg = name + " needs to be online!";
+                }
+
+                if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
+                    if (af.hasDifficulty(args[2])) {
+                        arg2 = af.getDifficultyAffinity(args[2]);
+                    } else if (Pattern.compile("(?i)[^a-zA-Z_&&[0-9]]").matcher(args[2]).find() || name.equalsIgnoreCase("world")) {
+                        try{
+                            arg2 = Integer.parseInt(args[2]);
+                        }
+                        catch(Exception e){
+                            msg = args[2] + " isn't a recognized difficulty or number";
+                        }
+                    } else {
                         msg = args[2] + " isn't a recognized difficulty or number";
                     }
-                } else {
-                    msg = args[2] + " isn't a recognized difficulty or number";
                 }
-            }
 
-            // No switch statement so earlier Java Versions are compatible
-            if(msg.equals("")) {
-                if(args[0].equalsIgnoreCase("get")){ msg = getAffinity(arg1); }
-                else if(args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
-                else if(args[0].equalsIgnoreCase("add")){ msg = setAffinity(arg1, af.getAffinity(Bukkit.getPlayer(arg1).getUniqueId()) + (arg2)); }
-                else if(args[0].equalsIgnoreCase("remove")){ msg = setAffinity(arg1, af.getAffinity(Bukkit.getPlayer(arg1).getUniqueId()) + (arg2*-1)); }
-                else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
-                else if(args[0].equalsIgnoreCase("delmax")){ msg = removeMaxAffinity(arg1); }
-                else if(args[0].equalsIgnoreCase("setmin")){ msg = setMinAffinity(arg1, arg2); }
-                else if(args[0].equalsIgnoreCase("delmin")){ msg = removeMinAffinity(arg1); }
-                else if(args[0].equalsIgnoreCase("reload")){ msg = reloadConfig(); }
-                else if(args[0].equalsIgnoreCase("force-save")){ msg = forceSave(); }
-                else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!"; }
-                else if(args[0].equalsIgnoreCase("playergui") && !console){ af.openPlayersInventory(Bukkit.getPlayer(arg1), 0); return true; }
-                else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
-            } else {
-                return sendMSG(msg,sender,false);
+                // No switch statement so earlier Java Versions are compatible
+                if(msg.equals("")) {
+                    if(args[0].equalsIgnoreCase("get")){ msg = getAffinity(arg1); }
+                    else if(args[0].equalsIgnoreCase("set")){ msg = setAffinity(arg1, arg2); }
+                    else if(args[0].equalsIgnoreCase("add")){ msg = setAffinity(arg1, af.getAffinity(Bukkit.getPlayer(arg1).getUniqueId()) + (arg2)); }
+                    else if(args[0].equalsIgnoreCase("remove")){ msg = setAffinity(arg1, af.getAffinity(Bukkit.getPlayer(arg1).getUniqueId()) + (arg2*-1)); }
+                    else if(args[0].equalsIgnoreCase("setmax")){ msg = setMaxAffinity(arg1, arg2); }
+                    else if(args[0].equalsIgnoreCase("delmax")){ msg = removeMaxAffinity(arg1); }
+                    else if(args[0].equalsIgnoreCase("setmin")){ msg = setMinAffinity(arg1, arg2); }
+                    else if(args[0].equalsIgnoreCase("delmin")){ msg = removeMinAffinity(arg1); }
+                    else if(args[0].equalsIgnoreCase("reload")){ msg = reloadConfig(); }
+                    else if(args[0].equalsIgnoreCase("force-save")){ msg = forceSave(); }
+                    else if(args[0].equalsIgnoreCase("author")){ msg = "The author of this plugin is: SkinnyJeans. Thank you for asking about me!"; }
+                    else if(args[0].equalsIgnoreCase("playergui") && !console){ af.openPlayersInventory(Bukkit.getPlayer(arg1), 0); return true; }
+                    else { return sendMSG("Sorry, I don't recognize the command: " + args[0],sender,false); }
+                } else {
+                    return sendMSG(msg,sender,false);
+                }
             }
             return sendMSG(msg,sender,true);
         } else {

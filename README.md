@@ -249,6 +249,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Randomize Difficulty mode
 - [x] Change player settings with chest GUI
 - [x] Stop certain mobs from following players on chosen difficulties
+- [x] selector support (@a, @p etc)
 
 ## Possible Future Updates
 - [ ] per biome difficulty
@@ -256,10 +257,11 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] promoted/demoted message
 - [ ] Export to DB / File
 - [ ] Prepare removal?
-- [ ] selector support (@a, @p etc)
+- [ ] Hunger Drain
+- [ ] Mob armor spawn chance
 
 ## Extra thanks to:
 Noiverre - For testing the Papi functions (Because there were a few issues sometimes)
 Mithran - For submitting several idea's and informing me of a lot of issues
 CodedRed - For all the Minecraft plugin videos
-Len76 - For testing Dynamic Difficulty and giving some advice regarding performance
+Len76 - For testing Dynamic Difficulty, giving a few idea's and giving some advice regarding performance

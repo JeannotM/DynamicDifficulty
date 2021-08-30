@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -79,6 +80,9 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
+            if(prey instanceof Player) {
+                if (((HumanEntity)prey).isBlocking()) { return; }
+            }
             try {
                 if (prey instanceof Player) {
                     if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString())) {
@@ -101,19 +105,23 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
-        if(e.getEntity() instanceof Player)
-            if(!effectsWhenAttacked.get(calcDifficulty(e.getEntity().getUniqueId())))
+        try {
+            if(e.getEntity() instanceof Player)
                 if(effectCauses.contains(e.getCause()))
                     if(effects.contains(e.getModifiedType()))
-                        e.setCancelled(true);
+                        if(!effectsWhenAttacked.get(calcDifficulty(e.getEntity().getUniqueId())))
+                            e.setCancelled(true);
+        }catch(NullPointerException er){ return; }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        if(e.getTarget() instanceof Player)
-            if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString()))
-                if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
-                    e.setCancelled(true);
+        try {
+            if(e.getTarget() instanceof Player)
+                if(mobsIgnorePlayers.get(calcDifficulty(e.getTarget().getUniqueId())).contains(e.getEntity().getType().toString()))
+                    if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
+                        e.setCancelled(true);
+        }catch(NullPointerException er){ return; }
     }
 
     @EventHandler
@@ -148,13 +156,13 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if(calculateMinAffinity) {
-
-        }
-        if(armorWorn.containsKey(e.getCurrentItem().getType().toString())) {
-            if (e.getSlotType().equals(InventoryType.SlotType.ARMOR)) {
-            }
-        }
+//        if(calculateMinAffinity) {
+//
+//        }
+//        if(armorWorn.containsKey(e.getCurrentItem().getType().toString())) {
+//            if (e.getSlotType().equals(InventoryType.SlotType.ARMOR)) {
+//            }
+//        }
 
         if(!e.getView().getTitle().contains("DynamicDifficulty"))
             return;
