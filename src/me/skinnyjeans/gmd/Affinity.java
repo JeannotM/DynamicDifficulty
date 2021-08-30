@@ -38,6 +38,7 @@ public class Affinity {
     protected HashMap<String, Integer> damageDoneOnMobs = new HashMap<>();
     protected HashMap<String, Integer> difficultyAffinity = new HashMap<>();
     protected HashMap<String, Integer> doubleLootChance = new HashMap<>();
+    protected HashMap<String, Integer> hungerDrainChance = new HashMap<>();
     protected HashMap<String, Integer> armorWorn = new HashMap<>();
     protected HashMap<String, Integer> mobsPVE = new HashMap<>();
     protected HashMap<String, Integer> blocks = new HashMap<>();
@@ -82,6 +83,7 @@ public class Affinity {
         difficultyAffinity.clear(); damageDoneByMobs.clear(); experienceMultiplier.clear(); damageDoneOnMobs.clear();
         doubleLootChance.clear(); mobsPVE.clear(); effectsWhenAttacked.clear(); prefixes.clear(); blocks.clear();
         difficulties.clear(); disabledWorlds.clear(); mobsOverrideIgnore.clear(); inventorySettings.clear();
+        hungerDrainChance.clear();
         loadConfig();
     }
 
@@ -160,6 +162,7 @@ public class Affinity {
             damageDoneByMobs.put(key, (int) (section.getDouble(key + ".damage-done-by-mobs", 100) * data.getConfig().getDouble("difficulty-modifiers.damage-done-by-mobs-multiplier", 1)));
             damageDoneOnMobs.put(key, (int) (section.getDouble(key + ".damage-done-on-mobs", 100) * data.getConfig().getDouble("difficulty-modifiers.damage-done-on-mobs-multiplier", 1)));
             effectsWhenAttacked.put(key, section.getBoolean(key + ".effects-when-attacked", true));
+            hungerDrainChance.put(key, section.getInt(key + ".hunger-drain-chance"));
             prefixes.put(key, section.getString(key + ".prefix"));
             mobsIgnorePlayers.put(key, section.getStringList(key + ".mobs-ignore-player"));
         }
@@ -372,6 +375,7 @@ public class Affinity {
         if(mode.equalsIgnoreCase("damage-done-on-mobs")) { return damageDoneOnMobs.get(diff); }
         if(mode.equalsIgnoreCase("experience-multiplier")) { return experienceMultiplier.get(diff); }
         if(mode.equalsIgnoreCase("double-loot-chance")) { return doubleLootChance.get(diff); }
+        if(mode.equalsIgnoreCase("hunger-drain-chance")) { return hungerDrainChance.get(diff); }
         return -1;
     }
 

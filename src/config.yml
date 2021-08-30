@@ -3,7 +3,7 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.3
+version: 1.4
 
 # Some info in the config have been typed shorter so as not to clutter it too much. Please visit for more detailed explanations with examples:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
@@ -101,6 +101,7 @@ difficulty:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
+    hunger-drain-chance: 60
     experience-multiplier: 70
     double-loot-chance: 0
     effects-when-attacked: false
@@ -111,6 +112,7 @@ difficulty:
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
+    hunger-drain-chance: 80
     experience-multiplier: 90
     double-loot-chance: 0
     effects-when-attacked: true
@@ -119,6 +121,7 @@ difficulty:
     affinity-required: 1000
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
+    hunger-drain-chance: 100
     experience-multiplier: 125
     double-loot-chance: 5
     effects-when-attacked: true

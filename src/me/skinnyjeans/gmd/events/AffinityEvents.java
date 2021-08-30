@@ -13,10 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -101,6 +98,18 @@ public class AffinityEvents extends Affinity implements Listener {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onHungerDrain(FoodLevelChangeEvent e) {
+        try {
+            if(e.getEntity() instanceof Player) {
+                double drainChance = calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance");
+                if(drainChance >= 0.0 && drainChance < 100.0)
+                    if(new Random().nextDouble() > (drainChance / 100.0))
+                        e.setCancelled(true);
+            }
+        }catch(NullPointerException er){ return; }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

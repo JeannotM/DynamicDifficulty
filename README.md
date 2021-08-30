@@ -120,6 +120,7 @@ difficulty-modifiers:
 #   affinity-required: <number, At What affinity this difficulty starts working>
 #   damage-done-by-mobs: <percentage, How much damage mobs do to you>
 #   damage-done-on-mobs: <percentage, How much damage you do on mobs>
+#   hunger-drain-chance: <percentage, Chance that the hunger of a player will drain>
 #   experience-multiplier: <percentage, Experience Multiplier>
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
@@ -130,6 +131,7 @@ difficulty:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
+    hunger-drain-chance: 60
     experience-multiplier: 70
     double-loot-chance: 0
     effects-when-attacked: false
@@ -140,6 +142,7 @@ difficulty:
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
+    hunger-drain-chance: 80
     experience-multiplier: 90
     double-loot-chance: 0
     effects-when-attacked: true
@@ -148,6 +151,7 @@ difficulty:
     affinity-required: 1000
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
+    hunger-drain-chance: 100
     experience-multiplier: 125
     double-loot-chance: 5
     effects-when-attacked: true
