@@ -8,7 +8,9 @@ import me.skinnyjeans.gmd.hooks.databases.SQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.inventory.Inventory;
@@ -29,7 +31,7 @@ public class Affinity {
     protected HashMap<UUID, Integer> playerAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMaxAffinity = new HashMap<>();
     protected HashMap<UUID, Integer> playerMinAffinity = new HashMap<>();
-    protected boolean silkTouchAllowed,calcExactPercentage,randomizer,unloadPlayers,calculateMinAffinity;
+    protected boolean silkTouchAllowed,calcExactPercentage,randomizer,unloadPlayers,calculateMinAffinity,calculateMaxAffinity,customArmorSpawnChance,overrideEnchantConflics;
     protected String difficultyType, saveType;
     protected List<String> disabledWorlds,disabledMobs;
     protected ArrayList<Integer> mobsOverrideIgnore = new ArrayList<>();
@@ -39,12 +41,15 @@ public class Affinity {
     protected HashMap<String, Integer> difficultyAffinity = new HashMap<>();
     protected HashMap<String, Integer> doubleLootChance = new HashMap<>();
     protected HashMap<String, Integer> hungerDrainChance = new HashMap<>();
+    protected HashMap<String, Integer> chancePerArmor = new HashMap<>();
     protected HashMap<String, Integer> armorWorn = new HashMap<>();
     protected HashMap<String, Integer> mobsPVE = new HashMap<>();
     protected HashMap<String, Integer> blocks = new HashMap<>();
+    protected HashMap<String, HashMap<String, Double>> customArmorChance = new HashMap<>();
     protected HashMap<String, Boolean> effectsWhenAttacked = new HashMap<>();
     protected HashMap<String, String> prefixes = new HashMap<>();
     protected HashMap<String, List<String>> mobsIgnorePlayers = new HashMap<>();
+    protected HashMap<String, List<String>> canEnchantPiece = new HashMap<>();
     protected HashMap<String, Inventory> inventorySettings = new HashMap<>();
     protected HashMap<String, UUID> playersUUID = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
@@ -52,6 +57,13 @@ public class Affinity {
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW, PotionEffectType.CONFUSION, PotionEffectType.HUNGER));
     protected ArrayList<EntityPotionEffectEvent.Cause> effectCauses = new ArrayList<>(Arrays.asList(EntityPotionEffectEvent.Cause.ATTACK,
             EntityPotionEffectEvent.Cause.ARROW, EntityPotionEffectEvent.Cause.POTION_SPLASH));
+    protected ArrayList<List<Enchantment>> enchantmentConflict = new ArrayList<>(Arrays.asList(
+            Arrays.asList(Enchantment.MENDING, Enchantment.ARROW_INFINITE),
+            Arrays.asList(Enchantment.PROTECTION_ENVIRONMENTAL, Enchantment.PROTECTION_EXPLOSIONS, Enchantment.PROTECTION_FIRE, Enchantment.PROTECTION_PROJECTILE),
+            Arrays.asList(Enchantment.SILK_TOUCH, Enchantment.LOOT_BONUS_BLOCKS),
+            Arrays.asList(Enchantment.DAMAGE_ALL, Enchantment.DAMAGE_ARTHROPODS, Enchantment.DAMAGE_UNDEAD),
+            Arrays.asList(Enchantment.DEPTH_STRIDER, Enchantment.FROST_WALKER)
+    ));
 
     public Affinity(Main ma) {
         m = ma;
@@ -107,7 +119,10 @@ public class Affinity {
         disabledWorlds = data.getConfig().getStringList("disabled-worlds");
         disabledMobs = data.getConfig().getStringList("disabled-mobs");
         unloadPlayers = data.getConfig().getBoolean("plugin-support.unload-leaving-player");
-        calculateMinAffinity = data.getConfig().getBoolean("");
+        customArmorSpawnChance = data.getConfig().getBoolean("advanced-features.custom-mob-items-spawn-chance");
+        calculateMinAffinity = data.getConfig().getBoolean("advanced-features.auto-calculate-min-affinity");
+        calculateMaxAffinity = data.getConfig().getBoolean("advanced-features.auto-calculate-max-affinity");
+        overrideEnchantConflics = data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts");
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = data.getConfig().getConfigurationSection("difficulty");
@@ -167,6 +182,31 @@ public class Affinity {
             mobsIgnorePlayers.put(key, section.getStringList(key + ".mobs-ignore-player"));
         }
 
+        if(customArmorSpawnChance) {
+            section = data.getConfig().getConfigurationSection("custom-mob-items-spawn-chance.difficulties");
+            for (String key : section.getKeys(false)) {
+                HashMap<String, Double> chances = new HashMap<>();
+                chances.put("chance-to-have-armor", section.getDouble(key + ".chance-to-have-armor"));
+                chances.put("chance-to-enchant-a-piece", section.getDouble(key + ".chance-to-enchant-a-piece"));
+                chances.put("helmet-chance", section.getDouble(key + ".helmet-chance"));
+                chances.put("weapon-chance", section.getDouble(key + ".weapon-chance"));
+                chances.put("chest-chance", section.getDouble(key + ".chest-chance"));
+                chances.put("leggings-chance", section.getDouble(key + ".leggings-chance"));
+                chances.put("boots-chance", section.getDouble(key + ".boots-chance"));
+                chances.put("max-enchants", section.getDouble(key + ".max-enchants"));
+                chances.put("max-level", section.getDouble(key + ".max-level"));
+                chances.put("armor-drop-chance", section.getDouble(key + ".armor-drop-chance"));
+                customArmorChance.put(key, chances);
+            }
+            ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "gold", "chain", "iron", "diamond", "netherite"));
+            int total = 0;
+            for(String key : array) {
+                int count = data.getConfig().getInt("custom-mob-items-spawn-chance.armor-set-weight." + key);
+                total += count;
+                chancePerArmor.put(key, data.getConfig().getInt("custom-mob-items-spawn-chance.armor-set-weight." + key));
+            }
+            chancePerArmor.put("total", total);
+        }
         loadMobs();
         loadBlocks();
         createPlayerInventory();
@@ -253,6 +293,8 @@ public class Affinity {
         playersUUID.forEach((name, uuid) -> {
             SQL.updatePlayer(uuid.toString(), playerAffinity.get(uuid), playerMaxAffinity.get(uuid), playerMinAffinity.get(uuid));
         });
+        if(saveType.equalsIgnoreCase("file"))
+            data.saveData();
     }
 
     /**
@@ -280,6 +322,69 @@ public class Affinity {
             x = minAffinity;
         }
         return x;
+    }
+
+    public ItemStack calcEnchant(ItemStack it, String piece, String diff, double chanceToEnchant) {
+        ItemStack item = it;
+        for(int j=0;j<customArmorChance.get(diff).get("max-enchants");j++) {
+            Enchantment chosenEnchant = null;
+            int total_amount = 0;
+            for(Object s : data.getConfig().getList("custom-mob-items-spawn-chance."+piece+"-enchants-include").toArray()) {
+                String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+                try {
+                    total_amount += Integer.parseInt(sep[1]);
+                } catch(Exception e) {
+                    total_amount += 1;
+                }
+            }
+            int random = new Random().nextInt(total_amount + 1) - 1;
+            total_amount = 0;
+            for(Object s : data.getConfig().getList("custom-mob-items-spawn-chance."+piece+"-enchants-include").toArray()) {
+                String[] sep = s.toString().replaceAll("[{|}]","").split("=");
+                int curr;
+                try {
+                    curr = Integer.parseInt(sep[1]);
+                } catch(Exception e) {
+                    curr = 1;
+                }
+                if(total_amount < random && (total_amount + curr) >= random) {
+                    chosenEnchant = Enchantment.getByKey(NamespacedKey.minecraft(sep[0].toLowerCase()));
+                    break;
+                }
+                total_amount += curr;
+            }
+
+            boolean allowed = true;
+            if(!data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts"))
+                for(List<Enchantment> enchantList : enchantmentConflict)
+                    if(allowed) {
+                        for(Enchantment currentEnchant : enchantList)
+                            if(chosenEnchant.equals(currentEnchant) || item.containsEnchantment(currentEnchant))
+                                allowed = false;
+                    } else {
+                        break;
+                    }
+            if (!allowed) {
+                j--;
+                continue;
+            }
+
+            int chosenLevel = 1;
+            if(data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-default-limits")){
+                chosenLevel = new Random().nextInt((int)Math.round(customArmorChance.get(diff).get("max-level") - 1)) + 1;
+            } else {
+                int maxlvl = (int)Math.round(customArmorChance.get(diff).get("max-level"));
+                if(maxlvl > chosenEnchant.getMaxLevel()) {
+                    chosenLevel = new Random().nextInt(chosenEnchant.getMaxLevel() - 1) + 1;
+                } else {
+                    chosenLevel = new Random().nextInt(maxlvl);
+                }
+            }
+            item.addUnsafeEnchantment(chosenEnchant, chosenLevel);
+            if(new Random().nextDouble() > chanceToEnchant)
+                break;
+        }
+        return item;
     }
 
     /** Closes all databases */
@@ -376,6 +481,14 @@ public class Affinity {
         if(mode.equalsIgnoreCase("experience-multiplier")) { return experienceMultiplier.get(diff); }
         if(mode.equalsIgnoreCase("double-loot-chance")) { return doubleLootChance.get(diff); }
         if(mode.equalsIgnoreCase("hunger-drain-chance")) { return hungerDrainChance.get(diff); }
+        if(mode.equalsIgnoreCase("chance-to-have-armor")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("chance-to-enchant-a-piece")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("weapon-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("helmet-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("chest-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("leggings-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("boots-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
+        if(mode.equalsIgnoreCase("armor-drop-chance")) { return (int) Math.round(customArmorChance.get(diff).get(mode)*100); }
         return -1;
     }
 

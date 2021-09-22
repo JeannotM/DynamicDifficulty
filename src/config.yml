@@ -126,3 +126,137 @@ difficulty:
     double-loot-chance: 5
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
+
+# Some of these features are experimental, change existing features or have a chance to reduce performance
+advanced-features:
+  # The 'auto-calculate' features will, add and remove min/max affinity from players depending on configured settings
+  # These WILL override existing min/max affinity settings.
+  auto-calculate-min-affinity: false
+  auto-calculate-max-affinity: false
+  custom-mob-items-spawn-chance: false
+
+# Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
+# Will use closest difficulty if no new values have been added for existing difficulties
+custom-mob-items-spawn-chance:
+  override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
+  override-enchant-conflicts: false # Allows conflicting enchants to occur on a single armor (E.g. Protection & Fire Protection)
+  includes-mobs:
+    - ZOMBIE
+    - SKELETON
+  weapons-include:
+    - WOODEN_SHOVEL
+    - GOLDEN_SHOVEL
+    - IRON_SHOVEL
+    - WOODEN_AXE
+    - GOLDEN_AXE
+    - IRON_AXE
+    - WOODEN_PICKAXE
+    - GOLDEN_PICKAXE
+    - IRON_PICKAXE
+    - WOODEN_SWORD
+    - GOLDEN_SWORD
+    - IRON_SWORD
+  armor-set-weight:
+    leather: 3706
+    gold: 4872
+    chain: 1290
+    iron: 127
+    diamond: 4
+    netherite: 1
+  # https://www.digminecraft.com/lists/enchantment_list_pc.php
+  helmet-enchants-include:
+    # - <ENCHANT_NAME>: WEIGHT, higher means more likely to occur, no value = weight of 1
+    - protection: 10
+    - blast_protection: 5
+    - fire_protection: 5
+    - projectile_protection: 5
+    - vanishing_curse
+    - binding_curse
+    - aqua_affinity: 2
+    - thorns
+    - respiration: 2
+    - unbreaking: 5
+  chestplate-enchants-include:
+    - protection: 10
+    - blast_protection: 5
+    - fire_protection: 5
+    - projectile_protection: 5
+    - vanishing_curse
+    - binding_curse
+    - thorns
+    - unbreaking: 5
+  leggings-enchants-include:
+    - protection: 10
+    - blast_protection: 5
+    - fire_protection: 5
+    - projectile_protection: 5
+    - vanishing_curse
+    - binding_curse
+    - thorns
+    - unbreaking: 5
+  boots-enchants-include:
+    - protection: 10
+    - blast_protection: 5
+    - fire_protection: 5
+    - projectile_protection: 5
+    - vanishing_curse
+    - binding_curse
+    - feather_falling: 5
+    - thorns
+    - frost_walker: 2
+    - soul_speed
+    - depth_strider: 2
+    - unbreaking: 5
+  weapon-enchants-include:
+    - sharpness: 10
+    - bane_of_arthropods: 5
+    - smite: 5
+    - fire_aspect: 2
+    - looting: 2
+    - knockback: 2
+    - sweeping: 2
+    - vanishing_curse
+    - binding_curse
+    - unbreaking: 5
+  bow-enchants-include:
+    - power: 10
+    - flame: 2
+    - infinity
+    - punch: 2
+    - vanishing_curse
+    - binding_curse
+    - unbreaking: 5
+  difficulties:
+    Easy:
+      max-enchants: 1
+      max-level: 1
+      chance-to-have-armor: 5.0
+      chance-to-enchant-a-piece: 15
+      armor-drop-chance: 10.0
+      weapon-chance: 1.0
+      helmet-chance: 100.0
+      chest-chance: 75.0
+      leggings-chance: 56.25
+      boots-chance: 42.19
+    Normal:
+      max-enchants: 2
+      max-level: 1
+      chance-to-have-armor: 15.0
+      chance-to-enchant-a-piece: 30
+      armor-drop-chance: 15.0
+      weapon-chance: 2.0
+      helmet-chance: 100.0
+      chest-chance: 75.0
+      leggings-chance: 56.25
+      boots-chance: 42.19
+    Hard:
+      max-enchants: 3
+      max-level: 2
+      chance-to-have-armor: 20.0
+      chance-to-enchant-a-piece: 45
+      armor-drop-chance: 20.0
+      weapon-chance: 5.0
+      helmet-chance: 100.0
+      chest-chance: 90.0
+      leggings-chance: 81.0
+      boots-chance: 72.9

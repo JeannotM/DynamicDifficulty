@@ -41,7 +41,6 @@ public class File implements SaveManager {
                     data.getDataFile().set(uuid + ".name", name);
                 }
             }
-            data.saveData();
         });
     }
 

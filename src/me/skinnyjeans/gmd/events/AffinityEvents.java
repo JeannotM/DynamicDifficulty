@@ -5,6 +5,7 @@ import me.skinnyjeans.gmd.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -22,10 +24,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class AffinityEvents extends Affinity implements Listener {
 
@@ -98,6 +97,83 @@ public class AffinityEvents extends Affinity implements Listener {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMobSpawn(CreatureSpawnEvent e) {
+//        if(!customArmorSpawnChance)
+//            e.getHandlers().unregister(m);
+
+        if(!data.getConfig().getStringList("custom-mob-items-spawn-chance.includes-mobs").contains(e.getEntity().getType().toString()))
+            return;
+
+//        List<SpawnReason> reasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL, SpawnReason.SPAWNER_EGG));
+//        if(customArmorSpawnChance && (reasons.contains(e.getSpawnReason()))) {
+            Player closestPlayer = null;
+            double distance = 512.0;
+            for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getName()).getPlayers()) {
+                if(e.getEntity().getLocation().distance(pl.getLocation()) < distance) {
+                    distance = e.getEntity().getLocation().distance(pl.getLocation());
+                    closestPlayer = pl;
+                }
+            }
+            String diff = calcDifficulty(closestPlayer.getUniqueId());
+            int rand = new Random().nextInt(chancePerArmor.get("total") + 1) -1;
+            int count = 0;
+            ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "gold", "chain", "iron", "diamond", "netherite"));
+            double chanceToEnchant = (calcPercentage(closestPlayer.getUniqueId(), "chance-to-enchant-a-piece") / 100.0 / 100.0);
+            if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "weapon-chance") / 100.0 / 100.0)) {
+                Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                    List<String> weapons = data.getConfig().getStringList("custom-mob-items-spawn-chance.weapons-include");
+                    ItemStack item = new ItemStack(Material.getMaterial(weapons.get(new Random().nextInt(weapons.size()) - 1)));
+                    e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                }));
+            }
+            if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0)) {
+                for(int i=0;i<6;i++) {
+                    int thisCount = count + chancePerArmor.get(array.get(i));
+                    Bukkit.broadcastMessage(count +" < "+ rand + " ("+(count < rand)+") && " + thisCount  +" >= "+ rand + " ("+(thisCount >= rand)+")");
+                    if(count < rand && thisCount >= rand) {
+                        String thisItem = array.get(i);
+                        double randomChance = new Random().nextDouble();
+                        if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "helmet-chance") / 100.0 / 100.0)) {
+                            Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_HELMET"));
+                                e.getEntity().getEquipment().setHelmet(calcEnchant(item, "helmet", diff, chanceToEnchant));
+//                                e.getEntity().getEquipment().setHelmetDropChance();
+                            }));
+                        }
+                        if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "chest-chance") / 100.0 / 100.0)) {
+                            Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_CHESTPLATE"));
+                                e.getEntity().getEquipment().setChestplate(calcEnchant(item, "chestplate", diff, chanceToEnchant));
+                            }));
+                        }
+                        if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "leggings-chance") / 100.0 / 100.0)) {
+                            Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_LEGGINGS"));
+                                e.getEntity().getEquipment().setLeggings(calcEnchant(item, "leggings", diff, chanceToEnchant));
+                            }));
+                        }
+                        if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "boots-chance") / 100.0 / 100.0)) {
+                            Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_BOOTS"));
+                                e.getEntity().getEquipment().setBoots(calcEnchant(item, "boots", diff, chanceToEnchant));
+                            }));
+                        }
+                        break;
+                    }
+                    count += chancePerArmor.get(array.get(i));
+                }
+            } else {
+                e.getEntity().getEquipment().setHelmet(null);
+                e.getEntity().getEquipment().setChestplate(null);
+                e.getEntity().getEquipment().setLeggings(null);
+                e.getEntity().getEquipment().setBoots(null);
+            }
+//        } else if(e.getSpawnReason().equals(SpawnReason.SPAWNER)) {
+//
+//        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -17,6 +17,7 @@ permissions:
       affinity.setmax: true
       affinity.delmax: true
       affinity.setmin: true
+      affinity.setmin: true
       affinity.delmin: true
       affinity.reload: true
       affinity.force-save: true

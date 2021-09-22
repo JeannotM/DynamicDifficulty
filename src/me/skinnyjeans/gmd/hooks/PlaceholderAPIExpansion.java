@@ -47,53 +47,59 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
-        if(identifier.equals("text_difficulty")){
-            if(usePrefix)
-                return affinity.getPrefix(player.getUniqueId());
-            return affinity.calcDifficulty(player.getUniqueId());
-        }
-        if(identifier.equals("affinity_points"))
-            return Integer.toString(affinity.getAffinity(player.getUniqueId()));
-        if(identifier.equals("world_text_difficulty")){
-            if(usePrefix)
-                return affinity.getPrefix(null);
-            return affinity.calcDifficulty(null);
-        }
-        if(identifier.equals("world_affinity_points"))
-            return Integer.toString(affinity.getAffinity(null));
-        if(identifier.equals("max_affinity"))
-            return Integer.toString(affinity.getVariable("max-affinity"));
-        if(identifier.equals("min_affinity"))
-            return Integer.toString(affinity.getVariable("min-affinity"));
+        try {
+            UUID uuid = null;
+            if(player != null)
+                uuid = player.getUniqueId();
 
+            if(identifier.equals("text_difficulty")){
+                if(usePrefix)
+                    return affinity.getPrefix(uuid);
+                return affinity.calcDifficulty(uuid);
+            }
+            if(identifier.equals("affinity_points"))
+                return Integer.toString(affinity.getAffinity(player.getUniqueId()));
+            if(identifier.equals("world_text_difficulty")){
+                if(usePrefix)
+                    return affinity.getPrefix(null);
+                return affinity.calcDifficulty(null);
+            }
+            if(identifier.equals("world_affinity_points"))
+                return Integer.toString(affinity.getAffinity(null));
+            if(identifier.equals("max_affinity"))
+                return Integer.toString(affinity.getVariable("max-affinity"));
+            if(identifier.equals("min_affinity"))
+                return Integer.toString(affinity.getVariable("min-affinity"));
+        } catch (NullPointerException e) { }
         return null;
     }
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier){
-        UUID uuid = null;
-        if(player != null)
-            uuid = player.getUniqueId();
+        try {
+            UUID uuid = null;
+            if(player != null)
+                uuid = player.getUniqueId();
 
-        if(identifier.equals("text_difficulty")){
-            if(usePrefix)
-                return affinity.getPrefix(uuid);
-            return affinity.calcDifficulty(uuid);
-        }
-        if(identifier.equals("affinity_points"))
-            return Integer.toString(affinity.getAffinity(player.getUniqueId()));
-        if(identifier.equals("world_text_difficulty")){
-            if(usePrefix)
-                return affinity.getPrefix(null);
-            return affinity.calcDifficulty(null);
-        }
-        if(identifier.equals("world_affinity_points"))
-            return Integer.toString(affinity.getAffinity(null));
-        if(identifier.equals("max_affinity"))
-            return Integer.toString(affinity.getVariable("max-affinity"));
-        if(identifier.equals("min_affinity"))
-            return Integer.toString(affinity.getVariable("min-affinity"));
-
+            if(identifier.equals("text_difficulty")){
+                if(usePrefix)
+                    return affinity.getPrefix(uuid);
+                return affinity.calcDifficulty(uuid);
+            }
+            if(identifier.equals("affinity_points"))
+                return Integer.toString(affinity.getAffinity(player.getUniqueId()));
+            if(identifier.equals("world_text_difficulty")){
+                if(usePrefix)
+                    return affinity.getPrefix(null);
+                return affinity.calcDifficulty(null);
+            }
+            if(identifier.equals("world_affinity_points"))
+                return Integer.toString(affinity.getAffinity(null));
+            if(identifier.equals("max_affinity"))
+                return Integer.toString(affinity.getVariable("max-affinity"));
+            if(identifier.equals("min_affinity"))
+                return Integer.toString(affinity.getVariable("min-affinity"));
+        } catch (NullPointerException e) { }
         return null;
     }
 }

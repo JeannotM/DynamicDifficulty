@@ -59,7 +59,7 @@ public class Main extends JavaPlugin {
 			}, 0L, 1200L);
 		}
 	}
-	
+
 	public void saveDataEveryFiveMinutes() {
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		scheduler.scheduleSyncRepeatingTask(this, () -> {
@@ -69,7 +69,7 @@ public class Main extends JavaPlugin {
 	}
 
 	/* To check a few settings and hooks */
-	public void checkData(){
+	public void checkData() {
 		if (!getConfig().getString("version").equals(Bukkit.getPluginManager().getPlugin("DynamicDifficulty").getDescription().getVersion()) || !getConfig().contains("version",true))
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] Your configuration file is not up to date. Please remove it or update it yourself, because I don't know how to do it with Java without deleting existing configs. Sorry :'(");
 

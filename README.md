@@ -254,6 +254,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Change player settings with chest GUI
 - [x] Stop certain mobs from following players on chosen difficulties
 - [x] selector support (@a, @p etc)
+- [x] Hunger Drain
 
 ## Possible Future Updates
 - [ ] per biome difficulty
@@ -261,7 +262,6 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [ ] promoted/demoted message
 - [ ] Export to DB / File
 - [ ] Prepare removal?
-- [ ] Hunger Drain
 - [ ] Mob armor spawn chance
 
 ## Extra thanks to:
