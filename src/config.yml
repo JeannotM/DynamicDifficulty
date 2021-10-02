@@ -23,11 +23,11 @@ starting-affinity: 500
 min-affinity: 0
 max-affinity: 1200
 
-# Mobs That Will Give Points From "pve-kill" when killed and if no custom value is given: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+# Mobs that will give affinity, Will use "pve-kill" if no value was specified: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # - MOBTYPE: <Affinity points>
 mobs-count-as-pve:
 - BLAZE: 4
-- CAVESPIDER: 3
+- CAVE_SPIDER: 3
 - CREEPER: 3
 - DROWNED
 - ENDER_DRAGON: 100
@@ -49,7 +49,7 @@ mobs-count-as-pve:
 - WITHER_SKELETON: 5
 - ZOMBIE
 
-# Blocks That Will Give Points From "block-mined" when mined and if no custom value is given: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# Blocks that will give affinity, Will use "block-mined" if no value was specified: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 # - BLOCKTYPE: <Affinity points>
 blocks:
 - ANCIENT_DEBRIS: 4
@@ -64,7 +64,7 @@ plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable BStats for DynamicDifficulty
   use-prefix: true
-  unload-leaving-player: true # Disable if you use a Vanish plugin
+  unload-leaving-player: false # Removes a few issues with not being able to find certain players, enabling it will also improve ram usage a little.
 
 saving-data:
   type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql
@@ -80,9 +80,9 @@ saving-data:
 
 # These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
 disabled-mobs:
-- WITHER
 - ENDER_DRAGON
 - ELDER_GUARDIAN
+- WITHER
 
 difficulty-modifiers:
   type: player # Supported: player, world
@@ -104,6 +104,7 @@ difficulty:
     hunger-drain-chance: 60
     experience-multiplier: 70
     double-loot-chance: 0
+    keep-inventory: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
     mobs-ignore-player:
@@ -115,6 +116,7 @@ difficulty:
     hunger-drain-chance: 80
     experience-multiplier: 90
     double-loot-chance: 0
+    keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
   Hard:
@@ -124,6 +126,7 @@ difficulty:
     hunger-drain-chance: 100
     experience-multiplier: 125
     double-loot-chance: 5
+    keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
 
@@ -136,26 +139,25 @@ advanced-features:
   custom-mob-items-spawn-chance: false
 
 # Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
-# Will use closest difficulty if no new values have been added for existing difficulties
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
   override-enchant-conflicts: false # Allows conflicting enchants to occur on a single armor (E.g. Protection & Fire Protection)
   includes-mobs:
-    - ZOMBIE
-    - SKELETON
+  - ZOMBIE
+  - SKELETON
   weapons-include:
-    - WOODEN_SHOVEL
-    - GOLDEN_SHOVEL
-    - IRON_SHOVEL
-    - WOODEN_AXE
-    - GOLDEN_AXE
-    - IRON_AXE
-    - WOODEN_PICKAXE
-    - GOLDEN_PICKAXE
-    - IRON_PICKAXE
-    - WOODEN_SWORD
-    - GOLDEN_SWORD
-    - IRON_SWORD
+  - WOODEN_SHOVEL
+  - GOLDEN_SHOVEL
+  - IRON_SHOVEL
+  - WOODEN_AXE
+  - GOLDEN_AXE
+  - IRON_AXE
+  - WOODEN_PICKAXE
+  - GOLDEN_PICKAXE
+  - IRON_PICKAXE
+  - WOODEN_SWORD
+  - GOLDEN_SWORD
+  - IRON_SWORD
   armor-set-weight:
     leather: 3706
     gold: 4872
@@ -165,67 +167,67 @@ custom-mob-items-spawn-chance:
     netherite: 1
   # https://www.digminecraft.com/lists/enchantment_list_pc.php
   helmet-enchants-include:
-    # - <ENCHANT_NAME>: WEIGHT, higher means more likely to occur, no value = weight of 1
-    - protection: 10
-    - blast_protection: 5
-    - fire_protection: 5
-    - projectile_protection: 5
-    - vanishing_curse
-    - binding_curse
-    - aqua_affinity: 2
-    - thorns
-    - respiration: 2
-    - unbreaking: 5
+  #- <ENCHANT_NAME>: WEIGHT, higher means more likely to occur, no value = weight of 1
+  - protection: 10
+  - blast_protection: 5
+  - fire_protection: 5
+  - projectile_protection: 5
+  - vanishing_curse
+  - binding_curse
+  - aqua_affinity: 2
+  - thorns
+  - respiration: 2
+  - unbreaking: 5
   chestplate-enchants-include:
-    - protection: 10
-    - blast_protection: 5
-    - fire_protection: 5
-    - projectile_protection: 5
-    - vanishing_curse
-    - binding_curse
-    - thorns
-    - unbreaking: 5
+  - protection: 10
+  - blast_protection: 5
+  - fire_protection: 5
+  - projectile_protection: 5
+  - vanishing_curse
+  - binding_curse
+  - thorns
+  - unbreaking: 5
   leggings-enchants-include:
-    - protection: 10
-    - blast_protection: 5
-    - fire_protection: 5
-    - projectile_protection: 5
-    - vanishing_curse
-    - binding_curse
-    - thorns
-    - unbreaking: 5
+  - protection: 10
+  - blast_protection: 5
+  - fire_protection: 5
+  - projectile_protection: 5
+  - vanishing_curse
+  - binding_curse
+  - thorns
+  - unbreaking: 5
   boots-enchants-include:
-    - protection: 10
-    - blast_protection: 5
-    - fire_protection: 5
-    - projectile_protection: 5
-    - vanishing_curse
-    - binding_curse
-    - feather_falling: 5
-    - thorns
-    - frost_walker: 2
-    - soul_speed
-    - depth_strider: 2
-    - unbreaking: 5
+  - protection: 10
+  - blast_protection: 5
+  - fire_protection: 5
+  - projectile_protection: 5
+  - vanishing_curse
+  - binding_curse
+  - feather_falling: 5
+  - thorns
+  - frost_walker: 2
+  - soul_speed
+  - depth_strider: 2
+  - unbreaking: 5
   weapon-enchants-include:
-    - sharpness: 10
-    - bane_of_arthropods: 5
-    - smite: 5
-    - fire_aspect: 2
-    - looting: 2
-    - knockback: 2
-    - sweeping: 2
-    - vanishing_curse
-    - binding_curse
-    - unbreaking: 5
+  - sharpness: 10
+  - bane_of_arthropods: 5
+  - smite: 5
+  - fire_aspect: 2
+  - looting: 2
+  - knockback: 2
+  - sweeping: 2
+  - vanishing_curse
+  - binding_curse
+  - unbreaking: 5
   bow-enchants-include:
-    - power: 10
-    - flame: 2
-    - infinity
-    - punch: 2
-    - vanishing_curse
-    - binding_curse
-    - unbreaking: 5
+  - power: 10
+  - flame: 2
+  - infinity
+  - punch: 2
+  - vanishing_curse
+  - binding_curse
+  - unbreaking: 5
   difficulties:
     Easy:
       max-enchants: 1
@@ -260,3 +262,74 @@ custom-mob-items-spawn-chance:
       chest-chance: 90.0
       leggings-chance: 81.0
       boots-chance: 72.9
+
+# This section is to calculate the min & max affinity of players automatically, WILL OVERRIDE existing values.
+calculating-affinity:
+  # this setting whether to check every minute or if a player equips/holds an item.
+  check-equipment: every-5-minutes # Supported: every-minute, every-5-minutes, on-equip
+  min-affinity-changes:
+    affinity-limit: 500
+    points-per-minute: -1
+    block-mined: 1
+    player-hit: 0
+    pvp-kill: 1
+    pve-kill: 5
+    death: -50
+    items-held-or-worn:
+    - IRON_HELMET: 5
+    - IRON_CHESTPLATE: 10
+    - IRON_LEGGINGS: 5
+    - IRON_BOOTS: 5
+    - DIAMOND_HELMET: 10
+    - DIAMOND_CHESTPLATE: 15
+    - DIAMOND_LEGGINGS: 10
+    - DIAMOND_BOOTS: 10
+    - NETHERITE_HELMET: 10
+    - NETHERITE_CHESTPLATE: 15
+    - NETHERITE_LEGGINGS: 10
+    - NETHERITE_BOOTS: 10
+    - ELYTRA: 50
+    - IRON_SWORD: 1
+    - IRON_PICKAXE: 1
+    - IRON_AXE: 1
+    - DIAMOND_SWORD: 3
+    - DIAMOND_PICKAXE: 3
+    - DIAMOND_AXE: 3
+    - NETHERITE_SWORD: 10
+    - NETHERITE_PICKAXE: 10
+    - NETHERITE_AXE: 10
+    - GOLDEN_APPLE: 10
+    - ENCHANTED_GOLDEN_APPLE: 20
+  max-affinity-changes:
+    affinity-limit: 700
+    points-per-minute: -3
+    block-mined: -2
+    player-hit: 1
+    pvp-kill: -5
+    pve-kill: -1
+    death: 100
+    items-held-or-worn:
+    - IRON_HELMET: -1
+    - IRON_CHESTPLATE: -2
+    - IRON_LEGGINGS: -1
+    - IRON_BOOTS: -1
+    - DIAMOND_HELMET: -3
+    - DIAMOND_CHESTPLATE: -4
+    - DIAMOND_LEGGINGS: -3
+    - DIAMOND_BOOTS: -3
+    - NETHERITE_HELMET: -5
+    - NETHERITE_CHESTPLATE: -8
+    - NETHERITE_LEGGINGS: -5
+    - NETHERITE_BOOTS: -5
+    - ELYTRA: -10
+    - IRON_SWORD: -1
+    - IRON_PICKAXE: -1
+    - IRON_AXE: -1
+    - DIAMOND_SWORD: -3
+    - DIAMOND_PICKAXE: -3
+    - DIAMOND_AXE: -3
+    - NETHERITE_SWORD: -5
+    - NETHERITE_PICKAXE: -5
+    - NETHERITE_AXE: -5
+    - GOLDEN_APPLE: -5
+    - ENCHANTED_GOLDEN_APPLE: -20

@@ -15,8 +15,9 @@ import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.Locale;
 
@@ -39,7 +40,7 @@ public class Main extends JavaPlugin {
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
 
-		saveDataEveryFiveMinutes();
+		saveDataEveryFewMinutes();
 		onInterval();
 	}
 	
@@ -52,20 +53,18 @@ public class Main extends JavaPlugin {
 	
 	public void onInterval() {
 		if(data.getConfig().getInt("points-per-minute") != 0) {
-			BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-			scheduler.scheduleSyncRepeatingTask(this, () -> {
+			Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
 				if (Bukkit.getOnlinePlayers().size() > 0)
 					af.onInterval();
 			}, 0L, 1200L);
 		}
 	}
 
-	public void saveDataEveryFiveMinutes() {
-		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-		scheduler.scheduleSyncRepeatingTask(this, () -> {
+	public void saveDataEveryFewMinutes() {
+		Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
 			if (Bukkit.getOnlinePlayers().size() > 0)
 				af.saveData();
-		}, 0L, 6000L);
+		}, 0L, 12000L);
 	}
 
 	/* To check a few settings and hooks */

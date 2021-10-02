@@ -54,137 +54,102 @@ public class SQL implements SaveManager {
     }
 
     public void addColumnsNotExists() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
-                                    "ADD COLUMN MinAffinity INT DEFAULT -1");
-                            ps.executeUpdate();
-                        } catch(Exception e) {}
-                    }
-                });
-            }
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            try {
+                PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
+                        "ADD COLUMN MinAffinity INT DEFAULT -1");
+                ps.executeUpdate();
+            } catch(Exception e) {}
+        }));
     }
 
     public void createTable() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if(isConnected()) {
-                                PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
-                                        "(UUID VARCHAR(60)," +
-                                        "Name VARCHAR(20), " +
-                                        "Affinity INT DEFAULT 500, " +
-                                        "MaxAffinity INT DEFAULT -1, " +
-                                        "MinAffinity INT DEFAULT -1, " +
-                                        "PRIMARY KEY(UUID))");
-                                ps.execute();
-                            }
-                        } catch(SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            try {
+                if(isConnected()) {
+                    PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
+                            "(UUID VARCHAR(60)," +
+                            "Name VARCHAR(20), " +
+                            "Affinity INT DEFAULT 500, " +
+                            "MaxAffinity INT DEFAULT -1, " +
+                            "MinAffinity INT DEFAULT -1, " +
+                            "PRIMARY KEY(UUID))");
+                    ps.execute();
+                }
+            } catch(SQLException e) {
+                e.printStackTrace();
             }
-        });
+        }));
     }
 
     @Override
     public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
-        playerExists(uuid, new findBooleanCallback() {
-            @Override
-            public void onQueryDone(boolean r) {
-                try {
-                    if(isConnected()) {
-                        PreparedStatement ps;
-                        if(r) {
-                            ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
-                        } else {
-                            ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
-                            ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
-                        }
-                        ps.setInt(1, af);
-                        ps.setInt(2, maxAf);
-                        ps.setInt(3, minAf);
-                        ps.setString(4, (uuid.equals("world")  ? "world" : uuid));
-                        ps.executeUpdate();
+        playerExists(uuid, r -> {
+            try {
+                if(isConnected()) {
+                    PreparedStatement ps;
+                    if(r) {
+                        ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
+                    } else {
+                        ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
+                        ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
                     }
-                } catch(SQLException e) {
-                    e.printStackTrace();
+                    ps.setInt(1, af);
+                    ps.setInt(2, maxAf);
+                    ps.setInt(3, minAf);
+                    ps.setString(4, (uuid.equals("world")  ? "world" : uuid));
+                    ps.executeUpdate();
                 }
+            } catch(SQLException e) {
+                e.printStackTrace();
             }
         });
     }
 
     @Override
     public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        List<Integer> tmpArray = new ArrayList<>();
-                        try {
-                            if(isConnected()) {
-                                PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
-                                ps.setString(1, uuid);
-                                ResultSet result = ps.executeQuery();
-                                if(result.next()){
-                                    tmpArray.add(result.getInt("Affinity"));
-                                    tmpArray.add(result.getInt("MaxAffinity"));
-                                    tmpArray.add(result.getInt("MinAffinity"));
-                                    callback.onQueryDone(tmpArray);
-                                    return;
-                                }
-                            }
-                        } catch(SQLException e) {
-                            e.printStackTrace();
-                        }
-                        tmpArray.add(0, -1);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            List<Integer> tmpArray = new ArrayList<>();
+            try {
+                if(isConnected()) {
+                    PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
+                    ps.setString(1, uuid);
+                    ResultSet result = ps.executeQuery();
+                    if(result.next()){
+                        tmpArray.add(result.getInt("Affinity"));
+                        tmpArray.add(result.getInt("MaxAffinity"));
+                        tmpArray.add(result.getInt("MinAffinity"));
                         callback.onQueryDone(tmpArray);
                         return;
                     }
-                });
+                }
+            } catch(SQLException e) {
+                e.printStackTrace();
             }
-        });
+            tmpArray.add(0, -1);
+            callback.onQueryDone(tmpArray);
+            return;
+        }));
     }
 
     @Override
     public void playerExists(String uuid, final findBooleanCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if(isConnected()) {
-                                PreparedStatement ps = getConnection().prepareStatement("SELECT * FROM "+tbName+" WHERE UUID=?");
-                                ps.setString(1, uuid);
-                                ResultSet result = ps.executeQuery();
-                                if(result.next()){
-                                    callback.onQueryDone(true);
-                                    return;
-                                }
-                            }
-                        } catch(SQLException e) {
-                            e.printStackTrace();
-                        }
-                        callback.onQueryDone(false);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            try {
+                if(isConnected()) {
+                    PreparedStatement ps = getConnection().prepareStatement("SELECT * FROM "+tbName+" WHERE UUID=?");
+                    ps.setString(1, uuid);
+                    ResultSet result = ps.executeQuery();
+                    if(result.next()){
+                        callback.onQueryDone(true);
+                        return;
                     }
-                });
+                }
+            } catch(SQLException e) {
+                e.printStackTrace();
             }
-        });
+            callback.onQueryDone(false);
+        }));
     }
 
     @Override

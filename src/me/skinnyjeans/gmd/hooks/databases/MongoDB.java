@@ -51,28 +51,25 @@ public class MongoDB implements SaveManager {
 
     @Override
     public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
-        playerExists(uuid, new findBooleanCallback() {
-            @Override
-            public void onQueryDone(boolean r) {
-                try {
-                    if(isConnected()) {
-                        DBObject obj = new BasicDBObject("_id", uuid).append("Affinity", af)
-                                .append("MinAffinity", minAf).append("MaxAffinity", maxAf);
-                        try {
-                            ((BasicDBObject) obj).append("Name", (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
-                        } catch(Exception e) {
-                            ((BasicDBObject) obj).append("Name", getConnection().find(new BasicDBObject("_id", uuid)).next().get("Name"));
-                        }
-
-                        if(r) {
-                            getConnection().update(new BasicDBObject("_id", uuid), obj);
-                        } else {
-                            getConnection().insert(obj);
-                        }
+        playerExists(uuid, r -> {
+            try {
+                if(isConnected()) {
+                    DBObject obj = new BasicDBObject("_id", uuid).append("Affinity", af)
+                            .append("MinAffinity", minAf).append("MaxAffinity", maxAf);
+                    try {
+                        ((BasicDBObject) obj).append("Name", (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+                    } catch(Exception e) {
+                        ((BasicDBObject) obj).append("Name", getConnection().find(new BasicDBObject("_id", uuid)).next().get("Name"));
                     }
-                } catch(Exception e) {
-                    e.printStackTrace();
+
+                    if(r) {
+                        getConnection().update(new BasicDBObject("_id", uuid), obj);
+                    } else {
+                        getConnection().insert(obj);
+                    }
                 }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         });
     }

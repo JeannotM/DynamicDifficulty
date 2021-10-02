@@ -46,19 +46,11 @@ public class AffinityCommands implements CommandExecutor {
                 if(msg == "" && args.length >= 2 && name != null && name != "") {
                     if (name.equalsIgnoreCase("world")) {
                         arg1 = "world";
-                    } else if (af.getPlayerUUID(name) != null) {
-                        if(af.getVariable("unload-player") == -1) {
-                            if(af.getAffinity(af.getPlayerUUID(name)) != -1) {
-                                arg1 = name;
-                            } else {
-                                msg = name + " hasn't been online yet!";
-                            }
-                        } else if (Bukkit.getOfflinePlayer(af.getPlayerUUID(name)).isOnline()) {
-                            arg1 = Bukkit.getPlayer(name).getName();
-                        }
-                    }
-                    if(arg1 == null && msg.equals(""))
+                    } else if(af.getPlayerUUID(name) != null && Bukkit.getOfflinePlayer(af.getPlayerUUID(name)).isOnline()) {
+                        arg1 = name;
+                    } else {
                         msg = name + " needs to be online!";
+                    }
                 }
 
                 if(msg == "" && args.length >= 3 && args[2] != null && args[2] != "") {
@@ -125,7 +117,7 @@ public class AffinityCommands implements CommandExecutor {
             if(!user.equalsIgnoreCase("world"))
                 uuid = af.getPlayerUUID(user);
 
-            amount = af.calcAffinity(uuid, amount);
+            amount = af.calcAffinity(amount);
             af.setAffinity(uuid, amount);
             return user+"'s set to "+ af.calcDifficulty(uuid)+" Difficulty with "+amount+" Affinity points";
         } catch(Exception e) {
@@ -172,7 +164,7 @@ public class AffinityCommands implements CommandExecutor {
                 return "The world doesn't need a Max Affinity!";
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(null, amount);
+            amount = af.calcAffinity(amount);
             af.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
         } catch(Exception e) {
@@ -219,7 +211,7 @@ public class AffinityCommands implements CommandExecutor {
                 return "The world doesn't need a Min Affinity!";
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(null, amount);
+            amount = af.calcAffinity(amount);
             af.setMinAffinity(uuid, amount);
             return "Set the Min Affinity to "+amount+" for "+user;
         } catch(Exception e) {

@@ -48,9 +48,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
         try {
-            UUID uuid = null;
-            if(player != null)
-                uuid = player.getUniqueId();
+            UUID uuid = (player != null) ? player.getUniqueId() : null;
 
             if(identifier.equals("text_difficulty")){
                 if(usePrefix)
@@ -77,9 +75,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, String identifier){
         try {
-            UUID uuid = null;
-            if(player != null)
-                uuid = player.getUniqueId();
+            UUID uuid = (player != null) ? player.getUniqueId() : null;
 
             if(identifier.equals("text_difficulty")){
                 if(usePrefix)
