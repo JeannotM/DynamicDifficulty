@@ -64,7 +64,8 @@ plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable BStats for DynamicDifficulty
   use-prefix: true
-  unload-leaving-player: false # Removes a few issues with not being able to find certain players, enabling it will also improve ram usage a little.
+  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity.
+  unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
 
 saving-data:
   type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql
@@ -146,18 +147,18 @@ custom-mob-items-spawn-chance:
   - ZOMBIE
   - SKELETON
   weapons-include:
-  - WOODEN_SHOVEL
-  - GOLDEN_SHOVEL
-  - IRON_SHOVEL
-  - WOODEN_AXE
-  - GOLDEN_AXE
-  - IRON_AXE
-  - WOODEN_PICKAXE
-  - GOLDEN_PICKAXE
-  - IRON_PICKAXE
-  - WOODEN_SWORD
-  - GOLDEN_SWORD
-  - IRON_SWORD
+  - WOODEN_SHOVEL: 200
+  - GOLDEN_SHOVEL: 50
+  - IRON_SHOVEL: 5
+  - WOODEN_AXE: 200
+  - GOLDEN_AXE: 50
+  - IRON_AXE: 5
+  - WOODEN_PICKAXE: 200
+  - GOLDEN_PICKAXE: 50
+  - IRON_PICKAXE: 5
+  - WOODEN_SWORD: 200
+  - GOLDEN_SWORD: 50
+  - IRON_SWORD: 5
   armor-set-weight:
     leather: 3706
     gold: 4872
@@ -268,13 +269,14 @@ calculating-affinity:
   # this setting whether to check every minute or if a player equips/holds an item.
   check-equipment: every-5-minutes # Supported: every-minute, every-5-minutes, on-equip
   min-affinity-changes:
-    affinity-limit: 500
-    points-per-minute: -1
+    # Affinity limit is counted from the min-affinity set at the top (0 + 600 = 600)
+    affinity-limit: 600
+    points-per-minute: 1
     block-mined: 1
     player-hit: 0
-    pvp-kill: 1
-    pve-kill: 5
-    death: -50
+    pvp-kill: 5
+    pve-kill: 1
+    death: -100
     items-held-or-worn:
     - IRON_HELMET: 5
     - IRON_CHESTPLATE: 10
@@ -288,7 +290,7 @@ calculating-affinity:
     - NETHERITE_CHESTPLATE: 15
     - NETHERITE_LEGGINGS: 10
     - NETHERITE_BOOTS: 10
-    - ELYTRA: 50
+    - ELYTRA: 20
     - IRON_SWORD: 1
     - IRON_PICKAXE: 1
     - IRON_AXE: 1
@@ -301,11 +303,12 @@ calculating-affinity:
     - GOLDEN_APPLE: 10
     - ENCHANTED_GOLDEN_APPLE: 20
   max-affinity-changes:
-    affinity-limit: 700
-    points-per-minute: -3
-    block-mined: -2
+    # Affinity limit is counted from the max-affinity set at the top (1200 - 550 = 650)
+    affinity-limit: 550
+    points-per-minute: -2
+    block-mined: -1
     player-hit: 1
-    pvp-kill: -5
+    pvp-kill: -4
     pve-kill: -1
     death: 100
     items-held-or-worn:

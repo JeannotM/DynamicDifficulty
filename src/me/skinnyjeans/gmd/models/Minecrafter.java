@@ -21,15 +21,18 @@ public class Minecrafter {
     public String getName() { return name; }
 
     public void addAffinity(int value) { setAffinity(value + affinity); }
+    public void addMinAffinity(int value, int limit) { setMinAffinity(Math.min(limit, value + minAffinity)); }
+    public void addMaxAffinity(int value, int limit) { setMaxAffinity(Math.max(limit, value * -1 + maxAffinity)); }
+
     public void setMinAffinity(int value) {
-        if(maxAffinity != -1 && minAffinity != -1 && maxAffinity < minAffinity) {
+        if(maxAffinity != -1 && minAffinity != -1 && minAffinity > maxAffinity) {
             minAffinity = maxAffinity;
         } else {
             minAffinity = value;
         }
     }
     public void setMaxAffinity(int value) {
-        if(maxAffinity != -1 && minAffinity != -1 && maxAffinity < minAffinity) {
+        if(maxAffinity != -1 && minAffinity != -1 && minAffinity > maxAffinity) {
             maxAffinity = minAffinity;
         } else {
             maxAffinity = value;

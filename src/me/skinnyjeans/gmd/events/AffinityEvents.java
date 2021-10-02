@@ -18,7 +18,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -40,6 +39,12 @@ public class AffinityEvents extends Affinity implements Listener {
                 e.setKeepLevel(true);
                 e.getDrops().clear();
             }
+            if(calcMaxAffinity)
+                playerList.get(e.getEntity().getUniqueId())
+                        .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.death"), maxAffinityLimit);
+            if(calcMinAffinity)
+                playerList.get(e.getEntity().getUniqueId())
+                        .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.death"), minAffinityLimit);
         }
     }
 
@@ -51,8 +56,20 @@ public class AffinityEvents extends Affinity implements Listener {
                     UUID uuid = e.getEntity().getKiller().getUniqueId();
                     if (onPVPKill != 0 && e.getEntity() instanceof Player) {
                         addAmountOfAffinity(uuid, onPVPKill);
+                        if(calcMaxAffinity)
+                            playerList.get(uuid)
+                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.pvp-kill"), maxAffinityLimit);
+                        if(calcMinAffinity)
+                            playerList.get(uuid)
+                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.pvp-kill"), minAffinityLimit);
                     } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
                         addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
+                        if(calcMaxAffinity)
+                            playerList.get(uuid)
+                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.pve-kill"), maxAffinityLimit);
+                        if(calcMinAffinity)
+                            playerList.get(uuid)
+                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.pve-kill"), minAffinityLimit);
                     }
 
                     if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
@@ -74,8 +91,15 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
             if (blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
                 if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || data.getConfig().getBoolean("silk-touch-allowed"))
-                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
+                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                         addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
+                        if(calcMaxAffinity)
+                            playerList.get(e.getPlayer().getUniqueId())
+                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.block-mined"), maxAffinityLimit);
+                        if(calcMinAffinity)
+                            playerList.get(e.getPlayer().getUniqueId())
+                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.block-mined"), minAffinityLimit);
+                    }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -83,18 +107,23 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
-            if(prey instanceof Player) {
-                if (((HumanEntity)prey).isBlocking()) { return; }
-            }
+            if (((HumanEntity)prey).isBlocking()) { return; }
             try {
                 if (prey instanceof Player) {
-                    if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString())) {
+                    if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString()) && !ignoreMobs.contains(hunter.getEntityId())) {
                         UUID uuid = prey.getUniqueId();
                         addAmountOfAffinity(uuid, onPlayerHit);
                         double dam = e.getFinalDamage() * calcPercentage(uuid, "damage-done-by-mobs") / 100.0;
                         e.setDamage(dam);
+
+                        if(calcMaxAffinity)
+                            playerList.get(prey.getUniqueId())
+                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.player-hit"), maxAffinityLimit);
+                        if(calcMinAffinity)
+                            playerList.get(prey.getUniqueId())
+                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.player-hit"), minAffinityLimit);
                     }
-                } else if (hunter instanceof Player && !disabledMobs.contains(prey.getType().toString())) {
+                } else if (hunter instanceof Player && !disabledMobs.contains(prey.getType().toString()) && !ignoreMobs.contains(prey.getEntityId())) {
                     double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
                     e.setDamage(dam);
                     if(!mobsOverrideIgnore.contains(prey.getEntityId()))
@@ -111,8 +140,9 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!data.getConfig().getStringList("custom-mob-items-spawn-chance.includes-mobs").contains(e.getEntity().getType().toString()))
             return;
 
-        List<SpawnReason> reasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL));
-        if(customArmorSpawnChance && (reasons.contains(e.getSpawnReason()))) {
+        List<SpawnReason> naturalReasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL));
+        List<SpawnReason> spawnReasons = new ArrayList<>(Arrays.asList(SpawnReason.SPAWNER_EGG, SpawnReason.SPAWNER, SpawnReason.DISPENSE_EGG));
+        if(customArmorSpawnChance && (naturalReasons.contains(e.getSpawnReason()))) {
             Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
                 Player closestPlayer = null;
                 double distance = 512.0;
@@ -129,23 +159,27 @@ public class AffinityEvents extends Affinity implements Listener {
                 double chanceToEnchant = (calcPercentage(closestPlayer.getUniqueId(), "chance-to-enchant-a-piece") / 100.0 / 100.0);
                 if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "weapon-chance") / 100.0 / 100.0)) {
                     ArrayList<Material> ranged = new ArrayList<>(Arrays.asList(Material.BOW, Material.CROSSBOW));
-                    if(ranged.contains(e.getEntity().getEquipment().getItemInMainHand().getType())) {
+                    if (ranged.contains(e.getEntity().getEquipment().getItemInMainHand().getType())) {
                         ItemStack item = new ItemStack(e.getEntity().getEquipment().getItemInMainHand().getType());
                         e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "bow", diff, chanceToEnchant));
                     } else {
-                        List<String> weapons = data.getConfig().getStringList("custom-mob-items-spawn-chance.weapons-include");
-                        ItemStack item = new ItemStack(Material.getMaterial(weapons.get(new Random().nextInt(weapons.size()) - 1)));
-                        e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                        for (int i = 0; i < customSpawnWeapons.size(); i++) {
+                            int thisCount = count + chancePerArmor.get(customSpawnWeapons.get(i));
+                            if (count < rand && thisCount >= rand) {
+                                ItemStack item = new ItemStack(Material.getMaterial(customSpawnWeapons.get(i)));
+                                e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                            }
+                        }
+                        count = 0;
                     }
                 }
                 if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0)) {
                     for(int i=0;i<6;i++) {
-                        Player finalClosestPlayer = closestPlayer;
                         int thisCount = count + chancePerArmor.get(array.get(i));
                         if(count < rand && thisCount >= rand) {
                             String thisItem = array.get(i);
                             double randomChance = new Random().nextDouble();
-                            float armorDropChance = (float) calcPercentage(finalClosestPlayer.getUniqueId(), "armor-drop-chance") / 100 / 100;
+                            float armorDropChance = (float) calcPercentage(closestPlayer.getUniqueId(), "armor-drop-chance") / 100 / 100;
                             if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "helmet-chance") / 100.0 / 100.0)) {
                                 ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_HELMET"));
                                 e.getEntity().getEquipment().setHelmet(calcEnchant(item, "helmet", diff, chanceToEnchant));
@@ -177,8 +211,9 @@ public class AffinityEvents extends Affinity implements Listener {
                     e.getEntity().getEquipment().setBoots(null);
                 }
             }));
-        } else if(e.getSpawnReason().equals(SpawnReason.SPAWNER)) {
-
+        } else if(spawnReasons.contains(e.getSpawnReason())) {
+            if(data.getConfig().getBoolean("plugin-support.no-changes-to-spawned-mobs", false))
+                ignoreMobs.add(e.getEntity().getEntityId());
         }
     }
 
@@ -191,7 +226,7 @@ public class AffinityEvents extends Affinity implements Listener {
                     if(new Random().nextDouble() > (drainChance / 100.0))
                         e.setCancelled(true);
             }
-        }catch(NullPointerException er){ return; }
+        }catch(NullPointerException er){ }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -202,7 +237,7 @@ public class AffinityEvents extends Affinity implements Listener {
                     if(effects.contains(e.getModifiedType()))
                         if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
                             e.setCancelled(true);
-        }catch(NullPointerException er){ return; }
+        }catch(NullPointerException er){ }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -210,9 +245,9 @@ public class AffinityEvents extends Affinity implements Listener {
         try {
             if(e.getTarget() instanceof Player)
                 if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
-                    if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()))
+                    if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
                         e.setCancelled(true);
-        }catch(NullPointerException er){ return; }
+        }catch(NullPointerException er){ }
     }
 
     @EventHandler
@@ -221,15 +256,14 @@ public class AffinityEvents extends Affinity implements Listener {
         Player usr = e.getPlayer();
         if(!playerList.containsKey(uuid)) {
             SQL.getAffinityValues(uuid.toString(), r -> {
+                Minecrafter mc = new Minecrafter(uuid, usr.getName());
                 if (r.get(0) == -1) {
-                    Minecrafter mc = new Minecrafter(uuid, usr.getName());
                     mc.setAffinity(startAffinity);
                     mc.setMaxAffinity(-1);
                     mc.setMinAffinity(-1);
                     playerList.put(uuid, mc);
                     SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
                 } else {
-                    Minecrafter mc = new Minecrafter(uuid, usr.getName());
                     mc.setAffinity(r.get(0));
                     mc.setMaxAffinity(r.get(1));
                     mc.setMinAffinity(r.get(2));
@@ -245,7 +279,7 @@ public class AffinityEvents extends Affinity implements Listener {
         UUID uuid = e.getPlayer().getUniqueId();
         Minecrafter pl = playerList.get(uuid);
         SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
-        if(data.getConfig().getBoolean("plugin-support.unload-leaving-player", true)) {
+        if(data.getConfig().getBoolean("plugin-support.unload-leaving-player", false)) {
             playerList.remove(uuid);
             playersUUID.remove(e.getPlayer().getName());
         }
@@ -253,25 +287,30 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if(equipmentCheck.equalsIgnoreCase("on-equip") && (calcMinAffinity || calcMaxAffinity)) {
-//            if(calcMaxAffinity) {
-//                if(armorWorn.containsKey(e.getCurrentItem().getType().toString())) {
-//                    if (e.getSlotType().equals(InventoryType.SlotType.ARMOR)) {
-//                    }
-//                }
-//            }
-//            if(calcMinAffinity) {
-//                if(armorWorn.containsKey(e.getCurrentItem().getType().toString())) {
-//                    if (e.getSlotType().equals(InventoryType.SlotType.ARMOR)) {
-//                    }
-//                }
-//            }
+        if (e.getCurrentItem() == null)
+            return;
 
+        if(equipmentCheck.equalsIgnoreCase("on-equip") && (calcMinAffinity || calcMaxAffinity)) {
+            if(calcMaxAffinity) {
+                if(maxAffinityListItems.contains(e.getCurrentItem().getType().toString())) {
+                    Minecrafter mc = playerList.get(e.getWhoClicked().getUniqueId());
+                    if(mc.getMaxAffinity() == -1)
+                        mc.setMaxAffinity(maxAffinity);
+                    mc.addMaxAffinity(maxAffinityItems.get(e.getCurrentItem().getType().toString()), maxAffinityLimit);
+                }
+            }
+
+            if(calcMinAffinity) {
+                if(minAffinityListItems.contains(e.getCurrentItem().getType().toString())) {
+                    Minecrafter mc = playerList.get(e.getWhoClicked().getUniqueId());
+                    if(mc.getMinAffinity() == -1)
+                        mc.setMinAffinity(minAffinity);
+                    mc.addMinAffinity(minAffinityItems.get(e.getCurrentItem().getType().toString()), minAffinityLimit);
+                }
+            }
         }
 
         if(!e.getView().getTitle().contains("DynamicDifficulty"))
-            return;
-        if (e.getCurrentItem() == null)
             return;
         if(e.getCurrentItem().getItemMeta() == null)
             return;
