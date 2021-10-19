@@ -21,7 +21,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -42,11 +41,9 @@ public class AffinityEvents extends Affinity implements Listener {
                 e.getDrops().clear();
             }
             if(calcMaxAffinity)
-                playerList.get(e.getEntity().getUniqueId())
-                        .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.death"), maxAffinityLimit);
+                addAmountOfMaxAffinity(e.getEntity().getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.death"));
             if(calcMinAffinity)
-                playerList.get(e.getEntity().getUniqueId())
-                        .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.death"), minAffinityLimit);
+                addAmountOfMinAffinity(e.getEntity().getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.death"));
         }
     }
 
@@ -59,19 +56,15 @@ public class AffinityEvents extends Affinity implements Listener {
                     if (e.getEntity() instanceof Player) {
                         addAmountOfAffinity(uuid, onPVPKill);
                         if(calcMaxAffinity)
-                            playerList.get(uuid)
-                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.pvp-kill"), maxAffinityLimit);
+                            addAmountOfMaxAffinity(uuid, data.getConfig().getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
                         if(calcMinAffinity)
-                            playerList.get(uuid)
-                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.pvp-kill"), minAffinityLimit);
+                            addAmountOfMinAffinity(uuid, data.getConfig().getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
                     } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
                         addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
                         if(calcMaxAffinity)
-                            playerList.get(uuid)
-                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.pve-kill"), maxAffinityLimit);
+                            addAmountOfMaxAffinity(uuid, data.getConfig().getInt("calculating-affinity.max-affinity-changes.pve-kill"));
                         if(calcMinAffinity)
-                            playerList.get(uuid)
-                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.pve-kill"), minAffinityLimit);
+                            addAmountOfMinAffinity(uuid, data.getConfig().getInt("calculating-affinity.min-affinity-changes.pve-kill"));
                     }
 
                     if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
@@ -96,11 +89,9 @@ public class AffinityEvents extends Affinity implements Listener {
                     if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                         addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
                         if(calcMaxAffinity)
-                            playerList.get(e.getPlayer().getUniqueId())
-                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.block-mined"), maxAffinityLimit);
+                            addAmountOfMaxAffinity(e.getPlayer().getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.block-mined"));
                         if(calcMinAffinity)
-                            playerList.get(e.getPlayer().getUniqueId())
-                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.block-mined"), minAffinityLimit);
+                            addAmountOfMinAffinity(e.getPlayer().getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.block-mined"));
                     }
     }
 
@@ -119,11 +110,17 @@ public class AffinityEvents extends Affinity implements Listener {
                         e.setDamage(dam);
 
                         if(calcMaxAffinity)
-                            playerList.get(prey.getUniqueId())
-                                    .addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.player-hit"), maxAffinityLimit);
+                            addAmountOfMaxAffinity(prey.getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.player-hit"));
                         if(calcMinAffinity)
-                            playerList.get(prey.getUniqueId())
-                                    .addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.player-hit"), minAffinityLimit);
+                            addAmountOfMinAffinity(prey.getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.player-hit"));
+                    } else if(hunter instanceof Player) {
+                        if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
+                            hunter.sendMessage(data.getConfig().getString("messages.attacker-no-pvp", "a"));
+                            e.setCancelled(true);
+                        } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
+                            hunter.sendMessage(data.getConfig().getString("messages.attackee-no-pvp", "b"));
+                            e.setCancelled(true);
+                        }
                     }
                 } else if (hunter instanceof Player && !disabledMobs.contains(prey.getType().toString()) && !ignoreMobs.contains(prey.getEntityId())) {
                     double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
@@ -264,7 +261,7 @@ public class AffinityEvents extends Affinity implements Listener {
         Player usr = e.getPlayer();
         if(!playerList.containsKey(uuid)) {
             SQL.getAffinityValues(uuid.toString(), r -> {
-                Minecrafter mc = new Minecrafter(uuid, usr.getName(), maxAffinity, minAffinity);
+                Minecrafter mc = new Minecrafter(usr.getName());
                 if (r.get(0) == -1) {
                     mc.setAffinity(startAffinity);
                     if (calcMaxAffinity) {
@@ -333,16 +330,16 @@ public class AffinityEvents extends Affinity implements Listener {
             UUID uuid = Bukkit.getPlayer(e.getInventory().getItem(13).getItemMeta().getDisplayName()).getUniqueId();
             ArrayList<String> allowed = new ArrayList<>(Arrays.asList("PINK_WOOL", "MAGENTA_WOOL", "PURPLE_WOOL", "LIME_WOOL", "BLUE_WOOL", "CYAN_WOOL", "LIGHT_BLUE_WOOL", "RED_WOOL"));
             if(allowed.contains(e.getCurrentItem().getType().toString()) && e.getSlot() % 9 != 0 && e.getSlot() % 9 != 4) {
-                Minecrafter pl = playerList.get(uuid);
                 if (e.getCurrentItem().getType().toString().equals("RED_WOOL")) {
+                    Minecrafter pl = playerList.get(uuid);
                     if(e.getSlot() / 9 < 1) { pl.setAffinity(startAffinity); }
                     else if(e.getSlot() / 9 < 2) { pl.setMinAffinity(-1); }
                     else if(e.getSlot() / 9 < 3) { pl.setMaxAffinity(-1); }
                 } else {
                     int add = Integer.parseInt(e.getCurrentItem().getItemMeta().getDisplayName());
-                    if(e.getSlot() / 9 < 1) { pl.addAffinity(calcAffinity(add)); }
-                    else if(e.getSlot() / 9 < 2) { pl.addMinAffinity(calcAffinity(add), 99999999); }
-                    else if(e.getSlot() / 9 < 3) { pl.addMaxAffinity(calcAffinity(add), 0); }
+                    if(e.getSlot() / 9 < 1) { addAmountOfAffinity(uuid, add); }
+                    else if(e.getSlot() / 9 < 2) { addAmountOfMinAffinity(uuid, add); }
+                    else if(e.getSlot() / 9 < 3) { addAmountOfMaxAffinity(uuid, add); }
                 }
                 ItemStack item = e.getInventory().getItem(13);
                 String c1 = ChatColor.BOLD+""+ChatColor.DARK_GREEN;

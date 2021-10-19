@@ -56,10 +56,12 @@ public class AffinityCommands implements CommandExecutor {
                 if(msg.equals("") && args.length >= 3 && args[2] != null && !args[2].equals("")) {
                     if (af.hasDifficulty(args[2])) {
                         arg2 = af.getDifficultyAffinity(args[2]);
-                    } else if (!Pattern.compile("(?i)[^0-9]").matcher(args[2]).find()) {
-                        arg2 = Integer.parseInt(args[2]);
                     } else {
-                        msg = args[2] + " isn't a recognized difficulty or number";
+                        try {
+                            arg2 = Integer.parseInt(args[2]);
+                        } catch (Exception e) {
+                            msg = args[2] + " isn't a recognized difficulty or number";
+                        }
                     }
                 }
 
@@ -109,7 +111,7 @@ public class AffinityCommands implements CommandExecutor {
     private String setAffinity(String user, int amount) {
         try {
             UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
-            amount = af.calcAffinity(amount);
+            amount = af.calcAffinity(uuid, amount);
             af.setAffinity(uuid, amount);
             return user+"'s set to "+ af.calcDifficulty(uuid)+" Difficulty with "+amount+" Affinity points";
         } catch(Exception e) {
@@ -153,8 +155,9 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a Max Affinity!";
 
-            amount = af.calcAffinity(amount);
-            af.setMaxAffinity(af.getPlayerUUID(user), amount);
+            UUID uuid = af.getPlayerUUID(user);
+            amount = af.calcAffinity(uuid, amount);
+            af.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
@@ -198,8 +201,9 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return "The world doesn't need a Min Affinity!";
 
-            amount = af.calcAffinity(amount);
-            af.setMinAffinity(af.getPlayerUUID(user), amount);
+            UUID uuid = af.getPlayerUUID(user);
+            amount = af.calcAffinity(uuid, amount);
+            af.setMinAffinity(uuid, amount);
             return "Set the Min Affinity to "+amount+" for "+user;
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);

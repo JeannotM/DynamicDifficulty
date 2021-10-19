@@ -68,7 +68,7 @@ public class Affinity {
             Bukkit.getOnlinePlayers().forEach(usr -> {
                 UUID uuid = usr.getUniqueId();
                 SQL.getAffinityValues(uuid.toString(), r -> {
-                    Minecrafter mc = new Minecrafter(uuid, usr.getName(), maxAffinity, minAffinity);
+                    Minecrafter mc = new Minecrafter(usr.getName());
                     if (r.get(0) == -1) {
                         mc.setAffinity(startAffinity);
                         mc.setMaxAffinity(-1);
@@ -218,6 +218,7 @@ public class Affinity {
             tmp.setHungerDrain(section.getInt(key + ".hunger-drain-chance", 100));
             tmp.setKeepInventory(section.getBoolean(key + ".keep-inventory", false));
             tmp.setEffectsOnAttack(section.getBoolean(key + ".effects-when-attacked", true));
+            tmp.setAllowPVP(section.getBoolean(key + ".allow-pvp", true));
             tmp.setDamageByMobs(dmgByMobs);
             tmp.setDamageOnMobs(dmgOnMobs);
             tmp.setDoubleLoot(dblLoot);
@@ -280,8 +281,9 @@ public class Affinity {
             difficulties.add(thisKey);
             if(tmpMap.size() == difficulties.size()) {
                 difficultyList.get(thisKey).setUntil(maxAffinity);
+                difficultyList.get(lastKey).setUntil((key - 1));
             } else if (lastKey != null) {
-                difficultyList.get(lastKey).setUntil(key - 1);
+                difficultyList.get(lastKey).setUntil((key - 1));
             }
             lastKey = thisKey;
         }
@@ -299,7 +301,7 @@ public class Affinity {
                         Minecrafter mc = playerList.get(pl.getUniqueId());
                         if (mc.getMinAffinity() == -1)
                             mc.setMinAffinity(minAffinity);
-                        mc.addMinAffinity(minAffinityItems.get(s), minAffinityLimit);
+                        addAmountOfMinAffinity(pl.getUniqueId(), minAffinityItems.get(s));
                     }
             });
         }
@@ -314,7 +316,7 @@ public class Affinity {
                         Minecrafter mc = playerList.get(pl.getUniqueId());
                         if (mc.getMaxAffinity() == -1)
                             mc.setMaxAffinity(maxAffinity);
-                        mc.addMaxAffinity(maxAffinityItems.get(s), maxAffinityLimit);
+                        addAmountOfMaxAffinity(pl.getUniqueId(), maxAffinityItems.get(s));
                     }
             });
         }
@@ -438,8 +440,8 @@ public class Affinity {
     }
 
     public void setAffinity(UUID uuid, int x) {
-        if (uuid == null) { worldAffinity = calcAffinity(x); }
-        else { playerList.get(uuid).setAffinity(calcAffinity(x)); }
+        if (uuid == null) { worldAffinity = calcAffinity(null, x); }
+        else { playerList.get(uuid).setAffinity(calcAffinity(uuid, x)); }
     }
 
     private void emptyHitMobsList() {
@@ -450,9 +452,9 @@ public class Affinity {
     }
 
     public int getMaxAffinity(UUID uuid) { return playerList.get(uuid).getMaxAffinity(); }
-    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity(x)); }
+    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity(uuid, x)); }
     public int getMinAffinity(UUID uuid) { return playerList.get(uuid).getMinAffinity(); }
-    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity(x)); }
+    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity(uuid, x)); }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
     public int getDifficultyAffinity(String x) { return difficultyList.get(x).getAffinity(); }
     public ArrayList<String> getDifficulties() { return difficulties; }
@@ -479,16 +481,29 @@ public class Affinity {
     /**
      * Calculates if the amount exceeds the users Maximum or the servers Minimum/Maximum
      *
+     * @param uuid is the player who's affinity will be changed
      * @param x is the affinity given to calculate
      * @return INT the affinity after it has been checked
      */
-    public int calcAffinity(int x) {
+    public int calcAffinity(UUID uuid, int x) {
         if(x == -1) { return -1; }
+
         if (x > maxAffinity) {
             x = maxAffinity;
         } else if (x < minAffinity) {
             x = minAffinity;
         }
+
+        if(uuid != null)
+            if(playerList.containsKey(uuid)) {
+                Minecrafter p = playerList.get(uuid);
+                if(p.getMaxAffinity() != -1 && x > p.getMaxAffinity()) {
+                    x = p.getMaxAffinity();
+                } else if(p.getMinAffinity() != -1 && x < p.getMinAffinity()) {
+                    x = p.getMinAffinity();
+                }
+            }
+
         return x;
     }
 
@@ -514,19 +529,22 @@ public class Affinity {
                 currentAmount += Integer.parseInt(spl[1]);
             }
 
-            boolean allowed = true;
-            if(!data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts", false))
+            if(!data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts", false)) {
+                boolean allowed = true;
                 for(List<Enchantment> enchantList : enchantmentConflict)
                     if(allowed) {
                         if(enchantList.contains(chosenEnchant))
                             for(Enchantment currentEnchant : enchantList)
-                                if(item.containsEnchantment(currentEnchant))
-                                    allowed = false; break;
+                                if(item.containsEnchantment(currentEnchant)){
+                                    allowed = false;
+                                    break;
+                                }
                     } else {
                         break;
                     }
-            if (!allowed)
-                continue;
+                if (!allowed)
+                    continue;
+            }
 
             int chosenLevel;
             if(data.getConfig().getBoolean("custom-mob-items-spawn-chance.override-default-limits", false)){
@@ -659,17 +677,28 @@ public class Affinity {
     }
 
     protected void addAmountOfAffinity(UUID uuid, int x) {
-        if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(worldAffinity + x); }
-        else { playerList.get(uuid).addAffinity(x); }
+        if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
+        else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
+    }
+    protected void addAmountOfMinAffinity(UUID uuid, int x) {
+        Minecrafter p = playerList.get(uuid);
+        p.setMinAffinity(calcAffinity(null, Math.min(p.getMaxAffinity() + x, minAffinityLimit)));
+    }
+    protected void addAmountOfMaxAffinity(UUID uuid, int x) {
+        Minecrafter p = playerList.get(uuid);
+        p.setMaxAffinity(calcAffinity(null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
     }
 
     /** To increase/decrease players Affinity every minute */
     public void onInterval() {
         if(onInterval != 0) {
             if(difficultyType.equalsIgnoreCase("world")) {
-                worldAffinity = calcAffinity(worldAffinity + onInterval);
+                worldAffinity = calcAffinity(null, worldAffinity + onInterval);
             } else {
-                Bukkit.getOnlinePlayers().forEach(pl -> playerList.get(pl.getUniqueId()).addAffinity(onInterval));
+                Bukkit.getOnlinePlayers().forEach(pl -> {
+                    Minecrafter p = playerList.get(pl.getUniqueId());
+                    p.setAffinity(calcAffinity(pl.getUniqueId(), p.getAffinity() + onInterval));
+                });
             }
         }
     }
@@ -679,9 +708,9 @@ public class Affinity {
         Bukkit.getOnlinePlayers().forEach(pl -> {
             Minecrafter mc = playerList.get(pl.getUniqueId());
             if(calcMaxAffinity)
-                mc.addMaxAffinity(data.getConfig().getInt("calculating-affinity.max-affinity-changes.points-per-minute"), maxAffinityLimit);
+                addAmountOfMaxAffinity(pl.getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.points-per-minute"));
             if(calcMinAffinity)
-                mc.addMinAffinity(data.getConfig().getInt("calculating-affinity.min-affinity-changes.points-per-minute"), minAffinityLimit);
+                addAmountOfMinAffinity(pl.getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.points-per-minute"));
         });
     }
 

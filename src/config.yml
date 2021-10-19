@@ -106,6 +106,7 @@ difficulty:
     experience-multiplier: 70
     double-loot-chance: 0
     keep-inventory: true
+    allow-pvp: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
     mobs-ignore-player:
@@ -117,6 +118,7 @@ difficulty:
     hunger-drain-chance: 80
     experience-multiplier: 90
     double-loot-chance: 0
+    allow-pvp: true
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
@@ -127,9 +129,14 @@ difficulty:
     hunger-drain-chance: 100
     experience-multiplier: 125
     double-loot-chance: 5
+    allow-pvp: true
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
+
+messages:
+  attacker-no-pvp: "You cannot attack this player because you're still having a hard time!"
+  attackee-no-pvp: "You cannot attack this player because he's already having a hard time!"
 
 # Some of these features are experimental, change existing features or have a chance to reduce server performance
 advanced-features:

@@ -20,6 +20,7 @@ public class Difficulty {
     private double chanceToEnchant;
     private double chanceToHaveArmor;
     private double weaponDropChance;
+    private boolean allowPVP;
     private boolean keepInventory;
     private boolean effectsWhenAttacked;
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
@@ -37,6 +38,7 @@ public class Difficulty {
     public int getDoubleLoot() { return doubleLootChance; }
     public int getMaxEnchants() { return maxEnchants; }
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
+    public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
@@ -56,6 +58,7 @@ public class Difficulty {
     public void setDoubleLoot(int value) { doubleLootChance = value; }
     public void setMaxEnchants(int value) { maxEnchants = value; }
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
+    public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
