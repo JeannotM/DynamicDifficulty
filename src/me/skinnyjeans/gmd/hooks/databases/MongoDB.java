@@ -76,61 +76,45 @@ public class MongoDB implements SaveManager {
 
     @Override
     public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        List<Integer> tmpArray = new ArrayList<>();
-                        try {
-                            if(isConnected()) {
-                                DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
-                                if(find.hasNext() && find != null){
-                                    DBObject tmp = find.next();
-                                    tmpArray.add(Integer.parseInt(tmp.get("Affinity").toString()));
-                                    tmpArray.add(Integer.parseInt(tmp.get("MaxAffinity").toString()));
-                                    tmpArray.add(Integer.parseInt(tmp.get("MinAffinity").toString()));
-                                    callback.onQueryDone(tmpArray);
-                                    return;
-                                }
-                            }
-                        } catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                        tmpArray.add(0, -1);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            List<Integer> tmpArray = new ArrayList<>();
+            try {
+                if(isConnected()) {
+                    DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
+                    if(find.hasNext() && find != null){
+                        DBObject tmp = find.next();
+                        tmpArray.add(Integer.parseInt(tmp.get("Affinity").toString()));
+                        tmpArray.add(Integer.parseInt(tmp.get("MaxAffinity").toString()));
+                        tmpArray.add(Integer.parseInt(tmp.get("MinAffinity").toString()));
                         callback.onQueryDone(tmpArray);
                         return;
                     }
-                });
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
-        });
+            tmpArray.add(0, -1);
+            callback.onQueryDone(tmpArray);
+            return;
+        }));
     }
 
     @Override
     public void playerExists(String uuid, final findBooleanCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if(isConnected()) {
-                                DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
-                                if(find.hasNext() && find != null){
-                                    callback.onQueryDone(true);
-                                    return;
-                                }
-                            }
-                        } catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                        callback.onQueryDone(false);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+            try {
+                if(isConnected()) {
+                    DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
+                    if(find.hasNext() && find != null){
+                        callback.onQueryDone(true);
+                        return;
                     }
-                });
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
-        });
+            callback.onQueryDone(false);
+        }));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package me.skinnyjeans.gmd.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,9 +19,10 @@ public class Difficulty {
     private double armorDropChance;
     private double chanceToEnchant;
     private double chanceToHaveArmor;
+    private double weaponDropChance;
     private boolean keepInventory;
     private boolean effectsWhenAttacked;
-    private List<String> mobsIgnoredPlayers;
+    private List<String> mobsIgnoredPlayers = new ArrayList<>();
     private HashMap<String, Double> armorChance = new HashMap<>();
 
     public Difficulty(String name) { difficultyName = name; }
@@ -42,6 +44,7 @@ public class Difficulty {
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
     public double getChanceToHaveArmor() { return chanceToHaveArmor; }
+    public double getWeaponDropChance() { return weaponDropChance; }
 
     public void setPrefix(String value) { userPrefix = value; }
     public void setAffinity(int value) { affinityRequirement = value; }
@@ -58,6 +61,7 @@ public class Difficulty {
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
     public void setEnchantChances(HashMap<String, Double> value) { armorChance = value; }
     public void setArmorDropChance(Double value) { armorDropChance = value; }
-    public void setChanceToEnchant(Double value) {  chanceToEnchant = value; }
+    public void setWeaponDropChance(Double value) { weaponDropChance = value; }
+    public void setChanceToEnchant(Double value) { chanceToEnchant = value; }
     public void setChanceToHaveArmor(Double value) { chanceToHaveArmor = value; }
 }

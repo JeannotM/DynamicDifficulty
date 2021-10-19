@@ -15,8 +15,8 @@ public class SQL implements SaveManager {
     private String host = "localhost";
     private String port = "3306";
     private String dbName = "dynamicdifficulty";
-    private String user = "root";
-    private String pwd = "";
+    private String user;
+    private String pwd;
     private String saveType = "";
     private Connection connection = null;
 
@@ -25,8 +25,8 @@ public class SQL implements SaveManager {
         host = data.getConfig().getString("saving-data.host");
         port = data.getConfig().getString("saving-data.port");
         dbName = data.getConfig().getString("saving-data.database");
-        user = data.getConfig().getString("saving-data.username");
-        pwd = data.getConfig().getString("saving-data.password");
+        user = data.getConfig().getString("saving-data.username", "root");
+        pwd = data.getConfig().getString("saving-data.password", "");
         saveType = sT;
         connect();
         if(sT.equalsIgnoreCase("mysql"))
@@ -40,14 +40,14 @@ public class SQL implements SaveManager {
     public void connect() throws SQLException, ClassNotFoundException {
         if(!isConnected()){
             if(saveType.equalsIgnoreCase("mysql")) {
-                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false", user, pwd);
+                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes", user, pwd);
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to MySQL!");
             } else if (saveType.equalsIgnoreCase("sqlite")){
-                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db?autoReconnect=true&useUnicode=yes");
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to SQLite!");
             } else if (saveType.equalsIgnoreCase("postgresql")) {
                 Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName, user, pwd);
+                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes", user, pwd);
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to PostGreSQL!");
             }
         }

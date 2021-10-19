@@ -20,6 +20,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -54,7 +56,7 @@ public class AffinityEvents extends Affinity implements Listener {
             try {
                 if(e.getEntity().getKiller() instanceof Player) {
                     UUID uuid = e.getEntity().getKiller().getUniqueId();
-                    if (onPVPKill != 0 && e.getEntity() instanceof Player) {
+                    if (e.getEntity() instanceof Player) {
                         addAmountOfAffinity(uuid, onPVPKill);
                         if(calcMaxAffinity)
                             playerList.get(uuid)
@@ -107,10 +109,10 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
-            if (((HumanEntity)prey).isBlocking()) { return; }
             try {
                 if (prey instanceof Player) {
                     if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString()) && !ignoreMobs.contains(hunter.getEntityId())) {
+                        if (((HumanEntity)prey).isBlocking()) { return; }
                         UUID uuid = prey.getUniqueId();
                         addAmountOfAffinity(uuid, onPlayerHit);
                         double dam = e.getFinalDamage() * calcPercentage(uuid, "damage-done-by-mobs") / 100.0;
@@ -142,73 +144,82 @@ public class AffinityEvents extends Affinity implements Listener {
 
         List<SpawnReason> naturalReasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL));
         List<SpawnReason> spawnReasons = new ArrayList<>(Arrays.asList(SpawnReason.SPAWNER_EGG, SpawnReason.SPAWNER, SpawnReason.DISPENSE_EGG));
-        if(customArmorSpawnChance && (naturalReasons.contains(e.getSpawnReason()))) {
+        if(customArmorSpawnChance && naturalReasons.contains(e.getSpawnReason())) {
             Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
                 Player closestPlayer = null;
-                double distance = 512.0;
-                for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getName()).getPlayers()) {
+                double distance = 1024.0;
+                for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers()) {
                     if(e.getEntity().getLocation().distance(pl.getLocation()) < distance) {
                         distance = e.getEntity().getLocation().distance(pl.getLocation());
                         closestPlayer = pl;
                     }
                 }
+                if(closestPlayer == null)
+                    return;
+
                 String diff = calcDifficulty(closestPlayer.getUniqueId());
-                int rand = new Random().nextInt(chancePerArmor.get("total") + 1) -1;
-                int count = 0;
-                ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "gold", "chain", "iron", "diamond", "netherite"));
                 double chanceToEnchant = (calcPercentage(closestPlayer.getUniqueId(), "chance-to-enchant-a-piece") / 100.0 / 100.0);
+                EntityEquipment eq = e.getEntity().getEquipment();
                 if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "weapon-chance") / 100.0 / 100.0)) {
                     ArrayList<Material> ranged = new ArrayList<>(Arrays.asList(Material.BOW, Material.CROSSBOW));
-                    if (ranged.contains(e.getEntity().getEquipment().getItemInMainHand().getType())) {
-                        ItemStack item = new ItemStack(e.getEntity().getEquipment().getItemInMainHand().getType());
-                        e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "bow", diff, chanceToEnchant));
+                    if (ranged.contains(eq.getItemInMainHand().getType())) {
+                        ItemStack item = new ItemStack(eq.getItemInMainHand().getType());
+                        eq.setItemInMainHand(calcEnchant(item, "bow", diff, chanceToEnchant));
                     } else {
-                        for (int i = 0; i < customSpawnWeapons.size(); i++) {
-                            int thisCount = count + chancePerArmor.get(customSpawnWeapons.get(i));
-                            if (count < rand && thisCount >= rand) {
-                                ItemStack item = new ItemStack(Material.getMaterial(customSpawnWeapons.get(i)));
-                                e.getEntity().getEquipment().setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                        int count = 0;
+                        int rnd = new Random().nextInt(chancePerWeapon.get("total") + 1) -1;
+                        for (String customSpawnWeapon : customSpawnWeapons) {
+                            if (count >= rnd) {
+                                ItemStack item = new ItemStack(Material.getMaterial(customSpawnWeapon));
+                                e.getEntity().setCanPickupItems(true);
+                                eq.setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                                eq.setItemInMainHandDropChance(((float)calcPercentage(closestPlayer.getUniqueId(), "weapon-drop-chance") / 100 / 100));
                             }
+                            count += chancePerWeapon.get(customSpawnWeapon);
                         }
-                        count = 0;
                     }
                 }
-                if(new Random().nextDouble() < (calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0)) {
-                    for(int i=0;i<6;i++) {
-                        int thisCount = count + chancePerArmor.get(array.get(i));
-                        if(count < rand && thisCount >= rand) {
-                            String thisItem = array.get(i);
+                if(new Random().nextDouble() < calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0) {
+                    ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "golden", "chainmail", "iron", "diamond", "netherite"));
+                    int rnd = new Random().nextInt(chancePerArmor.get("total") + 1) -1;
+                    int count = 0;
+                    for (String thisItem : array) {
+                        if (count >= rnd) {
                             double randomChance = new Random().nextDouble();
                             float armorDropChance = (float) calcPercentage(closestPlayer.getUniqueId(), "armor-drop-chance") / 100 / 100;
-                            if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "helmet-chance") / 100.0 / 100.0)) {
+                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "helmet-chance") / 100.0 / 100.0)) {
                                 ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_HELMET"));
-                                e.getEntity().getEquipment().setHelmet(calcEnchant(item, "helmet", diff, chanceToEnchant));
-                                e.getEntity().getEquipment().setHelmetDropChance(armorDropChance);
+                                e.getEntity().setCanPickupItems(true);
+                                eq.setHelmet(calcEnchant(item, "helmet", diff, chanceToEnchant));
+                                eq.setHelmetDropChance(armorDropChance);
                             }
-                            if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "chest-chance") / 100.0 / 100.0)) {
+                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "chest-chance") / 100.0 / 100.0)) {
                                 ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_CHESTPLATE"));
-                                e.getEntity().getEquipment().setChestplate(calcEnchant(item, "chestplate", diff, chanceToEnchant));
-                                e.getEntity().getEquipment().setChestplateDropChance(armorDropChance);
+                                e.getEntity().setCanPickupItems(true);
+                                eq.setChestplate(calcEnchant(item, "chestplate", diff, chanceToEnchant));
+                                eq.setChestplateDropChance(armorDropChance);
                             }
-                            if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "leggings-chance") / 100.0 / 100.0)) {
+                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "leggings-chance") / 100.0 / 100.0)) {
                                 ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_LEGGINGS"));
-                                e.getEntity().getEquipment().setLeggings(calcEnchant(item, "leggings", diff, chanceToEnchant));
-                                e.getEntity().getEquipment().setLeggingsDropChance(armorDropChance);
+                                e.getEntity().setCanPickupItems(true);
+                                eq.setLeggings(calcEnchant(item, "leggings", diff, chanceToEnchant));
+                                eq.setLeggingsDropChance(armorDropChance);
                             }
-                            if(randomChance < (calcPercentage(closestPlayer.getUniqueId(), "boots-chance") / 100.0 / 100.0)) {
+                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "boots-chance") / 100.0 / 100.0)) {
                                 ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_BOOTS"));
-                                e.getEntity().getEquipment().setBoots(calcEnchant(item, "boots", diff, chanceToEnchant));
-                                e.getEntity().getEquipment().setBootsDropChance(armorDropChance);
+                                e.getEntity().setCanPickupItems(true);
+                                eq.setBoots(calcEnchant(item, "boots", diff, chanceToEnchant));
+                                eq.setBootsDropChance(armorDropChance);
                             }
                             break;
                         }
-                        count += chancePerArmor.get(array.get(i));
+                        count += chancePerArmor.get(thisItem);
                     }
                 } else {
-                    e.getEntity().getEquipment().setHelmet(null);
-                    e.getEntity().getEquipment().setChestplate(null);
-                    e.getEntity().getEquipment().setLeggings(null);
-                    e.getEntity().getEquipment().setBoots(null);
+                    eq.setHelmet(null);
+                    eq.setChestplate(null);
+                    eq.setLeggings(null);
+                    eq.setBoots(null);
                 }
             }));
         } else if(spawnReasons.contains(e.getSpawnReason())) {
@@ -220,24 +231,21 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
         try {
-            if(e.getEntity() instanceof Player) {
-                double drainChance = calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance");
-                if(drainChance >= 0.0 && drainChance < 100.0)
-                    if(new Random().nextDouble() > (drainChance / 100.0))
+            if(e.getEntity() instanceof Player)
+                if(e.getEntity().getFoodLevel() > e.getFoodLevel())
+                    if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
                         e.setCancelled(true);
-            }
-        }catch(NullPointerException er){ }
+        }catch(NullPointerException ignored){}
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
         try {
             if(e.getEntity() instanceof Player)
-                if(effectCauses.contains(e.getCause()))
-                    if(effects.contains(e.getModifiedType()))
-                        if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
-                            e.setCancelled(true);
-        }catch(NullPointerException er){ }
+                if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
+                    if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
+                        e.setCancelled(true);
+        }catch(NullPointerException ignored){}
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -247,7 +255,7 @@ public class AffinityEvents extends Affinity implements Listener {
                 if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
                     if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
                         e.setCancelled(true);
-        }catch(NullPointerException er){ }
+        }catch(NullPointerException ignored){}
     }
 
     @EventHandler
@@ -256,19 +264,34 @@ public class AffinityEvents extends Affinity implements Listener {
         Player usr = e.getPlayer();
         if(!playerList.containsKey(uuid)) {
             SQL.getAffinityValues(uuid.toString(), r -> {
-                Minecrafter mc = new Minecrafter(uuid, usr.getName());
+                Minecrafter mc = new Minecrafter(uuid, usr.getName(), maxAffinity, minAffinity);
                 if (r.get(0) == -1) {
                     mc.setAffinity(startAffinity);
-                    mc.setMaxAffinity(-1);
-                    mc.setMinAffinity(-1);
-                    playerList.put(uuid, mc);
-                    SQL.updatePlayer(uuid.toString(), startAffinity, -1, -1);
+                    if (calcMaxAffinity) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else {
+                        mc.setMaxAffinity(-1);
+                    }
+                    if (calcMinAffinity) {
+                        mc.setMinAffinity(minAffinity);
+                    } else {
+                        mc.setMinAffinity(-1);
+                    }
+                    SQL.updatePlayer(uuid.toString(), startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
                 } else {
                     mc.setAffinity(r.get(0));
-                    mc.setMaxAffinity(r.get(1));
-                    mc.setMinAffinity(r.get(2));
-                    playerList.put(uuid, mc);
+                    if (calcMaxAffinity && r.get(1) == -1) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else {
+                        mc.setMaxAffinity(r.get(1));
+                    }
+                    if (calcMinAffinity && r.get(2) == -1) {
+                        mc.setMinAffinity(minAffinity);
+                    } else {
+                        mc.setMinAffinity(r.get(2));
+                    }
                 }
+                playerList.put(uuid, mc);
                 playersUUID.put(usr.getName(), uuid);
             });
         }
@@ -289,27 +312,6 @@ public class AffinityEvents extends Affinity implements Listener {
     public void onInventoryClick(InventoryClickEvent e) {
         if (e.getCurrentItem() == null)
             return;
-
-        if(equipmentCheck.equalsIgnoreCase("on-equip") && (calcMinAffinity || calcMaxAffinity)) {
-            if(calcMaxAffinity) {
-                if(maxAffinityListItems.contains(e.getCurrentItem().getType().toString())) {
-                    Minecrafter mc = playerList.get(e.getWhoClicked().getUniqueId());
-                    if(mc.getMaxAffinity() == -1)
-                        mc.setMaxAffinity(maxAffinity);
-                    mc.addMaxAffinity(maxAffinityItems.get(e.getCurrentItem().getType().toString()), maxAffinityLimit);
-                }
-            }
-
-            if(calcMinAffinity) {
-                if(minAffinityListItems.contains(e.getCurrentItem().getType().toString())) {
-                    Minecrafter mc = playerList.get(e.getWhoClicked().getUniqueId());
-                    if(mc.getMinAffinity() == -1)
-                        mc.setMinAffinity(minAffinity);
-                    mc.addMinAffinity(minAffinityItems.get(e.getCurrentItem().getType().toString()), minAffinityLimit);
-                }
-            }
-        }
-
         if(!e.getView().getTitle().contains("DynamicDifficulty"))
             return;
         if(e.getCurrentItem().getItemMeta() == null)
@@ -335,12 +337,12 @@ public class AffinityEvents extends Affinity implements Listener {
                 if (e.getCurrentItem().getType().toString().equals("RED_WOOL")) {
                     if(e.getSlot() / 9 < 1) { pl.setAffinity(startAffinity); }
                     else if(e.getSlot() / 9 < 2) { pl.setMinAffinity(-1); }
-                    else if(e.getSlot() / 9 < 3) {pl.setMaxAffinity(-1); }
+                    else if(e.getSlot() / 9 < 3) { pl.setMaxAffinity(-1); }
                 } else {
                     int add = Integer.parseInt(e.getCurrentItem().getItemMeta().getDisplayName());
-                    if(e.getSlot() / 9 < 1) { pl.setAffinity(calcAffinity(add)); }
-                    else if(e.getSlot() / 9 < 2) { pl.setMinAffinity(calcAffinity(add)); }
-                    else if(e.getSlot() / 9 < 3) {pl.setMaxAffinity(calcAffinity(add)); }
+                    if(e.getSlot() / 9 < 1) { pl.addAffinity(calcAffinity(add)); }
+                    else if(e.getSlot() / 9 < 2) { pl.addMinAffinity(calcAffinity(add), 99999999); }
+                    else if(e.getSlot() / 9 < 3) { pl.addMaxAffinity(calcAffinity(add), 0); }
                 }
                 ItemStack item = e.getInventory().getItem(13);
                 String c1 = ChatColor.BOLD+""+ChatColor.DARK_GREEN;

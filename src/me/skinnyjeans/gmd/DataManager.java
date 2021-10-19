@@ -57,7 +57,7 @@ public class DataManager {
 	}
 	
 	public void saveData() {
-		if (this.dataFile == null || this.customConfig == null)
+		if (this.dataFile == null)
 			return;
 		
 		try {
@@ -68,7 +68,7 @@ public class DataManager {
     }
 	
 	public void saveConfig() {
-		if (this.dataConfig == null || this.configFile == null)
+		if (this.configFile == null)
 			return;
 		
 		try {

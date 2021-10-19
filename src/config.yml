@@ -17,11 +17,11 @@ pve-kill: 2
 death: -80
 
 # How Much Affinity a Player Starts With When Joining For The First Time.
-starting-affinity: 500
+starting-affinity: 600
 
 # What The Maximum and Minimum Affinity Are, no one can get more or less than this (even with commands)
 min-affinity: 0
-max-affinity: 1200
+max-affinity: 1500
 
 # Mobs that will give affinity, Will use "pve-kill" if no value was specified: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # - MOBTYPE: <Affinity points>
@@ -64,7 +64,7 @@ plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
   allow-bstats: true # To Only Disable BStats for DynamicDifficulty
   use-prefix: true
-  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity.
+  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
 
 saving-data:
@@ -75,9 +75,9 @@ saving-data:
 #  password:
 #  database: dynamicdifficulty
 
-# Disable DynamicDifficulty in certain worlds
-# disabled-worlds:
-# - example_name
+# You can disable DynamicDifficulty in certain worlds
+disabled-worlds:
+- example_name
 
 # These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
 disabled-mobs:
@@ -121,7 +121,7 @@ difficulty:
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
   Hard:
-    affinity-required: 1000
+    affinity-required: 1100
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
     hunger-drain-chance: 100
@@ -131,7 +131,7 @@ difficulty:
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
 
-# Some of these features are experimental, change existing features or have a chance to reduce performance
+# Some of these features are experimental, change existing features or have a chance to reduce server performance
 advanced-features:
   # The 'auto-calculate' features will, add and remove min/max affinity from players depending on configured settings
   # These WILL override existing min/max affinity settings.
@@ -162,7 +162,7 @@ custom-mob-items-spawn-chance:
   armor-set-weight:
     leather: 3706
     gold: 4872
-    chain: 1290
+    chainmail: 1290
     iron: 127
     diamond: 4
     netherite: 1
@@ -236,6 +236,7 @@ custom-mob-items-spawn-chance:
       chance-to-have-armor: 5.0
       chance-to-enchant-a-piece: 15
       armor-drop-chance: 10.0
+      weapon-drop-chance: 5.0
       weapon-chance: 1.0
       helmet-chance: 100.0
       chest-chance: 75.0
@@ -247,6 +248,7 @@ custom-mob-items-spawn-chance:
       chance-to-have-armor: 15.0
       chance-to-enchant-a-piece: 30
       armor-drop-chance: 15.0
+      weapon-drop-chance: 10.0
       weapon-chance: 2.0
       helmet-chance: 100.0
       chest-chance: 75.0
@@ -258,6 +260,7 @@ custom-mob-items-spawn-chance:
       chance-to-have-armor: 20.0
       chance-to-enchant-a-piece: 45
       armor-drop-chance: 20.0
+      weapon-drop-chance: 15.0
       weapon-chance: 5.0
       helmet-chance: 100.0
       chest-chance: 90.0
@@ -266,11 +269,11 @@ custom-mob-items-spawn-chance:
 
 # This section is to calculate the min & max affinity of players automatically, WILL OVERRIDE existing values.
 calculating-affinity:
-  # this setting whether to check every minute or if a player equips/holds an item.
-  check-equipment: every-5-minutes # Supported: every-minute, every-5-minutes, on-equip
+  # Will check equipment every few minutes
+  minute-interval-per-checking-equipment: 5
   min-affinity-changes:
-    # Affinity limit is counted from the min-affinity set at the top (0 + 600 = 600)
-    affinity-limit: 600
+    # Affinity limit is counted from the min-affinity set at the top (0 + 700 = 700)
+    affinity-limit: 700
     points-per-minute: 1
     block-mined: 1
     player-hit: 0
@@ -278,33 +281,33 @@ calculating-affinity:
     pve-kill: 1
     death: -100
     items-held-or-worn:
-    - IRON_HELMET: 5
-    - IRON_CHESTPLATE: 10
-    - IRON_LEGGINGS: 5
-    - IRON_BOOTS: 5
-    - DIAMOND_HELMET: 10
-    - DIAMOND_CHESTPLATE: 15
-    - DIAMOND_LEGGINGS: 10
-    - DIAMOND_BOOTS: 10
-    - NETHERITE_HELMET: 10
-    - NETHERITE_CHESTPLATE: 15
-    - NETHERITE_LEGGINGS: 10
-    - NETHERITE_BOOTS: 10
-    - ELYTRA: 20
+    - IRON_HELMET: 2
+    - IRON_CHESTPLATE: 4
+    - IRON_LEGGINGS: 2
+    - IRON_BOOTS: 2
+    - DIAMOND_HELMET: 4
+    - DIAMOND_CHESTPLATE: 6
+    - DIAMOND_LEGGINGS: 4
+    - DIAMOND_BOOTS: 4
+    - NETHERITE_HELMET: 6
+    - NETHERITE_CHESTPLATE: 8
+    - NETHERITE_LEGGINGS: 6
+    - NETHERITE_BOOTS: 6
+    - ELYTRA: 10
     - IRON_SWORD: 1
     - IRON_PICKAXE: 1
     - IRON_AXE: 1
     - DIAMOND_SWORD: 3
     - DIAMOND_PICKAXE: 3
     - DIAMOND_AXE: 3
-    - NETHERITE_SWORD: 10
-    - NETHERITE_PICKAXE: 10
-    - NETHERITE_AXE: 10
-    - GOLDEN_APPLE: 10
-    - ENCHANTED_GOLDEN_APPLE: 20
+    - NETHERITE_SWORD: 5
+    - NETHERITE_PICKAXE: 5
+    - NETHERITE_AXE: 5
+    - GOLDEN_APPLE: 5
+    - ENCHANTED_GOLDEN_APPLE: 10
   max-affinity-changes:
-    # Affinity limit is counted from the max-affinity set at the top (1200 - 550 = 650)
-    affinity-limit: 550
+    # Affinity limit is counted from the max-affinity set at the top (1500 - 700 = 800)
+    affinity-limit: 700
     points-per-minute: -2
     block-mined: -1
     player-hit: 1
@@ -335,4 +338,4 @@ calculating-affinity:
     - NETHERITE_PICKAXE: -5
     - NETHERITE_AXE: -5
     - GOLDEN_APPLE: -5
-    - ENCHANTED_GOLDEN_APPLE: -20
+    - ENCHANTED_GOLDEN_APPLE: -15
