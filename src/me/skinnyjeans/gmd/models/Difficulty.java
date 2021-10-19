@@ -17,7 +17,7 @@ public class Difficulty {
     private int maxEnchantLevel;
     private int difficultyUntil;
     private double armorDropChance;
-    private double chanceToEnchant;
+    private double chanceToEnchant = Double.NaN;
     private double chanceToHaveArmor;
     private double weaponDropChance;
     private boolean allowPVP;

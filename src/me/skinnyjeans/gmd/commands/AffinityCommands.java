@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 public class AffinityCommands implements CommandExecutor {
     private final Affinity af;

@@ -41,9 +41,9 @@ public class AffinityEvents extends Affinity implements Listener {
                 e.getDrops().clear();
             }
             if(calcMaxAffinity)
-                addAmountOfMaxAffinity(e.getEntity().getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.death"));
+                addAmountOfMaxAffinity(e.getEntity().getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.death"));
             if(calcMinAffinity)
-                addAmountOfMinAffinity(e.getEntity().getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.death"));
+                addAmountOfMinAffinity(e.getEntity().getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.death"));
         }
     }
 
@@ -56,15 +56,17 @@ public class AffinityEvents extends Affinity implements Listener {
                     if (e.getEntity() instanceof Player) {
                         addAmountOfAffinity(uuid, onPVPKill);
                         if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(uuid, data.getConfig().getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
+                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
                         if(calcMinAffinity)
-                            addAmountOfMinAffinity(uuid, data.getConfig().getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
+                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
                     } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
                         addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
                         if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(uuid, data.getConfig().getInt("calculating-affinity.max-affinity-changes.pve-kill"));
+                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pve-kill"));
                         if(calcMinAffinity)
-                            addAmountOfMinAffinity(uuid, data.getConfig().getInt("calculating-affinity.min-affinity-changes.pve-kill"));
+                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pve-kill"));
+                        if(ignoreMobs.contains(e.getEntity().getEntityId()))
+                            ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
                     }
 
                     if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
@@ -76,7 +78,7 @@ public class AffinityEvents extends Affinity implements Listener {
                     }
                 }
             } catch (NullPointerException er) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] NullPointerException. A plugin might be causing issues");
             }
         }
     }
@@ -85,13 +87,13 @@ public class AffinityEvents extends Affinity implements Listener {
     public void onMined(BlockBreakEvent e) {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
             if (blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
-                if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || data.getConfig().getBoolean("silk-touch-allowed"))
+                if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || config.getBoolean("silk-touch-allowed"))
                     if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                         addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
                         if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(e.getPlayer().getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.block-mined"));
+                            addAmountOfMaxAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.block-mined"));
                         if(calcMinAffinity)
-                            addAmountOfMinAffinity(e.getPlayer().getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.block-mined"));
+                            addAmountOfMinAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.block-mined"));
                     }
     }
 
@@ -110,15 +112,17 @@ public class AffinityEvents extends Affinity implements Listener {
                         e.setDamage(dam);
 
                         if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(prey.getUniqueId(), data.getConfig().getInt("calculating-affinity.max-affinity-changes.player-hit"));
+                            addAmountOfMaxAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.player-hit"));
                         if(calcMinAffinity)
-                            addAmountOfMinAffinity(prey.getUniqueId(), data.getConfig().getInt("calculating-affinity.min-affinity-changes.player-hit"));
+                            addAmountOfMinAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.player-hit"));
                     } else if(hunter instanceof Player) {
                         if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
-                            hunter.sendMessage(data.getConfig().getString("messages.attacker-no-pvp", "a"));
+                            if(config.getString("messages.attacker-no-pvp") != null && !config.getString("messages.attacker-no-pvp").equals(""))
+                                hunter.sendMessage(config.getString("messages.attacker-no-pvp"));
                             e.setCancelled(true);
                         } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
-                            hunter.sendMessage(data.getConfig().getString("messages.attackee-no-pvp", "b"));
+                            if(config.getString("messages.attackee-no-pvp") != null && !config.getString("messages.attackee-no-pvp").equals(""))
+                                hunter.sendMessage(config.getString("messages.attackee-no-pvp"));
                             e.setCancelled(true);
                         }
                     }
@@ -129,14 +133,14 @@ public class AffinityEvents extends Affinity implements Listener {
                         mobsOverrideIgnore.add(prey.getEntityId());
                 }
             } catch (NullPointerException er) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[Dynamic Difficulty] NullPointerException. A plugin might be causing issues");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] NullPointerException. A plugin might be causing issues");
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMobSpawn(CreatureSpawnEvent e) {
-        if(!data.getConfig().getStringList("custom-mob-items-spawn-chance.includes-mobs").contains(e.getEntity().getType().toString()))
+        if(!config.getStringList("custom-mob-items-spawn-chance.includes-mobs").contains(e.getEntity().getType().toString()))
             return;
 
         List<SpawnReason> naturalReasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL));
@@ -145,12 +149,11 @@ public class AffinityEvents extends Affinity implements Listener {
             Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
                 Player closestPlayer = null;
                 double distance = 1024.0;
-                for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers()) {
+                for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers())
                     if(e.getEntity().getLocation().distance(pl.getLocation()) < distance) {
                         distance = e.getEntity().getLocation().distance(pl.getLocation());
                         closestPlayer = pl;
                     }
-                }
                 if(closestPlayer == null)
                     return;
 
@@ -162,23 +165,25 @@ public class AffinityEvents extends Affinity implements Listener {
                     if (ranged.contains(eq.getItemInMainHand().getType())) {
                         ItemStack item = new ItemStack(eq.getItemInMainHand().getType());
                         eq.setItemInMainHand(calcEnchant(item, "bow", diff, chanceToEnchant));
+                        eq.setItemInMainHandDropChance(((float)calcPercentage(closestPlayer.getUniqueId(), "weapon-drop-chance") / 100 / 100));
                     } else {
                         int count = 0;
-                        int rnd = new Random().nextInt(chancePerWeapon.get("total") + 1) -1;
+                        int rnd = new Random().nextInt(chancePerWeapon.get("total") + 1);
                         for (String customSpawnWeapon : customSpawnWeapons) {
-                            if (count >= rnd) {
+                            count += chancePerWeapon.get(customSpawnWeapon);
+                            if (rnd <= count) {
                                 ItemStack item = new ItemStack(Material.getMaterial(customSpawnWeapon));
                                 e.getEntity().setCanPickupItems(true);
                                 eq.setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
                                 eq.setItemInMainHandDropChance(((float)calcPercentage(closestPlayer.getUniqueId(), "weapon-drop-chance") / 100 / 100));
+                                break;
                             }
-                            count += chancePerWeapon.get(customSpawnWeapon);
                         }
                     }
                 }
                 if(new Random().nextDouble() < calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0) {
                     ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "golden", "chainmail", "iron", "diamond", "netherite"));
-                    int rnd = new Random().nextInt(chancePerArmor.get("total") + 1) -1;
+                    int rnd = new Random().nextInt(chancePerArmor.get("total") + 1);
                     int count = 0;
                     for (String thisItem : array) {
                         if (count >= rnd) {
@@ -220,7 +225,7 @@ public class AffinityEvents extends Affinity implements Listener {
                 }
             }));
         } else if(spawnReasons.contains(e.getSpawnReason())) {
-            if(data.getConfig().getBoolean("plugin-support.no-changes-to-spawned-mobs", false))
+            if(config.getBoolean("plugin-support.no-changes-to-spawned-mobs", false))
                 ignoreMobs.add(e.getEntity().getEntityId());
         }
     }
@@ -299,7 +304,7 @@ public class AffinityEvents extends Affinity implements Listener {
         UUID uuid = e.getPlayer().getUniqueId();
         Minecrafter pl = playerList.get(uuid);
         SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
-        if(data.getConfig().getBoolean("plugin-support.unload-leaving-player", false)) {
+        if(config.getBoolean("plugin-support.unload-leaving-player", false)) {
             playerList.remove(uuid);
             playersUUID.remove(e.getPlayer().getName());
         }

@@ -134,6 +134,7 @@ difficulty:
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
 
+# Custom messages for players that are being attack or attack others.
 messages:
   attacker-no-pvp: "You cannot attack this player because you're still having a hard time!"
   attackee-no-pvp: "You cannot attack this player because he's already having a hard time!"
@@ -150,6 +151,8 @@ advanced-features:
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
   override-enchant-conflicts: false # Allows conflicting enchants to occur on a single armor (E.g. Protection & Fire Protection)
+  # These are the only mobs that will spawn with these custom settings
+  # You can add any mob you want, but some will not show any armor. So it's not recommended going too wild
   includes-mobs:
   - ZOMBIE
   - SKELETON
@@ -174,6 +177,7 @@ custom-mob-items-spawn-chance:
     diamond: 4
     netherite: 1
   # https://www.digminecraft.com/lists/enchantment_list_pc.php
+  # You'll have to use the names that are beneath the names with those __snakes__
   helmet-enchants-include:
   #- <ENCHANT_NAME>: WEIGHT, higher means more likely to occur, no value = weight of 1
   - protection: 10
@@ -236,6 +240,8 @@ custom-mob-items-spawn-chance:
   - vanishing_curse
   - binding_curse
   - unbreaking: 5
+  # You'll need to use the EXACT same name as in difficulties.
+  # (E.g. if Extreme difficulty exists, but not here; will use the last difficulty that had any settings changed)
   difficulties:
     Easy:
       max-enchants: 1

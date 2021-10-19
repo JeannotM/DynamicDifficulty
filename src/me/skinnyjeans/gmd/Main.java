@@ -91,6 +91,15 @@ public class Main extends JavaPlugin {
 			m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
 				String.valueOf(data.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
 			));
+			m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
+				String.valueOf(data.getConfig().getBoolean("advanced-features.custom-mob-items-spawn-chance"))
+			));
+			m.addCustomChart(new Metrics.SimplePie("auto_calculate_minaffinity", () ->
+				String.valueOf(data.getConfig().getBoolean("advanced-features.auto-calculate-min-affinity"))
+			));
+			m.addCustomChart(new Metrics.SimplePie("auto_calculate_maxaffinity", () ->
+				String.valueOf(data.getConfig().getBoolean("advanced-features.auto-calculate-max-affinity"))
+			));
 		}
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))

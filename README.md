@@ -127,6 +127,7 @@ difficulty-modifiers:
 #   hunger-drain-chance: <percentage, Chance that the hunger of a player will drain>
 #   experience-multiplier: <percentage, Experience Multiplier>
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
+#   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
 #   keep-inventory: <bool, Whether the player keeps everything on death or not>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
@@ -139,6 +140,7 @@ difficulty:
     hunger-drain-chance: 60
     experience-multiplier: 70
     double-loot-chance: 0
+    allow-pvp: true
     keep-inventory: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
@@ -151,6 +153,7 @@ difficulty:
     hunger-drain-chance: 80
     experience-multiplier: 90
     double-loot-chance: 0
+    allow-pvp: true
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
@@ -161,9 +164,15 @@ difficulty:
     hunger-drain-chance: 100
     experience-multiplier: 125
     double-loot-chance: 5
+    allow-pvp: true
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
+
+# Messages that are sent to the player when the attacker or attackee has allow-pvp on false
+messages:
+  attacker-no-pvp: "You cannot attack this player because you're still having a hard time!"
+  attackee-no-pvp: "You cannot attack this player because he's already having a hard time!"
 
 # Some of these features are experimental, change existing features or have a chance to reduce performance
 advanced-features:
@@ -177,8 +186,8 @@ advanced-features:
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
   override-enchant-conflicts: false # Allows conflicting enchants to occur on a single armor (E.g. Protection & Fire Protection)
-  # These are the only mobs that will spawn with armor
-  # You can add any mob you want, but some will not show any armor. So it's not recommended to go too wild
+  # These are the only mobs that will spawn with these custom settings
+  # You can add any mob you want, but some will not show any armor. So it's not recommended going too wild
   includes-mobs:
   - ZOMBIE
   - SKELETON
@@ -267,8 +276,7 @@ custom-mob-items-spawn-chance:
   - binding_curse
   - unbreaking: 5
   # You'll need to use the EXACT same name as in difficulties.
-  # Will use the settings of the first difficulty if there are no default settings for a specific difficulty
-  # (E.g. if Extreme difficulty exists, but not here; will use Easy configs.)
+  # (E.g. if Extreme difficulty exists, but not here; will use the last difficulty that had)
   difficulties:
     Easy:
       max-enchants: 1
