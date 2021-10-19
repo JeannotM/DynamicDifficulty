@@ -15,8 +15,6 @@ import me.skinnyjeans.gmd.tabcompleter.AffinityTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Locale;
@@ -46,7 +44,8 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		af.exitProgram();
+		if(af != null)
+			af.exitProgram();
 		af = null;
 		data = null;
 	}

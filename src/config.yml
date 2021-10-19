@@ -289,7 +289,7 @@ calculating-affinity:
     affinity-limit: 700
     points-per-minute: 1
     block-mined: 1
-    player-hit: 0
+    player-hit: -1
     pvp-kill: 5
     pve-kill: 1
     death: -100

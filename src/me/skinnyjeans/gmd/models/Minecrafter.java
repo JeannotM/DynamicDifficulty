@@ -19,14 +19,14 @@ public class Minecrafter {
 
     public void setAffinity(int value) { affinity = value; }
     public void setMinAffinity(int value) {
-        if(maxAffinity != -1 && minAffinity != -1 && value > maxAffinity) {
+        if(maxAffinity != -1 && maxAffinity < value) {
             minAffinity = maxAffinity;
         } else {
             minAffinity = value;
         }
     }
     public void setMaxAffinity(int value) {
-        if(maxAffinity != -1 && minAffinity != -1 && value < minAffinity) {
+        if(minAffinity != -1 && minAffinity > value) {
             maxAffinity = minAffinity;
         } else {
             maxAffinity = value;

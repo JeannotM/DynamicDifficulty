@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.builder.Diff;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,7 +20,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -491,9 +489,9 @@ public class Affinity {
     }
 
     public int getMaxAffinity(UUID uuid) { return playerList.get(uuid).getMaxAffinity(); }
-    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity(uuid, x)); }
+    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity(null, x)); }
     public int getMinAffinity(UUID uuid) { return playerList.get(uuid).getMinAffinity(); }
-    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity(uuid, x)); }
+    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity(null, x)); }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
     public int getDifficultyAffinity(String x) { return difficultyList.get(x).getAffinity(); }
     public ArrayList<String> getDifficulties() { return difficulties; }
@@ -545,6 +543,43 @@ public class Affinity {
         return x;
     }
 
+    protected void addPlayerData(UUID uuid) {
+        Player usr = Bukkit.getOfflinePlayer(uuid).getPlayer();
+        if(!playerList.containsKey(uuid) && usr != null) {
+            SQL.getAffinityValues(uuid.toString(), r -> {
+                Minecrafter mc = new Minecrafter(usr.getName());
+                if (r.get(0) == -1) {
+                    mc.setAffinity(startAffinity);
+                    if (calcMaxAffinity) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else {
+                        mc.setMaxAffinity(-1);
+                    }
+                    if (calcMinAffinity) {
+                        mc.setMinAffinity(minAffinity);
+                    } else {
+                        mc.setMinAffinity(-1);
+                    }
+                    SQL.updatePlayer(uuid.toString(), startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
+                } else {
+                    mc.setAffinity(r.get(0));
+                    if (calcMaxAffinity && r.get(1) == -1) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else {
+                        mc.setMaxAffinity(r.get(1));
+                    }
+                    if (calcMinAffinity && r.get(2) == -1) {
+                        mc.setMinAffinity(minAffinity);
+                    } else {
+                        mc.setMinAffinity(r.get(2));
+                    }
+                }
+                playerList.put(uuid, mc);
+                playersUUID.put(usr.getName(), uuid);
+            });
+        }
+    }
+
     public ItemStack calcEnchant(ItemStack item, String piece, String diff, double chanceToEnchant) {
         for(int j=0;j<new Random().nextInt(difficultyList.get(diff).getMaxEnchants());j++) {
             Enchantment chosenEnchant = null;
@@ -553,7 +588,7 @@ public class Affinity {
             for(String s : enchantmentList.get(piece)) {
                 String[] spl = s.split(":");
                 if(s.startsWith("total")) {
-                    chosenAmount = new Random().nextInt(Integer.parseInt(spl[1]) + 1);
+                    chosenAmount = new Random().nextInt(Integer.parseInt(spl[1])) + 1;
                     continue;
                 }
 
@@ -585,19 +620,15 @@ public class Affinity {
             }
 
             int chosenLevel;
-            if(config.getBoolean("custom-mob-items-spawn-chance.override-default-limits", false)){
-                if(chosenEnchant.getMaxLevel() == 1) {
-                    chosenLevel = chosenEnchant.getMaxLevel();
-                } else {
-                    chosenLevel = new Random().nextInt(Math.round(difficultyList.get(diff).getMaxEnchantLevel() - 1)) + 1;
-                }
+            int maxlvl = Math.round(difficultyList.get(diff).getMaxEnchantLevel());
+            if(chosenEnchant.getMaxLevel() == 1) {
+                chosenLevel = chosenEnchant.getMaxLevel();
+            } else if (config.getBoolean("custom-mob-items-spawn-chance.override-default-limits", false)) {
+                chosenLevel = new Random().nextInt(Math.round(difficultyList.get(diff).getMaxEnchantLevel())) + 1;
+            } else if (maxlvl > chosenEnchant.getMaxLevel()) {
+                chosenLevel = new Random().nextInt(chosenEnchant.getMaxLevel()) + 1;
             } else {
-                int maxlvl = Math.round(difficultyList.get(diff).getMaxEnchantLevel());
-                if(maxlvl > chosenEnchant.getMaxLevel()) {
-                    chosenLevel = new Random().nextInt(chosenEnchant.getMaxLevel() - 1) + 1;
-                } else {
-                    chosenLevel = new Random().nextInt(maxlvl);
-                }
+                chosenLevel = new Random().nextInt(maxlvl);
             }
             item.addUnsafeEnchantment(chosenEnchant, chosenLevel);
             if(new Random().nextDouble() > chanceToEnchant)
@@ -720,7 +751,7 @@ public class Affinity {
     }
     protected void addAmountOfMinAffinity(UUID uuid, int x) {
         Minecrafter p = playerList.get(uuid);
-        p.setMinAffinity(calcAffinity(null, Math.min(p.getMaxAffinity() + x, minAffinityLimit)));
+        p.setMinAffinity(calcAffinity(null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
     }
     protected void addAmountOfMaxAffinity(UUID uuid, int x) {
         Minecrafter p = playerList.get(uuid);

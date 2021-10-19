@@ -32,17 +32,20 @@ public class AffinityCommands implements CommandExecutor {
             if(!oneArg.contains(args[0]) && args.length==1)
                 msg = "You forgot to include a user!";
 
-            if(args[1].equalsIgnoreCase("@a")) { Bukkit.getOnlinePlayers().forEach(pl -> playerList.add(pl.getName()));
-            } else if(args[1].equalsIgnoreCase("@p")) { playerList.add(Bukkit.selectEntities(sender, "@p").get(0).getName());
-            } else if(args[1].equalsIgnoreCase("@r")) { playerList.add(Bukkit.selectEntities(sender, "@r").get(0).getName());
-            } else if(args[1].equalsIgnoreCase("@s")) { if(!console) { playerList.add(sender.getName()); } else { msg = "You can't select the console or an commandBlock!"; }
-            } else { playerList.add(args[1]); }
+            if(args.length != 1) {
+                if(args[1].equalsIgnoreCase("@a")) { Bukkit.getOnlinePlayers().forEach(pl -> playerList.add(pl.getName()));
+                } else if(args[1].equalsIgnoreCase("@p")) { playerList.add(Bukkit.selectEntities(sender, "@p").get(0).getName());
+                } else if(args[1].equalsIgnoreCase("@r")) { playerList.add(Bukkit.selectEntities(sender, "@r").get(0).getName());
+                } else if(args[1].equalsIgnoreCase("@s")) { if(!console) { playerList.add(sender.getName()); } else { msg = "You can't select the console or an commandBlock!"; }
+                } else { playerList.add(args[1]); }
+            } else { playerList.add(sender.getName()); }
 
             if(msg != "")
                 return sendMSG(msg,sender,false);
 
             for(String name : playerList) {
-                if(msg.equals("") && args.length >= 2 && !name.equals("")) {
+                msg = "";
+                if(args.length >= 2 && !name.equals("")) {
                     if (name.equalsIgnoreCase("world")) {
                         arg1 = "world";
                     } else if(af.getPlayerUUID(name) != null && Bukkit.getOfflinePlayer(af.getPlayerUUID(name)).isOnline()) {
@@ -155,7 +158,7 @@ public class AffinityCommands implements CommandExecutor {
                 return "The world doesn't need a Max Affinity!";
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(uuid, amount);
+            amount = af.calcAffinity(null, amount);
             af.setMaxAffinity(uuid, amount);
             return "Set the Max Affinity to "+amount+" for "+user;
         } catch(Exception e) {
@@ -201,7 +204,7 @@ public class AffinityCommands implements CommandExecutor {
                 return "The world doesn't need a Min Affinity!";
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(uuid, amount);
+            amount = af.calcAffinity(null, amount);
             af.setMinAffinity(uuid, amount);
             return "Set the Min Affinity to "+amount+" for "+user;
         } catch(Exception e) {
