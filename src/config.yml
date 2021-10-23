@@ -18,6 +18,8 @@ death: -80
 
 # How Much Affinity a Player Starts With When Joining For The First Time.
 starting-affinity: 600
+starting-min-affinity: 0
+starting-max-affinity: 1500
 
 # What The Maximum and Minimum Affinity Are, no one can get more or less than this (even with commands)
 min-affinity: 0

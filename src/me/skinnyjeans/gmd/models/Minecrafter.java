@@ -5,8 +5,8 @@ import java.util.UUID;
 public class Minecrafter {
     private String name;
     private int affinity;
-    private int minAffinity;
-    private int maxAffinity;
+    private int minAffinity = -1;
+    private int maxAffinity = -1;
 
     public Minecrafter(String n) {
         name = n;

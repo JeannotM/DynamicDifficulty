@@ -48,7 +48,7 @@ public class File implements SaveManager {
     public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
             List<Integer> tmpArray = new ArrayList<>();
-            if(data.getDataFile().getInt(uuid + ".affinity") != -1) {
+            if(data.getDataFile().getString(uuid + ".affinity") != null) {
                 tmpArray.add(data.getDataFile().getInt(uuid + ".affinity"));
                 if(!uuid.equalsIgnoreCase("world")){
                     tmpArray.add(data.getDataFile().getInt(uuid + ".max-affinity"));

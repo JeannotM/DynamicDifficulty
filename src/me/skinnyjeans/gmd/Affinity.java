@@ -218,7 +218,7 @@ public class Affinity {
             tmp.setPrefix(section.getString(key + ".prefix", key));
             tmp.setHungerDrain(section.getInt(key + ".hunger-drain-chance", 100));
             tmp.setKeepInventory(section.getBoolean(key + ".keep-inventory", false));
-            tmp.setEffectsOnAttack(section.getBoolean(key + ".effects-when-attacked", true));
+            tmp.setEffectsOnAttack(section.getBoolean(key + ".effects-when-attacked"));
             tmp.setAllowPVP(section.getBoolean(key + ".allow-pvp", true));
             tmp.setDamageByMobs(dmgByMobs);
             tmp.setDamageOnMobs(dmgOnMobs);
@@ -553,12 +553,12 @@ public class Affinity {
                     if (calcMaxAffinity) {
                         mc.setMaxAffinity(maxAffinity);
                     } else {
-                        mc.setMaxAffinity(-1);
+                        mc.setMaxAffinity(calcAffinity(null, data.getConfig().getInt("starting-max-affinity", -1)));
                     }
                     if (calcMinAffinity) {
                         mc.setMinAffinity(minAffinity);
                     } else {
-                        mc.setMinAffinity(-1);
+                        mc.setMinAffinity(calcAffinity(null, data.getConfig().getInt("starting-min-affinity", -1)));
                     }
                     SQL.updatePlayer(uuid.toString(), startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
                 } else {
