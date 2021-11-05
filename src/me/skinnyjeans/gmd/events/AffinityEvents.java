@@ -53,38 +53,34 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
-            try {
-                if(e.getEntity().getKiller() instanceof Player) {
-                    UUID uuid = e.getEntity().getKiller().getUniqueId();
-                    if(playerList.get(uuid) == null)
-                        addPlayerData(uuid);
+            if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
+                UUID uuid = e.getEntity().getKiller().getUniqueId();
+                if(playerList.get(uuid) == null)
+                    addPlayerData(uuid);
 
-                    if (e.getEntity() instanceof Player) {
-                        addAmountOfAffinity(uuid, onPVPKill);
-                        if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
-                        if(calcMinAffinity)
-                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
-                    } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
-                        addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
-                        if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pve-kill"));
-                        if(calcMinAffinity)
-                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pve-kill"));
-                        if(ignoreMobs.contains(e.getEntity().getEntityId()))
-                            ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
-                    }
-
-                    if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
-                        e.setDroppedExp((int) (e.getDroppedExp() * calcPercentage(uuid, "experience-multiplier") / 100.0));
-                        double DoubleLoot = calcPercentage(uuid, "double-loot-chance");
-                        if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems())
-                            for (int i = 0; i < e.getDrops().size(); i++)
-                                Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
-                    }
+                if (e.getEntity() instanceof Player) {
+                    addAmountOfAffinity(uuid, onPVPKill);
+                    if(calcMaxAffinity)
+                        addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
+                    if(calcMinAffinity)
+                        addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
+                } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
+                    addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
+                    if(calcMaxAffinity)
+                        addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pve-kill"));
+                    if(calcMinAffinity)
+                        addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pve-kill"));
+                    if(ignoreMobs.contains(e.getEntity().getEntityId()))
+                        ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
                 }
-            } catch (NullPointerException er) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] NullPointerException. A plugin might be causing issues");
+
+                if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
+                    e.setDroppedExp((int) (e.getDroppedExp() * calcPercentage(uuid, "experience-multiplier") / 100.0));
+                    double DoubleLoot = calcPercentage(uuid, "double-loot-chance");
+                    if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems())
+                        for (int i = 0; i < e.getDrops().size(); i++)
+                            Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
+                }
             }
         }
     }
@@ -111,41 +107,39 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
-            try {
-                if (prey instanceof Player) {
-                    if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString()) && !ignoreMobs.contains(hunter.getEntityId())) {
-                        if (((HumanEntity)prey).isBlocking()) { return; }
-                        if(playerList.get(prey.getUniqueId()) == null)
-                            addPlayerData(prey.getUniqueId());
+            if (prey instanceof Player) {
+                if(playerList.get(prey.getUniqueId()) == null)
+                    addPlayerData(prey.getUniqueId());
+                if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString()) && !ignoreMobs.contains(hunter.getEntityId())) {
+                    if (((HumanEntity)prey).isBlocking()) { return; }
 
-                        UUID uuid = prey.getUniqueId();
-                        addAmountOfAffinity(uuid, onPlayerHit);
-                        double dam = e.getFinalDamage() * calcPercentage(uuid, "damage-done-by-mobs") / 100.0;
-                        e.setDamage(dam);
-
-                        if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.player-hit"));
-                        if(calcMinAffinity)
-                            addAmountOfMinAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.player-hit"));
-                    } else if(hunter instanceof Player) {
-                        if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
-                            if(config.getString("messages.attacker-no-pvp") != null && !config.getString("messages.attacker-no-pvp").equals(""))
-                                hunter.sendMessage(config.getString("messages.attacker-no-pvp"));
-                            e.setCancelled(true);
-                        } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
-                            if(config.getString("messages.attackee-no-pvp") != null && !config.getString("messages.attackee-no-pvp").equals(""))
-                                hunter.sendMessage(config.getString("messages.attackee-no-pvp"));
-                            e.setCancelled(true);
-                        }
-                    }
-                } else if (hunter instanceof Player && !disabledMobs.contains(prey.getType().toString()) && !ignoreMobs.contains(prey.getEntityId())) {
-                    double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
+                    UUID uuid = prey.getUniqueId();
+                    addAmountOfAffinity(uuid, onPlayerHit);
+                    double dam = e.getFinalDamage() * calcPercentage(uuid, "damage-done-by-mobs") / 100.0;
                     e.setDamage(dam);
-                    if(!mobsOverrideIgnore.contains(prey.getEntityId()))
-                        mobsOverrideIgnore.add(prey.getEntityId());
+
+                    if(calcMaxAffinity)
+                        addAmountOfMaxAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.player-hit"));
+                    if(calcMinAffinity)
+                        addAmountOfMinAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.player-hit"));
+                } else if(hunter instanceof Player) {
+                    if(playerList.get(hunter.getUniqueId()) == null)
+                        addPlayerData(hunter.getUniqueId());
+                    if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
+                        if(config.getString("messages.attacker-no-pvp") != null && !config.getString("messages.attacker-no-pvp").equals(""))
+                            hunter.sendMessage(config.getString("messages.attacker-no-pvp"));
+                        e.setCancelled(true);
+                    } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
+                        if(config.getString("messages.attackee-no-pvp") != null && !config.getString("messages.attackee-no-pvp").equals(""))
+                            hunter.sendMessage(config.getString("messages.attackee-no-pvp"));
+                        e.setCancelled(true);
+                    }
                 }
-            } catch (NullPointerException er) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] NullPointerException. A plugin might be causing issues");
+            } else if (hunter instanceof Player && !disabledMobs.contains(prey.getType().toString()) && !ignoreMobs.contains(prey.getEntityId())) {
+                double dam = e.getFinalDamage() * calcPercentage(hunter.getUniqueId(), "damage-done-on-mobs") / 100.0;
+                e.setDamage(dam);
+                if(!mobsOverrideIgnore.contains(prey.getEntityId()))
+                    mobsOverrideIgnore.add(prey.getEntityId());
             }
         }
     }
@@ -246,41 +240,35 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
-        try {
-            if(e.getEntity() instanceof Player) {
-                if(playerList.get(e.getEntity().getUniqueId()) == null)
-                    addPlayerData(e.getEntity().getUniqueId());
-                if(e.getEntity().getFoodLevel() > e.getFoodLevel())
-                    if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
-                        e.setCancelled(true);
-            }
-        }catch(NullPointerException ignored){}
+        if(e.getEntity() instanceof Player) {
+            if(playerList.get(e.getEntity().getUniqueId()) == null)
+                addPlayerData(e.getEntity().getUniqueId());
+            if(e.getEntity().getFoodLevel() > e.getFoodLevel())
+                if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
+                    e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
-        try {
-            if(e.getEntity() instanceof Player) {
-                if(playerList.get(e.getEntity().getUniqueId()) == null)
-                    addPlayerData(e.getEntity().getUniqueId());
-                if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
-                    if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
-                        e.setCancelled(true);
-            }
-        }catch(NullPointerException ignored){}
+        if(e.getEntity() instanceof Player) {
+            if(playerList.get(e.getEntity().getUniqueId()) == null)
+                addPlayerData(e.getEntity().getUniqueId());
+            if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
+                if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
+                    e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        try {
-            if(e.getTarget() instanceof Player) {
-                if(playerList.get(e.getEntity().getUniqueId()) == null)
-                    addPlayerData(e.getEntity().getUniqueId());
-                if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
-                    if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
-                        e.setCancelled(true);
-            }
-        }catch(NullPointerException ignored){}
+        if(e.getTarget() instanceof Player) {
+            if(playerList.get(e.getEntity().getUniqueId()) == null)
+                addPlayerData(e.getEntity().getUniqueId());
+            if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
+                if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
+                    e.setCancelled(true);
+        }
     }
 
     @EventHandler

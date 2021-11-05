@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.4
+version: 1.5
 author: SkinnyJeans
 api-version: 1.13
 softdepend: ['PlaceholderAPI']
@@ -9,20 +9,23 @@ permissions:
   affinity.*:
     default: op
     children:
-      affinity.get: true
-      affinity.author: true
-      affinity.add: true
-      affinity.remove: true
-      affinity.set: true
-      affinity.setmax: true
-      affinity.delmax: true
-      affinity.setmin: true
-      affinity.setmin: true
-      affinity.delmin: true
-      affinity.reload: true
-      affinity.force-save: true
-      affinity.playergui: true
+    affinity.help: true
+    affinity.get: true
+    affinity.author: true
+    affinity.add: true
+    affinity.remove: true
+    affinity.set: true
+    affinity.setmax: true
+    affinity.delmax: true
+    affinity.setmin: true
+    affinity.delmin: true
+    affinity.reload: true
+    affinity.force-save: true
+    affinity.playergui: true
 
+  affinity.help:
+    default: false
+    description: Returns all the commands of Dynamic Difficulty to the player
   affinity.get:
     default: false
     description: Allows a player to look up a someones affinity
