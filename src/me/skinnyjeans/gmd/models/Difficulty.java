@@ -27,6 +27,7 @@ public class Difficulty {
     private boolean effectsWhenAttacked;
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
     private HashMap<String, Double> armorChance = new HashMap<>();
+    private HashMap<String, Integer> armorDamageMultipliers = new HashMap<>();
 
     public Difficulty(String name) { difficultyName = name; }
 
@@ -42,6 +43,11 @@ public class Difficulty {
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
+    public int getArmorDamageMultiplier(String type) {
+        if(armorDamageMultipliers.containsKey(type))
+            return armorDamageMultipliers.get(type);
+        return -505;
+    }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
@@ -64,6 +70,7 @@ public class Difficulty {
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
     public void setDamageByRangedMobs(int value) { damageByRangedMobs = value; }
     public void setDoubleDurabilityDamageChance(int value) { doubleDurabilityDamageChance = value; }
+    public void setArmorDamageMultiplier(HashMap<String, Integer> value) { armorDamageMultipliers = value; }
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }

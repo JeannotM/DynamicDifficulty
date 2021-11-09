@@ -1,5 +1,6 @@
 package me.skinnyjeans.gmd;
 
+import com.mongodb.util.Hash;
 import me.skinnyjeans.gmd.hooks.SaveManager;
 import me.skinnyjeans.gmd.hooks.databases.*;
 import me.skinnyjeans.gmd.models.Difficulty;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffectType;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -29,7 +31,7 @@ public class Affinity {
     protected DataManager data;
     protected FileConfiguration config;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,startAffinity,onInterval,onPlayerHit,worldAffinity,maxAffinityLimit,minAffinityLimit;
-    protected boolean randomizer,calcMinAffinity,calcMaxAffinity,customArmorSpawnChance;
+    protected boolean randomizer,calcMinAffinity,calcMaxAffinity,customArmorSpawnChance,calculateExtraArmorDamage;
     protected String difficultyType,saveType;
     protected List<String> disabledMobs = new ArrayList<>();
     protected List<String> disabledWorlds = new ArrayList<>();
@@ -114,6 +116,7 @@ public class Affinity {
         disabledWorlds = config.getStringList("disabled-worlds");
         disabledMobs = config.getStringList("disabled-mobs");
         customArmorSpawnChance = config.getBoolean("advanced-features.custom-mob-items-spawn-chance", false);
+        calculateExtraArmorDamage = false;
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = config.getConfigurationSection("difficulty");
@@ -215,11 +218,19 @@ public class Affinity {
             int dmgOnMobs = (int) Math.ceil(section.getDouble(key + ".damage-done-on-mobs", 100.0) * config.getDouble(d+"damage-done-on-mobs-multiplier", 1.0));
 
             tmp.setAffinity(section.getInt(key + ".affinity-required"));
-            if(!section.isSet(key + ".mobs-ignore-player")) {
-                tmp.setIgnoredMobs(new ArrayList<>());
-            } else {
+            if(section.isSet(key + ".mobs-ignore-player"))
                 tmp.setIgnoredMobs(section.getStringList(key + ".mobs-ignore-player"));
+
+
+            if(section.isSet(key + ".extra-damage-for-certain-armor-types")){
+                ConfigurationSection damageTypes = section.getConfigurationSection(key + ".extra-damage-for-certain-armor-types");
+                HashMap<String, Integer> damage = new HashMap<>();
+                for(String value : damageTypes.getKeys(false))
+                    damage.put(value, damageTypes.getInt(value));
+                tmp.setArmorDamageMultiplier(damage);
+                calculateExtraArmorDamage = true;
             }
+
             tmp.setPrefix(section.getString(key + ".prefix", key));
             tmp.setHungerDrain(section.getInt(key + ".hunger-drain-chance", 100));
             tmp.setKeepInventory(section.getBoolean(key + ".keep-inventory", false));

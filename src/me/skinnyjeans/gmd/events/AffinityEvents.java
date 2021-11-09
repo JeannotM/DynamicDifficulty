@@ -143,7 +143,6 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
-        Bukkit.broadcastMessage(e.getEventName());
         if(playerList.get(e.getPlayer().getUniqueId()) == null)
             addPlayerData(e.getPlayer().getUniqueId());
 
@@ -173,13 +172,25 @@ public class AffinityEvents extends Affinity implements Listener {
                     UUID uuid = prey.getUniqueId();
                     addAmountOfAffinity(uuid, onPlayerHit);
                     double dam;
-                    if(e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
-                        dam = e.getFinalDamage() * (calcPercentage(uuid, "damage-done-by-ranged-mobs")) / 100.0;
-                    } else {
-                        dam = e.getFinalDamage() * calcPercentage(uuid, "damage-done-by-mobs") / 100.0;
-                    }
-                    e.setDamage(dam);
+                    int damageByArmor = 0;
 
+                    if(calculateExtraArmorDamage) {
+                        for(ItemStack x : ((Player)prey).getInventory().getArmorContents()) {
+                            String s = "nothing";
+                            if(x != null)
+                                s = x.getType().toString().split("_")[0].toLowerCase();
+                            int dmg = difficultyList.get(calcDifficulty(uuid)).getArmorDamageMultiplier(s);
+                            damageByArmor += ((dmg == -505) ? 0 : dmg);
+                        }
+                    }
+
+                    if(e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+                        dam = e.getFinalDamage() * (calcPercentage(uuid, "damage-done-by-ranged-mobs") + damageByArmor) / 100.0;
+                    } else {
+                        dam = e.getFinalDamage() * (calcPercentage(uuid, "damage-done-by-mobs") + damageByArmor) / 100.0;
+                    }
+
+                    e.setDamage(dam);
                     if(calcMaxAffinity)
                         addAmountOfMaxAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.player-hit"));
                     if(calcMinAffinity)
@@ -210,8 +221,6 @@ public class AffinityEvents extends Affinity implements Listener {
     public void onMobSpawn(CreatureSpawnEvent e) {
         if(!config.getStringList("custom-mob-items-spawn-chance.includes-mobs").contains(e.getEntity().getType().toString()))
             return;
-
-        Bukkit.broadcastMessage(e.getEventName());
 
         List<SpawnReason> naturalReasons = new ArrayList<>(Arrays.asList(SpawnReason.DEFAULT, SpawnReason.NATURAL));
         List<SpawnReason> spawnReasons = new ArrayList<>(Arrays.asList(SpawnReason.SPAWNER_EGG, SpawnReason.SPAWNER, SpawnReason.DISPENSE_EGG));
@@ -315,7 +324,6 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
-        Bukkit.broadcastMessage(e.getEventName());
         if(e.getEntity() instanceof Player) {
             if(playerList.get(e.getEntity().getUniqueId()) == null)
                 addPlayerData(e.getEntity().getUniqueId());
@@ -327,7 +335,6 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        Bukkit.broadcastMessage(e.getEventName());
         if(e.getTarget() instanceof Player) {
             if(playerList.get(e.getTarget().getUniqueId()) == null)
                 addPlayerData(e.getTarget().getUniqueId());
