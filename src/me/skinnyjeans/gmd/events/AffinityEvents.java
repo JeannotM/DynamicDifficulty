@@ -107,28 +107,29 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
-        Bukkit.broadcastMessage(e.getEventName());
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
                 UUID uuid = e.getEntity().getKiller().getUniqueId();
                 if(playerList.get(uuid) == null)
                     addPlayerData(uuid);
 
-                if (e.getEntity() instanceof Player) {
-                    addAmountOfAffinity(uuid, onPVPKill);
-                    if(calcMaxAffinity)
-                        addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
-                    if(calcMinAffinity)
-                        addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
-                } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
-                    addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
-                    if(calcMaxAffinity)
-                        addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pve-kill"));
-                    if(calcMinAffinity)
-                        addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pve-kill"));
-                    if(ignoreMobs.contains(e.getEntity().getEntityId()))
-                        ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
-                }
+                Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+                    if (e.getEntity() instanceof Player) {
+                        addAmountOfAffinity(uuid, onPVPKill);
+                        if(calcMaxAffinity)
+                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pvp-kill"));
+                        if(calcMinAffinity)
+                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pvp-kill"));
+                    } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
+                        addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
+                        if(calcMaxAffinity)
+                            addAmountOfMaxAffinity(uuid, config.getInt("calculating-affinity.max-affinity-changes.pve-kill"));
+                        if(calcMinAffinity)
+                            addAmountOfMinAffinity(uuid, config.getInt("calculating-affinity.min-affinity-changes.pve-kill"));
+                        if(ignoreMobs.contains(e.getEntity().getEntityId()))
+                            ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
+                    }
+                }));
 
                 if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
                     e.setDroppedExp((int) (e.getDroppedExp() * calcPercentage(uuid, "experience-multiplier") / 100.0));
@@ -146,16 +147,18 @@ public class AffinityEvents extends Affinity implements Listener {
         if(playerList.get(e.getPlayer().getUniqueId()) == null)
             addPlayerData(e.getPlayer().getUniqueId());
 
-        if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
-            if (blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
-                if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || config.getBoolean("silk-touch-allowed"))
-                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                        addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
-                        if(calcMaxAffinity)
-                            addAmountOfMaxAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.block-mined"));
-                        if(calcMinAffinity)
-                            addAmountOfMinAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.block-mined"));
-                    }
+        Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
+            if(!disabledWorlds.contains(e.getPlayer().getWorld().getName()))
+                if (blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
+                    if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || config.getBoolean("silk-touch-allowed"))
+                        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                            addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
+                            if(calcMaxAffinity)
+                                addAmountOfMaxAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.block-mined"));
+                            if(calcMinAffinity)
+                                addAmountOfMinAffinity(e.getPlayer().getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.block-mined"));
+                        }
+        }));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -312,7 +315,6 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
-        Bukkit.broadcastMessage(e.getEventName());
         if(e.getEntity() instanceof Player) {
             if(playerList.get(e.getEntity().getUniqueId()) == null)
                 addPlayerData(e.getEntity().getUniqueId());

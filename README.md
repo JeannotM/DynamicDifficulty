@@ -15,7 +15,7 @@ I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDif
 ```
 # The amount of affinity a user or the world increases (or decreases):
 # points-on-interval is made to give the user points every minute.
-points-per-minute: 5
+points-per-minute: 3
 
 # when a block from the blocks list is mined.
 block-mined: 2
@@ -132,6 +132,7 @@ difficulty-modifiers:
 #   keep-inventory: <bool, Whether the player keeps everything on death or not>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
+#   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 * 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
 #   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
 difficulty:
   Easy:
@@ -139,14 +140,17 @@ difficulty:
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
     hunger-drain-chance: 60
-    damage-done-by-ranged-mobs: 100
+    damage-done-by-ranged-mobs: 75
     double-durability-damage-chance: 0
     experience-multiplier: 70
     double-loot-chance: 0
-    allow-pvp: true
     keep-inventory: true
+    allow-pvp: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
+    extra-damage-for-certain-armor-types:
+      nothing: -3
+      leather: -1
     mobs-ignore-player:
     - CREEPER
   Normal:
@@ -175,6 +179,12 @@ difficulty:
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
+    extra-damage-for-certain-armor-types:
+      golden: 1
+      chainmail: 1
+      iron: 2
+      diamond: 4
+      netherite: 5
 
 # Messages that are sent to the player when the attacker or attackee has allow-pvp on false
 messages:
