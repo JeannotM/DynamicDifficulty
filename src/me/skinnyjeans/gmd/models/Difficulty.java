@@ -16,6 +16,8 @@ public class Difficulty {
     private int maxEnchants;
     private int maxEnchantLevel;
     private int difficultyUntil;
+    private int damageByRangedMobs;
+    private int doubleDurabilityDamageChance;
     private double armorDropChance;
     private double chanceToEnchant = Double.NaN;
     private double chanceToHaveArmor;
@@ -38,6 +40,8 @@ public class Difficulty {
     public int getDoubleLoot() { return doubleLootChance; }
     public int getMaxEnchants() { return maxEnchants; }
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
+    public int getDamageByRangedMobs() { return damageByRangedMobs; }
+    public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
@@ -58,6 +62,8 @@ public class Difficulty {
     public void setDoubleLoot(int value) { doubleLootChance = value; }
     public void setMaxEnchants(int value) { maxEnchants = value; }
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
+    public void setDamageByRangedMobs(int value) { damageByRangedMobs = value; }
+    public void setDoubleDurabilityDamageChance(int value) { doubleDurabilityDamageChance = value; }
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }

@@ -117,7 +117,6 @@ difficulty-modifiers:
   experience-multiplier: 1.0
   
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
-# Only "effects-when-attacked" affect the Wither and EnderDragon
 # To see mob damage: https://minecraft.gamepedia.com/Mob#Damage_dealt_by_hostile_and_neutral_mobs
 # Format if you want to create your own difficulty:
 # <custom_name>:
@@ -125,6 +124,8 @@ difficulty-modifiers:
 #   damage-done-by-mobs: <percentage, How much damage mobs do to you>
 #   damage-done-on-mobs: <percentage, How much damage you do on mobs>
 #   hunger-drain-chance: <percentage, Chance that the hunger of a player will drain>
+#   damage-done-by-ranged-mobs: <percentage, How much damage projectiles do>
+#   double-durability-damage-chance: <percentage, Chance to take double damage on item durability>
 #   experience-multiplier: <percentage, Experience Multiplier>
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
 #   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
@@ -138,6 +139,8 @@ difficulty:
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
     hunger-drain-chance: 60
+    damage-done-by-ranged-mobs: 100
+    double-durability-damage-chance: 0
     experience-multiplier: 70
     double-loot-chance: 0
     allow-pvp: true
@@ -151,6 +154,8 @@ difficulty:
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
     hunger-drain-chance: 80
+    damage-done-by-ranged-mobs: 100
+    double-durability-damage-chance: 1
     experience-multiplier: 90
     double-loot-chance: 0
     allow-pvp: true
@@ -162,6 +167,8 @@ difficulty:
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
     hunger-drain-chance: 100
+    damage-done-by-ranged-mobs: 125
+    double-durability-damage-chance: 5
     experience-multiplier: 125
     double-loot-chance: 5
     allow-pvp: true
@@ -398,9 +405,11 @@ I made this a separate option so you can decide yourself if you would like to ke
 If you'd like to read more about the psychology behind it: https://en.wikipedia.org/wiki/Flow_(psychology)
 
 ## Commands, Permissions and explanations
-The Commands aren't case sensitive, meaning both remove and ReMoVe will result in the same function being executed. Also applies to /aFFinIty. This does not work on player names though
+The Commands aren't case sensitive, meaning both remove and ReMoVe will result in the same function being executed. Also applies to /aFFinIty. This may not work on player names though
 If you want to change the settings of the world you'll need to replace the <user> part with world
 ```
+You can also add .other or .self after the permissions to only support 1 kind of change
+
 /Affinity set <user> <number>
 perm: affinity.set
 The amount of affinity an user will be set to.
@@ -474,7 +483,7 @@ Allows you to change all player settings in a chestGUI
 ## Other Small Things
 Feel free to contact me if you have any idea's that could expand/improve the DynamicDifficulty plugin or have any trouble getting it to work on your server due to errors
 - [x] Per player and World difficulties
-- [x] Permissions on Luckperms and other management tools
+- [x] Permissions on Luckperms and other management tools (now with .other & .self)
 - [x] Custom Affinity points for each mobs and blocks
 - [x] Implemented BStats & Placeholder API.
 - [x] Disable DD for certain worlds and Mobs
@@ -487,6 +496,7 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Hunger Drain
 - [x] Auto calculate Min Affinity setting
 - [x] Mob armor spawn chance
+- [x] 
 
 ## Possible Future Updates
 - [ ] per biome difficulty

@@ -35,7 +35,7 @@ public class Main extends JavaPlugin {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		getServer().getPluginManager().registerEvents(af, this);
-		this.getCommand("affinity").setExecutor(new AffinityCommands(af));
+		this.getCommand("affinity").setExecutor(new AffinityCommands(af, data));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
 
 		saveDataEveryFewMinutes();
@@ -104,6 +104,8 @@ public class Main extends JavaPlugin {
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
 				new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();
+
+
 	}
 }
 

@@ -50,6 +50,7 @@ public class Affinity {
     protected HashMap<String, UUID> playersUUID = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
     protected ArrayList<String> customSpawnWeapons = new ArrayList<>();
+    protected ArrayList<Material> ranged = new ArrayList<>(Arrays.asList(Material.BOW, Material.CROSSBOW));
     protected ArrayList<PotionEffectType> effects = new ArrayList<>(Arrays.asList(PotionEffectType.WITHER, PotionEffectType.POISON,
             PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW, PotionEffectType.CONFUSION, PotionEffectType.HUNGER));
     protected ArrayList<EntityPotionEffectEvent.Cause> effectCauses = new ArrayList<>(Arrays.asList(EntityPotionEffectEvent.Cause.ATTACK,
@@ -145,9 +146,9 @@ public class Affinity {
                 for(Object s : config.getList("calculating-affinity.max-affinity-changes.items-held-or-worn").toArray()) {
                     String[] sep = s.toString().replaceAll("[{|}]","").split("=");
                     maxAffinityListItems.add(sep[0]);
-                    try{
+                    try {
                         maxAffinityItems.put(sep[0], Integer.parseInt(sep[1]));
-                    } catch(Exception e){
+                    } catch(Exception e) {
                         maxAffinityItems.put(sep[0], 1);
                     }
                 }
@@ -214,12 +215,18 @@ public class Affinity {
             int dmgOnMobs = (int) Math.ceil(section.getDouble(key + ".damage-done-on-mobs", 100.0) * config.getDouble(d+"damage-done-on-mobs-multiplier", 1.0));
 
             tmp.setAffinity(section.getInt(key + ".affinity-required"));
-            tmp.setIgnoredMobs(section.getStringList(key + ".mobs-ignore-player"));
+            if(!section.isSet(key + ".mobs-ignore-player")) {
+                tmp.setIgnoredMobs(new ArrayList<>());
+            } else {
+                tmp.setIgnoredMobs(section.getStringList(key + ".mobs-ignore-player"));
+            }
             tmp.setPrefix(section.getString(key + ".prefix", key));
             tmp.setHungerDrain(section.getInt(key + ".hunger-drain-chance", 100));
             tmp.setKeepInventory(section.getBoolean(key + ".keep-inventory", false));
-            tmp.setEffectsOnAttack(section.getBoolean(key + ".effects-when-attacked"));
+            tmp.setEffectsOnAttack(section.getBoolean(key + ".effects-when-attacked", true));
+            tmp.setDamageByRangedMobs(section.getInt(key + ".damage-done-by-ranged-mobs", 100));
             tmp.setAllowPVP(section.getBoolean(key + ".allow-pvp", true));
+            tmp.setDoubleDurabilityDamageChance(section.getInt(key + ".double-durability-damage-chance", 0));
             tmp.setDamageByMobs(dmgByMobs);
             tmp.setDamageOnMobs(dmgOnMobs);
             tmp.setDoubleLoot(dblLoot);
@@ -408,7 +415,7 @@ public class Affinity {
             Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW+"[DynamicDifficulty] Invalid mobs in mobs-count-as-pve: "+mobNames.substring(0, mobNames.length() - 2));
     }
 
-    private void loadBlocks(){
+    private void loadBlocks() {
         String blockNames = "";
         Object[] tmpBlocks = config.getList("blocks").toArray();
         for(Object s : tmpBlocks) {
@@ -724,38 +731,46 @@ public class Affinity {
      * @param diff which is the difficulty setting
      * @return INT from the selected variable and difficulty
      */
-    private int getHashData(String mode, String diff) {
+    protected int getHashData(String mode, String diff) {
         if(difficultyList.containsKey(diff)) {
             Difficulty d = difficultyList.get(diff);
-            if(mode.equalsIgnoreCase("damage-done-by-mobs")) { return d.getDamageByMobs(); }
-            if(mode.equalsIgnoreCase("damage-done-on-mobs")) { return d.getDamageOnMobs(); }
-            if(mode.equalsIgnoreCase("experience-multiplier")) { return d.getExperienceMultiplier(); }
-            if(mode.equalsIgnoreCase("double-loot-chance")) { return d.getDoubleLoot(); }
-            if(mode.equalsIgnoreCase("hunger-drain-chance")) { return d.getHungerDrain(); }
-            if(mode.equalsIgnoreCase("chance-to-have-armor")) { return (int) Math.round(d.getChanceToHaveArmor()*100); }
-            if(mode.equalsIgnoreCase("chance-to-enchant-a-piece")) { return (int) Math.round(d.getChanceToEnchant()*100); }
-            if(mode.equalsIgnoreCase("weapon-chance")) { return (int) Math.round(d.getEnchantChance("weapon")*100); }
-            if(mode.equalsIgnoreCase("helmet-chance")) { return (int) Math.round(d.getEnchantChance("helmet")*100); }
-            if(mode.equalsIgnoreCase("chest-chance")) { return (int) Math.round(d.getEnchantChance("chest")*100); }
-            if(mode.equalsIgnoreCase("leggings-chance")) { return (int) Math.round(d.getEnchantChance("leggings")*100); }
-            if(mode.equalsIgnoreCase("boots-chance")) { return (int) Math.round(d.getEnchantChance("boots")*100); }
-            if(mode.equalsIgnoreCase("armor-drop-chance")) { return (int) Math.round(d.getArmorDropChance()*100); }
-            if(mode.equalsIgnoreCase("weapon-drop-chance")) { return (int) Math.round(d.getWeaponDropChance()*100); }
+            if(mode.equals("damage-done-by-mobs")) { return d.getDamageByMobs(); }
+            if(mode.equals("damage-done-on-mobs")) { return d.getDamageOnMobs(); }
+            if(mode.equals("experience-multiplier")) { return d.getExperienceMultiplier(); }
+            if(mode.equals("double-loot-chance")) { return d.getDoubleLoot(); }
+            if(mode.equals("hunger-drain-chance")) { return d.getHungerDrain(); }
+            if(mode.equals("double-durability-damage")) { return d.getDoubleDurabilityDamageChance(); }
+            if(mode.equals("damage-done-by-ranged-mobs")) { return d.getDamageByRangedMobs(); }
+            if(mode.equals("chance-to-have-armor")) { return (int) Math.round(d.getChanceToHaveArmor()*100); }
+            if(mode.equals("chance-to-enchant-a-piece")) { return (int) Math.round(d.getChanceToEnchant()*100); }
+            if(mode.equals("weapon-chance")) { return (int) Math.round(d.getEnchantChance("weapon")*100); }
+            if(mode.equals("helmet-chance")) { return (int) Math.round(d.getEnchantChance("helmet")*100); }
+            if(mode.equals("chest-chance")) { return (int) Math.round(d.getEnchantChance("chest")*100); }
+            if(mode.equals("leggings-chance")) { return (int) Math.round(d.getEnchantChance("leggings")*100); }
+            if(mode.equals("boots-chance")) { return (int) Math.round(d.getEnchantChance("boots")*100); }
+            if(mode.equals("armor-drop-chance")) { return (int) Math.round(d.getArmorDropChance()*100); }
+            if(mode.equals("weapon-drop-chance")) { return (int) Math.round(d.getWeaponDropChance()*100); }
         }
         return -1;
     }
 
     protected void addAmountOfAffinity(UUID uuid, int x) {
-        if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
-        else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
+        if(x != 0) {
+            if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
+            else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
+        }
     }
     protected void addAmountOfMinAffinity(UUID uuid, int x) {
-        Minecrafter p = playerList.get(uuid);
-        p.setMinAffinity(calcAffinity(null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
+        if(x != 0) {
+            Minecrafter p = playerList.get(uuid);
+            p.setMinAffinity(calcAffinity(null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
+        }
     }
     protected void addAmountOfMaxAffinity(UUID uuid, int x) {
-        Minecrafter p = playerList.get(uuid);
-        p.setMaxAffinity(calcAffinity(null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
+        if(x != 0) {
+            Minecrafter p = playerList.get(uuid);
+            p.setMaxAffinity(calcAffinity(null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
+        }
     }
 
     /** To increase/decrease players Affinity every minute */

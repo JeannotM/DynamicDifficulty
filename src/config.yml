@@ -98,13 +98,30 @@ difficulty-modifiers:
   experience-multiplier: 1.0
 
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
-# Copy one of the existing difficulty settings to create your own, check the Github page for more info
+# More information if you want to make your own difficulty (I'd recommend copying one of the other difficulties and changing values):
+# <custom_name>:
+#   affinity-required: <number, At What affinity this difficulty starts working>
+#   damage-done-by-mobs: <percentage, How much damage mobs do to you>
+#   damage-done-on-mobs: <percentage, How much damage you do on mobs>
+#   hunger-drain-chance: <percentage, Chance that the hunger of a player will drain>
+#   damage-done-by-ranged-mobs: <percentage, How much damage projectiles do>
+#   double-durability-damage-chance: <percentage, Chance to take double damage on item durability>
+#   experience-multiplier: <percentage, Experience Multiplier>
+#   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
+#   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
+#   keep-inventory: <bool, Whether the player keeps everything on death or not>
+#   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
+#   prefix: <text, prefix to return if PlaceholderAPI is enabled>
+#   extra-damage-for-certain-armor-types: <list, how much damage reduction/ count for per armor>
+#   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
 difficulty:
   Easy:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
     hunger-drain-chance: 60
+    damage-done-by-ranged-mobs: 100
+    double-durability-damage-chance: 0
     experience-multiplier: 70
     double-loot-chance: 0
     keep-inventory: true
@@ -118,6 +135,8 @@ difficulty:
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
     hunger-drain-chance: 80
+    damage-done-by-ranged-mobs: 100
+    double-durability-damage-chance: 1
     experience-multiplier: 90
     double-loot-chance: 0
     allow-pvp: true
@@ -129,17 +148,14 @@ difficulty:
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
     hunger-drain-chance: 100
+    damage-done-by-ranged-mobs: 125
+    double-durability-damage-chance: 5
     experience-multiplier: 125
     double-loot-chance: 5
     allow-pvp: true
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
-
-# Custom messages for players that are being attack or attack others.
-messages:
-  attacker-no-pvp: "You cannot attack this player because you're still having a hard time!"
-  attackee-no-pvp: "You cannot attack this player because he's already having a hard time!"
 
 # Some of these features are experimental, change existing features or have a chance to reduce server performance
 advanced-features:

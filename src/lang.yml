@@ -1,0 +1,50 @@
+# If you don't like any of the text, you can change it here. But it will hurt me emotionally :'(
+# Some of these prefixes won't work on all commands
+# %number% is used to display the number given by the player (E.g. 51, Easy, etc...)
+# %difficulty% is used to display the difficulty the player is in (works on a few of the commands with %number% for singular users)
+# %user% Is used to display given names or player names
+
+in-game:
+  attacker-no-pvp: "You cannot attack %user% because you're still having a hard time!"
+  attackee-no-pvp: "You cannot attack %user% because he's already having a hard time!"
+
+command:
+  set:
+    set-affinity: "%user% set to %difficulty% Difficulty with %number% Affinity Points"
+    set-max-affinity-for-all: "Set MaxAffinity to %number% for all Online Players!"
+    set-min-affinity-for-all: "Set MinAffinity to %number% for all Online Players!"
+    set-affinity-for-all: "Set Affinity to %number% for all Online Players!"
+    set-max-affinity: "Set the Max Affinity to %number% for %user%"
+    set-min-affinity: "Set the Min Affinity to %number% for %user%"
+  add:
+    added-to-all: "Added %number% Affinity points to all Online Players!"
+  remove:
+    remove-from-all: "Removed %number% Affinity points from all Online Players!"
+    all-max-affinity-removed: "All Online Player's MaxAffinity removed!"
+    all-min-affinity-removed: "All Online Player's MinAffinity removed!"
+    max-affinity: "Removed the Max Affinity for %user%"
+    min-affinity: "Removed the Min Affinity for %user%"
+  get:
+    cannot-use-get-for-all: "It's not recommended to use @a with the /get command"
+    has-affinity: "%user% has %number% Affinity points"
+    currently-on: "Currently on %difficulty% Difficulty"
+    max-affinity: "Max affinity: %number%"
+    min-affinity: "Min affinity: %number%"
+
+error:
+  no-permission: "You don't have permission to do that!"
+  cannot-find-self: "Can't find your username in the plugin, please rejoin the server"
+  add-force: "You'll need to add 'force' at the end for @a to work here"
+  include-number: "You need to include a Number or Difficulty with this command!"
+  something-wrong: "Something went wrong, please check the console for more info"
+  not-a-number: "%number% isn't a recognized difficulty or number"
+  cannot-be-found: "%user% Does not exist or hasn't been online yet"
+  world:
+    need-min-affinity: "The world doesn't need Min Affinity!"
+    need-max-affinity: "The world doesn't need Max Affinity!"
+    have-min-affinity: "The world doesn't have a Min Affinity!"
+    have-max-affinity: "The world doesn't have a Max Affinity!"
+  console:
+    cannot-open-playergui: "The Console can't open the PlayerGUI!"
+    console-selected: "You can't select the console or a command block!"
+    no-player-name: "You can't use this command as the console without providing a Player's name!"
