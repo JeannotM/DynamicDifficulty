@@ -69,14 +69,17 @@ public class AffinityEvents extends Affinity implements Listener {
             EntityPotionEffectEvent.getHandlerList().unregister(m);
         if(food == 0)
             FoodLevelChangeEvent.getHandlerList().unregister(m);
-        if(ignoredMobs == 0)
+        if(ignoredMobs == 0) {
             EntityTargetLivingEntityEvent.getHandlerList().unregister(m);
+        } else {
+            emptyHitMobsList();
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
-            if(playerList.get(e.getEntity().getUniqueId()) == null)
+            if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
 
             if(onDeath != 0)
@@ -97,7 +100,7 @@ public class AffinityEvents extends Affinity implements Listener {
     public void onItemDamage(PlayerItemDamageEvent e) {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName())) {
             UUID uuid = e.getPlayer().getUniqueId();
-            if(playerList.get(uuid) == null)
+            if(!playerList.containsKey(uuid))
                 addPlayerData(uuid);
 
             if(new Random().nextDouble() < calcPercentage(uuid, "double-durability-damage") / 100)
@@ -110,7 +113,7 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
                 UUID uuid = e.getEntity().getKiller().getUniqueId();
-                if(playerList.get(uuid) == null)
+                if(!playerList.containsKey(uuid))
                     addPlayerData(uuid);
 
                 Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
@@ -144,7 +147,7 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
-        if(playerList.get(e.getPlayer().getUniqueId()) == null)
+        if(!playerList.containsKey(e.getPlayer().getUniqueId()))
             addPlayerData(e.getPlayer().getUniqueId());
 
         Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
@@ -167,7 +170,7 @@ public class AffinityEvents extends Affinity implements Listener {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
             if (prey instanceof Player) {
-                if(playerList.get(prey.getUniqueId()) == null)
+                if(!playerList.containsKey(prey.getUniqueId()))
                     addPlayerData(prey.getUniqueId());
                 if (!(hunter instanceof Player) && !disabledMobs.contains(hunter.getType().toString()) && !ignoreMobs.contains(hunter.getEntityId())) {
                     if (((HumanEntity)prey).isBlocking()) { return; }
@@ -238,7 +241,7 @@ public class AffinityEvents extends Affinity implements Listener {
                     }
                 if(closestPlayer == null)
                     return;
-                if(playerList.get(closestPlayer.getUniqueId()) == null)
+                if(!playerList.containsKey(closestPlayer.getUniqueId()))
                     addPlayerData(closestPlayer.getUniqueId());
 
                 String diff = calcDifficulty(closestPlayer.getUniqueId());
@@ -316,7 +319,7 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
         if(e.getEntity() instanceof Player) {
-            if(playerList.get(e.getEntity().getUniqueId()) == null)
+            if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
             if(e.getEntity().getFoodLevel() > e.getFoodLevel())
                 if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
@@ -327,7 +330,7 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(e.getEntity() instanceof Player) {
-            if(playerList.get(e.getEntity().getUniqueId()) == null)
+            if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
             if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
                 if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
@@ -338,7 +341,7 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(e.getTarget() instanceof Player) {
-            if(playerList.get(e.getTarget().getUniqueId()) == null)
+            if(!playerList.containsKey(e.getTarget().getUniqueId()))
                 addPlayerData(e.getTarget().getUniqueId());
             if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
                 if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
@@ -348,7 +351,7 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if(playerList.get(e.getPlayer().getUniqueId()) == null)
+        if(!playerList.containsKey(e.getPlayer().getUniqueId()))
             addPlayerData(e.getPlayer().getUniqueId());
     }
 

@@ -1,7 +1,5 @@
 package me.skinnyjeans.gmd.models;
 
-import java.util.UUID;
-
 public class Minecrafter {
     private String name;
     private int affinity;

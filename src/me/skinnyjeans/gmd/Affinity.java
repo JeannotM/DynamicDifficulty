@@ -21,7 +21,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -41,6 +40,7 @@ public class Affinity {
     protected ArrayList<Integer> ignoreMobs = new ArrayList<>();
     protected HashMap<String, Difficulty> difficultyList = new HashMap<>();
     protected HashMap<UUID, Minecrafter> playerList = new HashMap<>();
+    protected HashMap<String, Minecrafter> biomeList = new HashMap<>();
     protected HashMap<String, Integer> chancePerArmor = new HashMap<>();
     protected HashMap<String, Integer> chancePerWeapon = new HashMap<>();
     protected HashMap<String, ArrayList<String>> enchantmentList = new HashMap<>();
@@ -66,7 +66,6 @@ public class Affinity {
 
     public Affinity(Main ma) {
         m = ma;
-        emptyHitMobsList();
         loadConfig();
         if(Bukkit.getOnlinePlayers().size() > 0) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Reloading or loading DynamicDifficulty with a plugin manager may break it!");
@@ -120,10 +119,15 @@ public class Affinity {
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = config.getConfigurationSection("difficulty");
-        calcMinAffinity = !difficultyType.equalsIgnoreCase("world") && config.getBoolean("advanced-features.auto-calculate-min-affinity", false);
-        calcMaxAffinity = !difficultyType.equalsIgnoreCase("world") && config.getBoolean("advanced-features.auto-calculate-max-affinity", false);
+        calcMinAffinity = difficultyType.equalsIgnoreCase("player") && config.getBoolean("advanced-features.auto-calculate-min-affinity", false);
+        calcMaxAffinity = difficultyType.equalsIgnoreCase("player") && config.getBoolean("advanced-features.auto-calculate-max-affinity", false);
         minAffinityLimit = minAffinity;
         maxAffinityLimit = maxAffinity;
+
+        if(section.getKeys(false).size() == 0) {
+            Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] You don't have any custom difficulties!!! Disabling Dynamic Difficulty.");
+            Bukkit.getPluginManager().disablePlugin(m);
+        }
 
         if((calcMinAffinity || calcMaxAffinity) && config.getInt("calculating-affinity.minute-interval-per-checking-equipment") > 0) {
             boolean onIntervalAllowed = false;
@@ -162,12 +166,11 @@ public class Affinity {
                     checkEquipmentEvery();
             }, 0L, time);
 
-            if(onIntervalAllowed) {
+            if(onIntervalAllowed)
                 Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(m, () -> {
                     if (Bukkit.getOnlinePlayers().size() > 0)
                         onIntervalMinMaxAffinity();
                 }, 0L, 1200);
-            }
         }
 
         if(SQL == null) {
@@ -342,10 +345,14 @@ public class Affinity {
                 customArmorSpawnChance = false;
             }
         }
+        if(difficultyType.equalsIgnoreCase("biome")) {
+
+        }
+
     }
 
     private void checkEquipmentEvery(){
-        if(calcMinAffinity) {
+        if(calcMinAffinity)
             Bukkit.getOnlinePlayers().forEach(pl -> {
                 ArrayList<String> equipment = new ArrayList<>();
                 if(pl.getEquipment().getItemInMainHand() != null){ equipment.add(pl.getEquipment().getItemInMainHand().getType().toString());}
@@ -358,9 +365,8 @@ public class Affinity {
                         addAmountOfMinAffinity(pl.getUniqueId(), minAffinityItems.get(s));
                     }
             });
-        }
 
-        if(calcMaxAffinity) {
+        if(calcMaxAffinity)
             Bukkit.getOnlinePlayers().forEach(pl -> {
                 ArrayList<String> equipment = new ArrayList<>();
                 if(pl.getEquipment().getItemInMainHand() != null){ equipment.add(pl.getEquipment().getItemInMainHand().getType().toString());}
@@ -373,7 +379,6 @@ public class Affinity {
                         addAmountOfMaxAffinity(pl.getUniqueId(), maxAffinityItems.get(s));
                     }
             });
-        }
     }
 
     private void loadWeapons() {
@@ -499,7 +504,7 @@ public class Affinity {
         else { playerList.get(uuid).setAffinity(calcAffinity(uuid, x)); }
     }
 
-    private void emptyHitMobsList() {
+    protected void emptyHitMobsList() {
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(m, () -> {
             if(mobsOverrideIgnore.size() > 0)
                 mobsOverrideIgnore.clear();
@@ -549,15 +554,15 @@ public class Affinity {
             x = minAffinity;
         }
 
-        if(uuid != null)
-            if(playerList.containsKey(uuid)) {
-                Minecrafter p = playerList.get(uuid);
-                if(p.getMaxAffinity() != -1 && x > p.getMaxAffinity()) {
-                    x = p.getMaxAffinity();
-                } else if(p.getMinAffinity() != -1 && x < p.getMinAffinity()) {
-                    x = p.getMinAffinity();
-                }
+        if(uuid != null && playerList.containsKey(uuid)) {
+            Minecrafter p = playerList.get(uuid);
+            if(p.getMaxAffinity() != -1 && x > p.getMaxAffinity()) {
+                x = p.getMaxAffinity();
+            } else if(p.getMinAffinity() != -1 && x < p.getMinAffinity()) {
+                x = p.getMinAffinity();
             }
+        }
+
         return x;
     }
 
@@ -584,12 +589,20 @@ public class Affinity {
                     if (calcMaxAffinity && r.get(1) == -1) {
                         mc.setMaxAffinity(maxAffinity);
                     } else {
-                        mc.setMaxAffinity(r.get(1));
+                        if(!calcMaxAffinity && r.get(1) == maxAffinity) {
+                            mc.setMaxAffinity(-1);
+                        } else {
+                            mc.setMaxAffinity(r.get(1));
+                        }
                     }
                     if (calcMinAffinity && r.get(2) == -1) {
                         mc.setMinAffinity(minAffinity);
                     } else {
-                        mc.setMinAffinity(r.get(2));
+                        if(!calcMinAffinity && r.get(2) == minAffinity) {
+                            mc.setMinAffinity(-1);
+                        } else {
+                            mc.setMinAffinity(r.get(1));
+                        }
                     }
                 }
                 playerList.put(uuid, mc);
@@ -626,7 +639,7 @@ public class Affinity {
                     if(allowed) {
                         if(enchantList.contains(chosenEnchant))
                             for(Enchantment currentEnchant : enchantList)
-                                if(item.containsEnchantment(currentEnchant)){
+                                if(item.containsEnchantment(currentEnchant)) {
                                     allowed = false;
                                     break;
                                 }
@@ -673,30 +686,9 @@ public class Affinity {
     public String calcDifficulty(UUID uuid) {
         if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
         int af = (uuid != null) ? playerList.get(uuid).getAffinity() : worldAffinity;
-        try {
-            for (int i = 0; i < difficulties.size(); i++)
-                if(af <= difficultyList.get(difficulties.get(i)).getUntil())
-                    return difficulties.get(i);
-        } catch(IndexOutOfBoundsException e) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] "+e+": Looks like the difficulties didn't load in properly, will try to load them in again. Unless difficulties is empty...");
-            reloadConfig();
-            if(difficulties.size() == 0) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Difficulties still haven't loaded in after reloading, Make sure you have atleast 1 difficulty in the config!");
-                Difficulty d = new Difficulty("Normal");
-                d.setAffinity(minAffinity);
-                d.setUntil(maxAffinity);
-                d.setDoubleLoot(0);
-                d.setExperienceMultiplier(90);
-                d.setDamageOnMobs(100);
-                d.setDamageByMobs(75);
-                d.setPrefix("&7&l[&9&lNormal&7&l]&r");
-                d.setEffectsOnAttack(true);
-                d.setKeepInventory(false);
-                difficultyList.put("Normal", d);
-                difficulties.add("Normal");
-                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW+"[DynamicDifficulty] Added the Normal difficulty from the default config");
-            }
-        }
+        for (int i = 0; i < difficulties.size(); i++)
+            if(af <= difficultyList.get(difficulties.get(i)).getUntil())
+                return difficulties.get(i);
         return difficulties.get(0);
     }
 
@@ -768,6 +760,7 @@ public class Affinity {
     protected void addAmountOfAffinity(UUID uuid, int x) {
         if(x != 0) {
             if (difficultyType.equalsIgnoreCase("world")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
+            if (difficultyType.equalsIgnoreCase("biome")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
             else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
         }
     }
@@ -801,7 +794,6 @@ public class Affinity {
     /** To increase/decrease players Min & Max Affinity every minute */
     public void onIntervalMinMaxAffinity() {
         Bukkit.getOnlinePlayers().forEach(pl -> {
-            Minecrafter mc = playerList.get(pl.getUniqueId());
             if(calcMaxAffinity)
                 addAmountOfMaxAffinity(pl.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.points-per-minute"));
             if(calcMinAffinity)

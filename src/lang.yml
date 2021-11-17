@@ -1,7 +1,7 @@
 # If you don't like any of the text, you can change it here. But it will hurt me emotionally :'(
 # Some of these prefixes won't work on all commands
-# %number% is used to display the number given by the player (E.g. 51, Easy, etc...)
-# %difficulty% is used to display the difficulty the player is in (works on a few of the commands with %number% for singular users)
+# %number% is used to display the number given by the player (1, 25, 59 etc)
+# %difficulty% is used to display the difficulty the player is in (works on most of the commands with %number% for Singular users)
 # %user% Is used to display given names or player names
 
 in-game:

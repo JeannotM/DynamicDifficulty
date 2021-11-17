@@ -31,12 +31,14 @@ public class Main extends JavaPlugin {
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
 		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
+		} else if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("biome")) {
+			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Biome Difficulty mode!");
 		} else {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}
 		getServer().getPluginManager().registerEvents(af, this);
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af, data));
-		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af));
+		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af, data));
 
 		saveDataEveryFewMinutes();
 		onInterval();
@@ -79,27 +81,25 @@ public class Main extends JavaPlugin {
 		if(worldNames != "")
 			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] The following worlds do not have their difficulty on Hard mode: "+worldNames);
 
-		if(data.getConfig().getBoolean("plugin-support.allow-bstats")){
-			Metrics m = new Metrics(this, 11417);
-			m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
-				data.getConfig().getString("difficulty-modifiers.type").toLowerCase(Locale.ROOT)
-			));
-			m.addCustomChart(new Metrics.SimplePie("save_type", () ->
-				data.getConfig().getString("saving-data.type").toLowerCase(Locale.ROOT)
-			));
-			m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
-				String.valueOf(data.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
-			));
-			m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
-				String.valueOf(data.getConfig().getBoolean("advanced-features.custom-mob-items-spawn-chance"))
-			));
-			m.addCustomChart(new Metrics.SimplePie("auto_calculate_minaffinity", () ->
-				String.valueOf(data.getConfig().getBoolean("advanced-features.auto-calculate-min-affinity"))
-			));
-			m.addCustomChart(new Metrics.SimplePie("auto_calculate_maxaffinity", () ->
-				String.valueOf(data.getConfig().getBoolean("advanced-features.auto-calculate-max-affinity"))
-			));
-		}
+		Metrics m = new Metrics(this, 11417);
+		m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
+			data.getConfig().getString("difficulty-modifiers.type").toLowerCase()
+		));
+		m.addCustomChart(new Metrics.SimplePie("save_type", () ->
+			data.getConfig().getString("saving-data.type").toLowerCase()
+		));
+		m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
+			String.valueOf(data.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
+		));
+		m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
+			data.getConfig().getString("advanced-features.custom-mob-items-spawn-chance", "false").toLowerCase()
+		));
+		m.addCustomChart(new Metrics.SimplePie("auto_calculate_minaffinity", () ->
+			data.getConfig().getString("advanced-features.auto-calculate-min-affinity", "false").toLowerCase()
+		));
+		m.addCustomChart(new Metrics.SimplePie("auto_calculate_maxaffinity", () ->
+			data.getConfig().getString("advanced-features.auto-calculate-max-affinity", "false").toLowerCase()
+		));
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)

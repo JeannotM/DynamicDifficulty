@@ -37,8 +37,8 @@ starting-affinity: 600
 
 # What The Minimum and Maximum Affinity Are, no one can get more or less than this (even with commands)
 # Any value is acceptable, but it's not recommended to go lower than 0 as it may break a few commands.
-min-affinity: 0
-max-affinity: 1500
+min-affinity: -1
+max-affinity: -1
 
 # Mobs That Will Give Points From "pve-kill" when killed: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
 # Format:
@@ -83,7 +83,6 @@ silk-touch-allowed: false
 # whether to hook into some other plugins or not. (List may be expanded in the future)
 plugin-support:
   allow-papi: false # Check the Github or Spigot page for the commands
-  allow-bstats: true # To Only Disable it on DynamicDifficulty (enabling bstats here when it's disabled won't work)
   use-prefix: true
   no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity.
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
@@ -506,10 +505,11 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Hunger Drain
 - [x] Auto calculate Min Affinity setting
 - [x] Mob armor spawn chance
-- [x] 
 
 ## Possible Future Updates
 - [ ] per biome difficulty
+- [ ] per biome difficulty adjustments (extra)
+- [ ] Block commands per difficulty
 - [ ] promoted/demoted message
 
 ## Extra thanks to:
