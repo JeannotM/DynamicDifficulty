@@ -3,10 +3,12 @@
 # %number% is used to display the number given by the player (1, 25, 59 etc)
 # %difficulty% is used to display the difficulty the player is in (works on most of the commands with %number% for Singular users)
 # %user% Is used to display given names or player names
+# Add custom colors using &color https://minecraft.fandom.com/wiki/Formatting_codes
 
 in-game:
   attacker-no-pvp: "You cannot attack %user% because you're still having a hard time!"
   attackee-no-pvp: "You cannot attack %user% because he's already having a hard time!"
+  command-not-allowed: "You're too good of a player too use this command!"
 
 command:
   set:
@@ -30,6 +32,9 @@ command:
     currently-on: "Currently on %difficulty% Difficulty"
     max-affinity: "Max affinity: %number%"
     min-affinity: "Min affinity: %number%"
+  other:
+    command-right-prefix: "&f"
+    command-wrong-prefix: "&c"
 
 error:
   no-permission: "You don't have permission to do that!"

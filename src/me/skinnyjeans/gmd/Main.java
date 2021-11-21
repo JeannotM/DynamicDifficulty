@@ -17,8 +17,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Locale;
-
 public class Main extends JavaPlugin {
 	
 	public DataManager data = new DataManager(this);
@@ -33,6 +31,8 @@ public class Main extends JavaPlugin {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
 		} else if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("biome")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Biome Difficulty mode!");
+		} else if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("radius")) {
+			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Radius Difficulty mode!");
 		} else {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
 		}

@@ -106,9 +106,13 @@ disabled-mobs:
 - WITHER
 
 difficulty-modifiers:
-  type: player # Supported difficulty types: player, world
+  type: player # Supported: player, world, radius
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
+  # needs type: radius for this to work. Will calculate the difficulties based on how far they are from the given x & y coordinates
+  radius-x: 0
+  radius-z: 0
+  max-radius-size: 10000
   # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
   damage-done-by-mobs-multiplier: 1.0
   damage-done-on-mobs-multiplier: 1.0
@@ -116,8 +120,7 @@ difficulty-modifiers:
   experience-multiplier: 1.0
   
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
-# To see mob damage: https://minecraft.gamepedia.com/Mob#Damage_dealt_by_hostile_and_neutral_mobs
-# Format if you want to create your own difficulty:
+# More information if you want to make your own difficulty (I'd recommend copying one of the other difficulties and changing values):
 # <custom_name>:
 #   affinity-required: <number, At What affinity this difficulty starts working>
 #   damage-done-by-mobs: <percentage, How much damage mobs do to you>
@@ -131,7 +134,8 @@ difficulty-modifiers:
 #   keep-inventory: <bool, Whether the player keeps everything on death or not>
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
-#   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 * 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
+#   commands-not-allowed-on-difficulty: <list, What commands aren't allowed to be run by players on certain difficulties, spaces not recommended>
+#   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 x 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
 #   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
 difficulty:
   Easy:
@@ -178,6 +182,9 @@ difficulty:
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
+    commands-not-allowed-on-difficulty:
+      - gotohome
+      - help 34
     extra-damage-for-certain-armor-types:
       golden: 1
       chainmail: 1
@@ -505,11 +512,12 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Hunger Drain
 - [x] Auto calculate Min Affinity setting
 - [x] Mob armor spawn chance
+- [x] Block commands per difficulty
+- [x] radial difficulty (gets harder the further you get away from spawn)
 
 ## Possible Future Updates
 - [ ] per biome difficulty
 - [ ] per biome difficulty adjustments (extra)
-- [ ] Block commands per difficulty
 - [ ] promoted/demoted message
 
 ## Extra thanks to:

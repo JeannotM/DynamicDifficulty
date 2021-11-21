@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -37,24 +38,27 @@ public class AffinityEvents extends Affinity implements Listener {
 
     protected void checkEvents() {
         int death = onDeath;
+        int disabledCommands = 0;
         int ignoredMobs = 0;
         int durabilty = 0;
         int effects = 0;
         int food = 0;
 
-        for(String d : difficulties) {
-            Difficulty diff = difficultyList.get(d);
+        for(String diff : difficulties) {
+            Difficulty d = difficultyList.get(diff);
 
-            if(diff.getKeepInventory())
+            if(d.getKeepInventory())
                 death++;
-            if(diff.getDoubleDurabilityDamageChance() != 0)
+            if(d.getDoubleDurabilityDamageChance() != 0)
                 durabilty++;
-            if(!diff.getEffectsOnAttack())
+            if(!d.getEffectsOnAttack())
                 effects++;
-            if(diff.getHungerDrain() != 100)
+            if(d.getHungerDrain() != 100)
                 food++;
-            if(diff.getIgnoredMobs() != null && !diff.getIgnoredMobs().isEmpty())
+            if(d.getIgnoredMobs() != null && !d.getIgnoredMobs().isEmpty())
                 ignoredMobs++;
+            if(d.getDisabledCommands() != null && !d.getDisabledCommands().isEmpty())
+                disabledCommands++;
         }
 
         if(blocks.size() == 0)
@@ -69,11 +73,35 @@ public class AffinityEvents extends Affinity implements Listener {
             EntityPotionEffectEvent.getHandlerList().unregister(m);
         if(food == 0)
             FoodLevelChangeEvent.getHandlerList().unregister(m);
+        if(disabledCommands == 0)
+            PlayerCommandPreprocessEvent.getHandlerList().unregister(m);
         if(ignoredMobs == 0) {
             EntityTargetLivingEntityEvent.getHandlerList().unregister(m);
         } else {
             emptyHitMobsList();
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void beforeCommand(PlayerCommandPreprocessEvent e) {
+        Player p = e.getPlayer();
+        if(!p.isOp())
+            if(playerList.containsKey(p.getUniqueId())) {
+                List<String> list = difficultyList.get(calcDifficulty(p.getUniqueId())).getDisabledCommands();
+                String cmd = "";
+                if(!list.isEmpty())
+                    for(String arg : e.getMessage().replace("/","").split(" ")) {
+                        if(!cmd.equals(""))
+                            cmd += " ";
+                        cmd += arg;
+                        if(list.contains(cmd)) {
+                            e.setCancelled(true);
+                            if(!data.getLang().getString("in-game.command-not-allowed").equals("") && data.getLang().getString("in-game.command-not-allowed") != null)
+                                e.getPlayer().sendMessage(data.getLang().getString("in-game.command-not-allowed"));
+                            return;
+                        }
+                    }
+            }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -110,7 +138,7 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
-        if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
+        if(!disabledWorlds.contains(e.getEntity().getWorld().getName()))
             if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
                 UUID uuid = e.getEntity().getKiller().getUniqueId();
                 if(!playerList.containsKey(uuid))
@@ -142,7 +170,6 @@ public class AffinityEvents extends Affinity implements Listener {
                             Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
                 }
             }
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -189,6 +216,8 @@ public class AffinityEvents extends Affinity implements Listener {
                             damageByArmor += ((dmg == -505) ? 0 : dmg);
                         }
                     }
+
+                    Bukkit.broadcastMessage("Damage done:" + calcPercentage(uuid, "damage-done-by-mobs"));
 
                     if(e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
                         dam = e.getFinalDamage() * (calcPercentage(uuid, "damage-done-by-ranged-mobs") + damageByArmor) / 100.0;

@@ -25,6 +25,7 @@ public class Difficulty {
     private boolean allowPVP;
     private boolean keepInventory;
     private boolean effectsWhenAttacked;
+    private List<String> disabledCommands = new ArrayList<>();
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
     private HashMap<String, Double> armorChance = new HashMap<>();
     private HashMap<String, Integer> armorDamageMultipliers = new HashMap<>();
@@ -52,6 +53,7 @@ public class Difficulty {
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
+    public List<String> getDisabledCommands() { return disabledCommands; }
     public double getEnchantChance(String type) { return armorChance.get(type); }
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
@@ -74,6 +76,7 @@ public class Difficulty {
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }
+    public void setDisabledCommands(List<String> value) { disabledCommands = value; }
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
     public void setEnchantChances(HashMap<String, Double> value) { armorChance = value; }
     public void setArmorDropChance(Double value) { armorDropChance = value; }

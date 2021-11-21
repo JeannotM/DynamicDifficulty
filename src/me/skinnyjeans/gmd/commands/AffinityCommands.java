@@ -49,22 +49,22 @@ public class AffinityCommands implements CommandExecutor {
                 else if(cmd.equals("help")){ return sendMSG(returnHelp(label, (Player)sender), sender, true); }
                 else if(cmd.equals("playergui")){
                     if(console)
-                        return sendMSG(lang.getString("error.console.cannot-open-playergui"), sender, false);
+                        return sendMSG(getString("error.console.cannot-open-playergui"), sender, false);
                     af.openPlayersInventory(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), 0);
                     return true;
                 }
             }
-            return sendMSG(lang.getString("error.no-permission"), sender, false);
+            return sendMSG(getString("error.no-permission"), sender, false);
         } else if(oneArg.contains(cmd)) {
             if (args.length == 1) {
                 if(!console) {
                     if(af.getPlayerUUID(sender.getName()) != null) {
                         userName = sender.getName();
                     } else {
-                        return sendMSG(lang.getString("error.cannot-find-self"), sender, false);
+                        return sendMSG(getString("error.cannot-find-self"), sender, false);
                     }
                 } else {
-                    return sendMSG(lang.getString("error.console.no-player-name"), sender, false);
+                    return sendMSG(getString("error.console.no-player-name"), sender, false);
                 }
             } else {
                 String p = args[1].toLowerCase();
@@ -72,38 +72,38 @@ public class AffinityCommands implements CommandExecutor {
                 else if(p.equals("@p") || p.equals("@r")) { userName = Bukkit.selectEntities(sender, p).get(0).getName(); }
                 else if(p.equals("@s")) {
                     if(console)
-                        return sendMSG(lang.getString("error.console.console-selected"), sender, false);
+                        return sendMSG(getString("error.console.console-selected"), sender, false);
                     userName = sender.getName();
                 }
 
                 if(playerList.size() != 0) {
                     if(args.length < 3 || !args[2].equalsIgnoreCase("force"))
-                        return sendMSG(lang.getString("error.add-force"), sender, false);
+                        return sendMSG(getString("error.add-force"), sender, false);
                 } else if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) != null) {
                     userName = args[1];
                 } else {
-                    return sendMSG(lang.getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
+                    return sendMSG(getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
                 }
             }
 
             if(!console)
                 if(sender.getName().equalsIgnoreCase(userName)) {
                     if(!hasSelfPermission(Bukkit.getPlayer(af.getPlayerUUID(sender.getName())), cmd))
-                        return sendMSG(lang.getString("error.no-permission"), sender, false);
+                        return sendMSG(getString("error.no-permission"), sender, false);
                 } else {
                     if(!hasOtherPermission(Bukkit.getPlayer(af.getPlayerUUID(sender.getName())), cmd))
-                        return sendMSG(lang.getString("error.no-permission"), sender, false);
+                        return sendMSG(getString("error.no-permission"), sender, false);
                 }
             if(playerList.size() != 0) {
                 String msg = "";
                 for(String user : playerList) {
                     if(cmd.equals("delmax")){ msg = removeMaxAffinity(user); }
                     else if(cmd.equals("delmin")){ msg = removeMinAffinity(user);}
-                    else if(cmd.equals("get")){ return sendMSG(lang.getString("command.selector.cannot-use-get-for-all"), sender, false);}
+                    else if(cmd.equals("get")){ return sendMSG(getString("command.selector.cannot-use-get-for-all"), sender, false);}
                 }
                 if(!msg.startsWith("Something went wrong")) {
-                    if(cmd.equals("delmax")){ return sendMSG(lang.getString("command.selector.all-max-affinity-removed"), sender, true); }
-                    else if(cmd.equals("delmin")){ return sendMSG(lang.getString("command.selector.all-min-affinity-removed"), sender, true); }
+                    if(cmd.equals("delmax")){ return sendMSG(getString("command.selector.all-max-affinity-removed"), sender, true); }
+                    else if(cmd.equals("delmin")){ return sendMSG(getString("command.selector.all-min-affinity-removed"), sender, true); }
                 }
                 return sendMSG(msg, sender, false);
             } else {
@@ -115,7 +115,7 @@ public class AffinityCommands implements CommandExecutor {
         } else if(twoArg.contains(cmd)) {
             int numberGiven = -1;
             if (args.length == 1) {
-                return sendMSG(lang.getString("error.include-number"), sender, false);
+                return sendMSG(getString("error.include-number"), sender, false);
             } else if (args.length == 2) {
                 if(!console) {
                     if(af.getPlayerUUID(sender.getName()) != null) {
@@ -126,14 +126,14 @@ public class AffinityCommands implements CommandExecutor {
                             try {
                                 numberGiven = Integer.parseInt(args[1]);
                             } catch(Exception ignored) {
-                                return sendMSG(lang.getString("error.not-a-number").replaceAll(number, args[1]), sender, false);
+                                return sendMSG(getString("error.not-a-number").replaceAll(number, args[1]), sender, false);
                             }
                         }
                     } else {
-                        return sendMSG(lang.getString("error.cannot-find-self"), sender, false);
+                        return sendMSG(getString("error.cannot-find-self"), sender, false);
                     }
                 } else {
-                    return sendMSG(lang.getString("error.console.no-player-name"), sender, false);
+                    return sendMSG(getString("error.console.no-player-name"), sender, false);
                 }
             } else {
                 String p = args[1].toLowerCase();
@@ -141,16 +141,16 @@ public class AffinityCommands implements CommandExecutor {
                 else if(p.equals("@p") || p.equals("@r")) { userName = Bukkit.selectEntities(sender, p).get(0).getName(); }
                 else if(p.equals("@s")) {
                     if(console)
-                        return sendMSG(lang.getString("error.console.console-selected"), sender, false);
+                        return sendMSG(getString("error.console.console-selected"), sender, false);
                     userName = sender.getName();
                 }
 
                 if(playerList.size() != 0) {
                     if(args.length < 4 || !args[3].equalsIgnoreCase("force"))
-                        return sendMSG(lang.getString("error.add-force"), sender, false);
+                        return sendMSG(getString("error.add-force"), sender, false);
                 } else if(userName.equals("")){
                     if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) == null)
-                        return sendMSG(lang.getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
+                        return sendMSG(getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
                     userName = args[1];
                 }
 
@@ -160,17 +160,17 @@ public class AffinityCommands implements CommandExecutor {
                     try {
                         numberGiven = Integer.parseInt(args[2]);
                     } catch(Exception ignored) {
-                        return sendMSG(lang.getString("error.not-a-number").replaceAll(number, args[2]), sender, false);
+                        return sendMSG(getString("error.not-a-number").replaceAll(number, args[2]), sender, false);
                     }
                 }
             }
 
             if(sender.getName().equalsIgnoreCase(userName)) {
                 if(!hasSelfPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
-                    return sendMSG(lang.getString("error.no-permission"), sender, false);
+                    return sendMSG(getString("error.no-permission"), sender, false);
             } else {
                 if(!hasOtherPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
-                    return sendMSG(lang.getString("error.no-permission"), sender, false);
+                    return sendMSG(getString("error.no-permission"), sender, false);
             }
 
             if(playerList.size() != 0) {
@@ -182,12 +182,12 @@ public class AffinityCommands implements CommandExecutor {
                     else if(cmd.equals("set")){ msg = setAffinity(user, numberGiven); }
                     else if(cmd.equals("add")){ msg = setAffinity(user, af.getAffinity(af.getPlayerUUID(user)) + numberGiven); }
                 }
-                if(!msg.equals(lang.getString("error.something-wrong"))) {
-                    if(cmd.equals("remove")){ return sendMSG(lang.getString("command.remove.remove-from-all").replaceAll(number, numberGiven + ""), sender, true); }
-                    else if(cmd.equals("setmax")){ return sendMSG(lang.getString("command.set.max-affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
-                    else if(cmd.equals("setmin")){ return sendMSG(lang.getString("command.set.min-affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
-                    else if(cmd.equals("set")){ return sendMSG(lang.getString("command.set.affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
-                    else if(cmd.equals("add")){ return sendMSG(lang.getString("command.add.added-to-all").replaceAll(number, numberGiven + ""), sender, true); }
+                if(!msg.equals(getString("error.something-wrong"))) {
+                    if(cmd.equals("remove")){ return sendMSG(getString("command.remove.remove-from-all").replaceAll(number, numberGiven + ""), sender, true); }
+                    else if(cmd.equals("setmax")){ return sendMSG(getString("command.set.max-affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
+                    else if(cmd.equals("setmin")){ return sendMSG(getString("command.set.min-affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
+                    else if(cmd.equals("set")){ return sendMSG(getString("command.set.affinity-for-all").replaceAll(number, numberGiven + ""), sender, true); }
+                    else if(cmd.equals("add")){ return sendMSG(getString("command.add.added-to-all").replaceAll(number, numberGiven + ""), sender, true); }
                 }
                 return sendMSG(msg, sender, false);
             } else {
@@ -271,10 +271,10 @@ public class AffinityCommands implements CommandExecutor {
             UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
             amount = af.calcAffinity(uuid, amount);
             af.setAffinity(uuid, amount);
-            return lang.getString("command.set.set-affinity").replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid)).replaceAll(pUser, user);
+            return getString("command.set.set-affinity").replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid)).replaceAll(pUser, user);
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
     }
 
@@ -288,16 +288,20 @@ public class AffinityCommands implements CommandExecutor {
     private String setMaxAffinity(String user, int amount) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return lang.getString("error.world.need-max-affinity");
+                return getString("error.world.need-max-affinity");
 
             UUID uuid = af.getPlayerUUID(user);
             amount = af.calcAffinity(null, amount);
             af.setMaxAffinity(uuid, amount);
-            return lang.getString("command.set.set-max-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            return getString("command.set.set-max-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
+    }
+
+    private String getString(String msg) {
+        return ChatColor.translateAlternateColorCodes('&', lang.getString(msg));
     }
 
     /**
@@ -310,15 +314,15 @@ public class AffinityCommands implements CommandExecutor {
     private String setMinAffinity(String user, int amount) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return lang.getString("error.world.need-min-affinity");
+                return getString("error.world.need-min-affinity");
 
             UUID uuid = af.getPlayerUUID(user);
             amount = af.calcAffinity(null, amount);
             af.setMinAffinity(uuid, amount);
-            return lang.getString("command.set.set-min-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            return getString("command.set.set-min-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
     }
 
@@ -331,14 +335,14 @@ public class AffinityCommands implements CommandExecutor {
     private String removeMaxAffinity(String user) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return lang.getString("error.world.have-max-affinity");
+                return getString("error.world.have-max-affinity");
 
             af.setMaxAffinity(af.getPlayerUUID(user), -1);
-            return lang.getString("command.remove.max-affinity").replaceAll(pUser, user);
+            return getString("command.remove.max-affinity").replaceAll(pUser, user);
         }
         catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
     }
 
@@ -351,13 +355,13 @@ public class AffinityCommands implements CommandExecutor {
     private String removeMinAffinity(String user) {
         try {
             if(user.equalsIgnoreCase("world"))
-                return lang.getString("error.world.have-min-affinity");
+                return getString("error.world.have-min-affinity");
             af.setMinAffinity(af.getPlayerUUID(user), -1);
-            return lang.getString("command.remove.min-affinity").replaceAll(pUser, user);
+            return getString("command.remove.min-affinity").replaceAll(pUser, user);
         }
         catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
     }
 
@@ -371,16 +375,16 @@ public class AffinityCommands implements CommandExecutor {
         try {
             UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
 
-            String msg = lang.getString("command.get.has-affinity").replaceAll(pUser, user).replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
-            msg+="\n"+lang.getString("command.get.currently-on").replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            String msg = getString("command.get.has-affinity").replaceAll(pUser, user).replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            msg+="\n"+getString("command.get.currently-on").replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
             if(uuid != null && af.getMaxAffinity(uuid) != -1)
-                msg+="\n"+lang.getString("command.get.max-affinity").replaceAll(number, af.getMaxAffinity(uuid)+"");
+                msg+="\n"+getString("command.get.max-affinity").replaceAll(number, af.getMaxAffinity(uuid)+"");
             if(uuid != null && af.getMinAffinity(uuid) != -1)
-                msg+="\n"+lang.getString("command.get.min-affinity").replaceAll(number, af.getMinAffinity(uuid)+"");
+                msg+="\n"+getString("command.get.min-affinity").replaceAll(number, af.getMinAffinity(uuid)+"");
             return msg;
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
-            return lang.getString("error.something-wrong");
+            return getString("error.something-wrong");
         }
     }
 
@@ -420,7 +424,7 @@ public class AffinityCommands implements CommandExecutor {
         if(msg == null || msg.equals(""))
             return r;
 
-        String coloredMessage = ((r) ? ChatColor.WHITE : ChatColor.RED) + msg;
+        String coloredMessage = ((r) ? getString("command.other.command-right-prefix") : getString("command.other.command-wrong-prefix")) + msg;
 
         if (sender instanceof Player) {
             ((Player) sender).getPlayer().sendMessage(coloredMessage);

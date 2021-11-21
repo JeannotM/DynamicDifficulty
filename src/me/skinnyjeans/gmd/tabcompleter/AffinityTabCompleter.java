@@ -22,12 +22,8 @@ public class AffinityTabCompleter implements TabCompleter {
 
     public AffinityTabCompleter(Affinity af, DataManager data){
         numbers.addAll(af.getDifficulties());
-        if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
+        if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world"))
             extraNames.add("world");
-        } else if (data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("biome")) {
-            for (Biome b : Biome.values())
-                extraNames.add(b.toString());
-        }
     }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
