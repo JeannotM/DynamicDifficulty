@@ -88,15 +88,16 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!p.isOp())
             if(playerList.containsKey(p.getUniqueId())) {
                 List<String> list = difficultyList.get(calcDifficulty(p.getUniqueId())).getDisabledCommands();
-                String cmd = "";
+                StringBuilder cmd = new StringBuilder("");
+                String[] args = e.getMessage().replace("/","").split(" ");
                 if(!list.isEmpty())
-                    for(String arg : e.getMessage().replace("/","").split(" ")) {
-                        if(!cmd.equals(""))
-                            cmd += " ";
-                        cmd += arg;
-                        if(list.contains(cmd)) {
+                    for(String arg : args) {
+                        if(cmd.length() != 0)
+                            cmd.append(" ");
+                        cmd.append(arg);
+                        if(list.contains(cmd.toString())) {
                             e.setCancelled(true);
-                            if(!data.getLang().getString("in-game.command-not-allowed").equals("") && data.getLang().getString("in-game.command-not-allowed") != null)
+                            if(data.getLang().isSet("in-game.command-not-allowed") && data.getLang().getString("in-game.command-not-allowed").length() != 0)
                                 e.getPlayer().sendMessage(data.getLang().getString("in-game.command-not-allowed"));
                             return;
                         }
@@ -217,8 +218,6 @@ public class AffinityEvents extends Affinity implements Listener {
                         }
                     }
 
-                    Bukkit.broadcastMessage("Damage done:" + calcPercentage(uuid, "damage-done-by-mobs"));
-
                     if(e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
                         dam = e.getFinalDamage() * (calcPercentage(uuid, "damage-done-by-ranged-mobs") + damageByArmor) / 100.0;
                     } else {
@@ -234,11 +233,11 @@ public class AffinityEvents extends Affinity implements Listener {
                     if(playerList.get(hunter.getUniqueId()) == null)
                         addPlayerData(hunter.getUniqueId());
                     if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
-                        if(data.getLang().getString("in-game.attacker-no-pvp") != null && !data.getLang().getString("in-game.attacker-no-pvp").equals(""))
+                        if(data.getLang().isSet("in-game.attacker-no-pvp") && data.getLang().getString("in-game.attacker-no-pvp").length() != 0)
                             hunter.sendMessage(config.getString("in-game.attacker-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
                         e.setCancelled(true);
                     } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
-                        if(data.getLang().getString("in-game.attackee-no-pvp") != null && !data.getLang().getString("in-game.attackee-no-pvp").equals(""))
+                        if(data.getLang().isSet("in-game.attackee-no-pvp") && data.getLang().getString("in-game.attackee-no-pvp").length() != 0)
                             hunter.sendMessage(config.getString("in-game.attackee-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
                         e.setCancelled(true);
                     }
@@ -263,7 +262,8 @@ public class AffinityEvents extends Affinity implements Listener {
             Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
                 Player closestPlayer = null;
                 double distance = 1024.0;
-                for(Player pl : Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers())
+                List<Player> onlinePlayers = Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers();
+                for(Player pl : onlinePlayers)
                     if(e.getEntity().getLocation().distance(pl.getLocation()) < distance) {
                         distance = e.getEntity().getLocation().distance(pl.getLocation());
                         closestPlayer = pl;

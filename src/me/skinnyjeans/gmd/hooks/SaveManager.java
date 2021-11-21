@@ -1,8 +1,7 @@
 package me.skinnyjeans.gmd.hooks;
 
 import me.skinnyjeans.gmd.Affinity;
-
-import java.sql.*;
+import java.sql.SQLException;
 
 public interface SaveManager {
     interface findBooleanCallback { void onQueryDone(boolean r); }

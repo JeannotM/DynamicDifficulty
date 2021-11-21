@@ -35,6 +35,8 @@ command:
   other:
     command-right-prefix: "&f"
     command-wrong-prefix: "&c"
+    reload-config: "Config has successfully been reloaded!"
+    force-save: "Player data has been saved!"
 
 error:
   no-permission: "You don't have permission to do that!"

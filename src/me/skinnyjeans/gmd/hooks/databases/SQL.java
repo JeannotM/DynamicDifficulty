@@ -12,12 +12,12 @@ import java.util.*;
 public class SQL implements SaveManager {
     private final String tbName = "dynamicdifficulty";
     private final Main plugin;
-    private String host = "localhost";
-    private String port = "3306";
-    private String dbName = "dynamicdifficulty";
-    private String user;
-    private String pwd;
-    private String saveType = "";
+    private final String host;
+    private final String port;
+    private final String dbName;
+    private final String user;
+    private final String pwd;
+    private final String saveType;
     private Connection connection = null;
 
     public SQL(Main m, DataManager data, String sT) throws SQLException, ClassNotFoundException {
@@ -27,9 +27,9 @@ public class SQL implements SaveManager {
         dbName = data.getConfig().getString("saving-data.database");
         user = data.getConfig().getString("saving-data.username", "root");
         pwd = data.getConfig().getString("saving-data.password", "");
-        saveType = sT;
+        saveType = sT.toLowerCase();
         connect();
-        if(sT.equalsIgnoreCase("mysql"))
+        if(sT.equals("mysql"))
             addColumnsNotExists();
         createTable();
     }
@@ -39,32 +39,32 @@ public class SQL implements SaveManager {
 
     public void connect() throws SQLException, ClassNotFoundException {
         if(!isConnected()){
-            if(saveType.equalsIgnoreCase("mysql")) {
-                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes", user, pwd);
+            if(saveType.equals("mysql")) {
+                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to MySQL!");
-            } else if (saveType.equalsIgnoreCase("sqlite")){
-                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db?autoReconnect=true&useUnicode=yes");
+            } else if (saveType.equals("sqlite")){
+                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true");
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to SQLite!");
-            } else if (saveType.equalsIgnoreCase("postgresql")) {
+            } else if (saveType.equals("postgresql")) {
                 Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes", user, pwd);
+                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
                 Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to PostGreSQL!");
             }
         }
     }
 
     public void addColumnsNotExists() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
                         "ADD COLUMN MinAffinity INT DEFAULT -1");
                 ps.executeUpdate();
-            } catch(Exception e) {}
-        }));
+            } catch(Exception e) { e.printStackTrace(); }
+        });
     }
 
     public void createTable() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
                     PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
@@ -76,10 +76,8 @@ public class SQL implements SaveManager {
                             "PRIMARY KEY(UUID))");
                     ps.execute();
                 }
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-        }));
+            } catch(SQLException e) { e.printStackTrace(); }
+        });
     }
 
     @Override
@@ -92,7 +90,7 @@ public class SQL implements SaveManager {
                         ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
                         ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
-                        ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+                        ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName()));
                     }
                     ps.setInt(1, af);
                     ps.setInt(2, maxAf);
@@ -100,41 +98,35 @@ public class SQL implements SaveManager {
                     ps.setString(4, (uuid.equals("world")  ? "world" : uuid));
                     ps.executeUpdate();
                 }
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+            } catch(SQLException e) { e.printStackTrace(); }
         });
     }
 
     @Override
     public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
-            List<Integer> tmpArray = new ArrayList<>();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            List<Integer> tmpArray = new ArrayList<>(Arrays.asList(-1));
             try {
                 if(isConnected()) {
                     PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
                     ps.setString(1, uuid);
                     ResultSet result = ps.executeQuery();
                     if(result.next()){
-                        tmpArray.add(result.getInt("Affinity"));
+                        tmpArray.set(0, result.getInt("Affinity"));
                         tmpArray.add(result.getInt("MaxAffinity"));
                         tmpArray.add(result.getInt("MinAffinity"));
                         callback.onQueryDone(tmpArray);
                         return;
                     }
                 }
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-            tmpArray.add(0, -1);
+            } catch(SQLException e) { e.printStackTrace(); }
             callback.onQueryDone(tmpArray);
-            return;
-        }));
+        });
     }
 
     @Override
     public void playerExists(String uuid, final findBooleanCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
                     PreparedStatement ps = getConnection().prepareStatement("SELECT * FROM "+tbName+" WHERE UUID=?");
@@ -145,11 +137,9 @@ public class SQL implements SaveManager {
                         return;
                     }
                 }
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+            } catch(SQLException e) { e.printStackTrace(); }
             callback.onQueryDone(false);
-        }));
+        });
     }
 
     @Override

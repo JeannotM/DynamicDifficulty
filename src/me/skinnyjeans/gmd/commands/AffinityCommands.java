@@ -42,7 +42,7 @@ public class AffinityCommands implements CommandExecutor {
         String cmd = args[0].toLowerCase();
 
         if(noArg.contains(cmd)){
-            if(console || hasPermission(Bukkit.getPlayer(af.getPlayerUUID(sender.getName())), cmd)) {
+            if(console || hasPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd)) {
                 if(cmd.equals("author")){ return sendMSG(sendAuthor((Player)sender), sender, true); }
                 else if(cmd.equals("reload")){ return sendMSG(reloadConfig(), sender, true); }
                 else if(cmd.equals("force-save")){ return sendMSG(forceSave(), sender, true); }
@@ -88,10 +88,10 @@ public class AffinityCommands implements CommandExecutor {
 
             if(!console)
                 if(sender.getName().equalsIgnoreCase(userName)) {
-                    if(!hasSelfPermission(Bukkit.getPlayer(af.getPlayerUUID(sender.getName())), cmd))
+                    if(!hasSelfPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
                         return sendMSG(getString("error.no-permission"), sender, false);
                 } else {
-                    if(!hasOtherPermission(Bukkit.getPlayer(af.getPlayerUUID(sender.getName())), cmd))
+                    if(!hasOtherPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
                         return sendMSG(getString("error.no-permission"), sender, false);
                 }
             if(playerList.size() != 0) {
@@ -148,7 +148,7 @@ public class AffinityCommands implements CommandExecutor {
                 if(playerList.size() != 0) {
                     if(args.length < 4 || !args[3].equalsIgnoreCase("force"))
                         return sendMSG(getString("error.add-force"), sender, false);
-                } else if(userName.equals("")){
+                } else if(userName.length() == 0){
                     if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) == null)
                         return sendMSG(getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
                     userName = args[1];
@@ -253,7 +253,8 @@ public class AffinityCommands implements CommandExecutor {
 
     private TextComponent constructText(String cmd, String hoverItem) {
         TextComponent message = new TextComponent(cmd);
-        String cmdSuggest = cmd.split(" ")[0].substring(2) + " " + cmd.split(" ")[1]+ " ";
+        String[] split = cmd.split(" ");
+        String cmdSuggest = split[0].substring(2) + " " + split[1]+ " ";
         message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, cmdSuggest));
         message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(cmd + " " + hoverItem)));
         return message;
@@ -404,12 +405,12 @@ public class AffinityCommands implements CommandExecutor {
 
     private String forceSave() {
         af.saveData();
-        return "saved Succesfully";
+        return getString("command.other.force-save");
     }
 
     private String reloadConfig() {
         af.reloadConfig();
-        return "Succesfully reloaded the config!";
+        return getString("command.other.reload-config");
     }
 
     /**
@@ -421,7 +422,7 @@ public class AffinityCommands implements CommandExecutor {
      * @return a boolean
      */
     private boolean sendMSG(String msg, CommandSender sender, boolean r) {
-        if(msg == null || msg.equals(""))
+        if(msg == null || msg.length() == 0)
             return r;
 
         String coloredMessage = ((r) ? getString("command.other.command-right-prefix") : getString("command.other.command-wrong-prefix")) + msg;

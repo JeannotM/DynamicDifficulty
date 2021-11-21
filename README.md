@@ -522,6 +522,9 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 
 ## Extra thanks to:
 Noiverre - For testing the Papi functions (Because there were a few issues sometimes)
+
 Mithran - For submitting several idea's and informing me of a lot of issues
+
 CodedRed - For all the Minecraft plugin videos
+
 Len76 - For testing Dynamic Difficulty, giving a few idea's and giving some advice regarding performance

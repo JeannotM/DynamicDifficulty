@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class MongoDB implements SaveManager {
-    private final String tbName = "dynamicdifficulty";
     private final Main plugin;
-    private String host = "localhost";
-    private String port = "3306";
-    private String dbName = "dynamicdifficulty";
-    private String user = "root";
-    private String pwd = "";
+    private final String host;
+    private final String port;
+    private final String dbName;
+    private final String user;
+    private final String pwd;
     private MongoClient connection;
 
     public MongoDB(Main m, DataManager data) throws UnknownHostException {
@@ -33,7 +32,7 @@ public class MongoDB implements SaveManager {
         connect();
     }
 
-    public DBCollection getConnection() { return connection.getDB(dbName).getCollection(tbName) ;}
+    public DBCollection getConnection() { return connection.getDB(dbName).getCollection("dynamicdifficulty") ;}
     public boolean isConnected() { return connection != null; }
 
     public void connect() throws UnknownHostException {
@@ -54,12 +53,12 @@ public class MongoDB implements SaveManager {
         playerExists(uuid, r -> {
             try {
                 if(isConnected()) {
-                    DBObject obj = new BasicDBObject("_id", uuid).append("Affinity", af)
+                    BasicDBObject obj = new BasicDBObject("_id", uuid).append("Affinity", af)
                             .append("MinAffinity", minAf).append("MaxAffinity", maxAf);
                     try {
-                        ((BasicDBObject) obj).append("Name", (uuid.equals("world") ? "world" : Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+                        obj.append("Name", (uuid.equalsIgnoreCase("world") ? "world" : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName()));
                     } catch(Exception e) {
-                        ((BasicDBObject) obj).append("Name", getConnection().find(new BasicDBObject("_id", uuid)).next().get("Name"));
+                        obj.append("Name", getConnection().find(new BasicDBObject("_id", uuid)).next().get("Name"));
                     }
 
                     if(r) {
@@ -76,12 +75,12 @@ public class MongoDB implements SaveManager {
 
     @Override
     public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<Integer> tmpArray = new ArrayList<>();
             try {
                 if(isConnected()) {
                     DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
-                    if(find.hasNext() && find != null){
+                    if(find.hasNext()){
                         DBObject tmp = find.next();
                         tmpArray.add(Integer.parseInt(tmp.get("Affinity").toString()));
                         tmpArray.add(Integer.parseInt(tmp.get("MaxAffinity").toString()));
@@ -96,16 +95,16 @@ public class MongoDB implements SaveManager {
             tmpArray.add(0, -1);
             callback.onQueryDone(tmpArray);
             return;
-        }));
+        });
     }
 
     @Override
     public void playerExists(String uuid, final findBooleanCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
                     DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
-                    if(find.hasNext() && find != null){
+                    if(find.hasNext()){
                         callback.onQueryDone(true);
                         return;
                     }
@@ -114,7 +113,7 @@ public class MongoDB implements SaveManager {
                 e.printStackTrace();
             }
             callback.onQueryDone(false);
-        }));
+        });
     }
 
     @Override
