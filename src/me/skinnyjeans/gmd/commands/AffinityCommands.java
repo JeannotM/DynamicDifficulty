@@ -20,6 +20,7 @@ import java.util.logging.Level;
 public class AffinityCommands implements CommandExecutor {
     private final Affinity af;
     private final FileConfiguration lang;
+    private final String difficultyType;
     private final String difficulty = "%difficulty%";
     private final String number = "%number%";
     private final String pUser = "%user%";
@@ -28,8 +29,9 @@ public class AffinityCommands implements CommandExecutor {
     private final ArrayList<String> twoArg = new ArrayList<>(Arrays.asList("add", "remove", "set", "setmax", "setmin"));
 
     public AffinityCommands(Affinity af, DataManager data) {
-        this.af = af;
+        this.difficultyType = data.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
         this.lang = data.getLang();
+        this.af = af;
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -79,7 +81,7 @@ public class AffinityCommands implements CommandExecutor {
                 if(playerList.size() != 0) {
                     if(args.length < 3 || !args[2].equalsIgnoreCase("force"))
                         return sendMSG(getString("error.add-force"), sender, false);
-                } else if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) != null) {
+                } else if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) != null || af.hasBiome(args[1])) {
                     userName = args[1];
                 } else {
                     return sendMSG(getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
@@ -149,13 +151,13 @@ public class AffinityCommands implements CommandExecutor {
                     if(args.length < 4 || !args[3].equalsIgnoreCase("force"))
                         return sendMSG(getString("error.add-force"), sender, false);
                 } else if(userName.length() == 0){
-                    if(args[1].equalsIgnoreCase("world") || af.getPlayerUUID(args[1]) == null)
+                    if(!args[1].equalsIgnoreCase("world") && af.getPlayerUUID(args[1]) == null && !af.hasBiome(args[1]))
                         return sendMSG(getString("error.cannot-be-found").replaceAll(pUser, args[1]), sender, false);
                     userName = args[1];
                 }
 
-                if (af.hasDifficulty(args[2])) {
-                    numberGiven = af.getDifficultyAffinity(args[2]);
+                if (af.hasDifficulty(args[1])) {
+                    numberGiven = af.getDifficultyAffinity(args[1]);
                 } else {
                     try {
                         numberGiven = Integer.parseInt(args[2]);
@@ -165,13 +167,14 @@ public class AffinityCommands implements CommandExecutor {
                 }
             }
 
-            if(sender.getName().equalsIgnoreCase(userName)) {
-                if(!hasSelfPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
-                    return sendMSG(getString("error.no-permission"), sender, false);
-            } else {
-                if(!hasOtherPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
-                    return sendMSG(getString("error.no-permission"), sender, false);
-            }
+            if(!console)
+                if(sender.getName().equalsIgnoreCase(userName)) {
+                    if(!hasSelfPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
+                        return sendMSG(getString("error.no-permission"), sender, false);
+                } else {
+                    if(!hasOtherPermission(Bukkit.getOfflinePlayer(af.getPlayerUUID(sender.getName())).getPlayer(), cmd))
+                        return sendMSG(getString("error.no-permission"), sender, false);
+                }
 
             if(playerList.size() != 0) {
                 String msg = "";
@@ -269,10 +272,18 @@ public class AffinityCommands implements CommandExecutor {
      */
     private String setAffinity(String user, int amount) {
         try {
-            UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
-            amount = af.calcAffinity(uuid, amount);
-            af.setAffinity(uuid, amount);
-            return getString("command.set.set-affinity").replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid)).replaceAll(pUser, user);
+            UUID uuid = af.getPlayerUUID(user);
+            String playerDifficulty;
+            if (af.hasBiome(user)) {
+                amount = af.calcAffinity(user, amount);
+                af.setAffinity(user, amount);
+                playerDifficulty = af.calcDifficulty(user);
+            } else {
+                amount = af.calcAffinity(uuid, amount);
+                af.setAffinity(uuid, amount);
+                playerDifficulty = af.calcDifficulty(uuid);
+            }
+            return getString("command.set.set-affinity").replaceAll(number, amount+"").replaceAll(difficulty, playerDifficulty).replaceAll(pUser, user);
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return getString("error.something-wrong");
@@ -292,9 +303,16 @@ public class AffinityCommands implements CommandExecutor {
                 return getString("error.world.need-max-affinity");
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(null, amount);
-            af.setMaxAffinity(uuid, amount);
-            return getString("command.set.set-max-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            amount = af.calcAffinity((UUID) null, amount);
+            String playerDifficulty;
+            if (af.hasBiome(user)) {
+                af.setMaxAffinity(user, amount);
+                playerDifficulty = af.calcDifficulty(user);
+            } else {
+                af.setMaxAffinity(uuid, amount);
+                playerDifficulty = af.calcDifficulty(uuid);
+            }
+            return getString("command.set.set-max-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, playerDifficulty);
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return getString("error.something-wrong");
@@ -318,9 +336,16 @@ public class AffinityCommands implements CommandExecutor {
                 return getString("error.world.need-min-affinity");
 
             UUID uuid = af.getPlayerUUID(user);
-            amount = af.calcAffinity(null, amount);
-            af.setMinAffinity(uuid, amount);
-            return getString("command.set.set-min-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+            amount = af.calcAffinity((UUID)null, amount);
+            String playerDifficulty;
+            if (af.hasBiome(user)) {
+                af.setMinAffinity(user, amount);
+                playerDifficulty = af.calcDifficulty(user);
+            } else {
+                af.setMinAffinity(uuid, amount);
+                playerDifficulty = af.calcDifficulty(uuid);
+            }
+            return getString("command.set.set-min-affinity").replaceAll(pUser, user).replaceAll(number, amount+"").replaceAll(difficulty, playerDifficulty);
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);
             return getString("error.something-wrong");
@@ -338,7 +363,11 @@ public class AffinityCommands implements CommandExecutor {
             if(user.equalsIgnoreCase("world"))
                 return getString("error.world.have-max-affinity");
 
-            af.setMaxAffinity(af.getPlayerUUID(user), -1);
+            if(af.hasBiome(user)) {
+                af.setMaxAffinity(user, -1);
+            } else {
+                af.setMaxAffinity(af.getPlayerUUID(user), -1);
+            }
             return getString("command.remove.max-affinity").replaceAll(pUser, user);
         }
         catch(Exception e) {
@@ -357,7 +386,11 @@ public class AffinityCommands implements CommandExecutor {
         try {
             if(user.equalsIgnoreCase("world"))
                 return getString("error.world.have-min-affinity");
-            af.setMinAffinity(af.getPlayerUUID(user), -1);
+            if(af.hasBiome(user)) {
+                af.setMinAffinity(user, -1);
+            } else {
+                af.setMinAffinity(af.getPlayerUUID(user), -1);
+            }
             return getString("command.remove.min-affinity").replaceAll(pUser, user);
         }
         catch(Exception e) {
@@ -374,14 +407,23 @@ public class AffinityCommands implements CommandExecutor {
      */
     private String getAffinity(String user) {
         try {
-            UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
-
-            String msg = getString("command.get.has-affinity").replaceAll(pUser, user).replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
-            msg+="\n"+getString("command.get.currently-on").replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
-            if(uuid != null && af.getMaxAffinity(uuid) != -1)
-                msg+="\n"+getString("command.get.max-affinity").replaceAll(number, af.getMaxAffinity(uuid)+"");
-            if(uuid != null && af.getMinAffinity(uuid) != -1)
-                msg+="\n"+getString("command.get.min-affinity").replaceAll(number, af.getMinAffinity(uuid)+"");
+            String msg;
+            if(af.hasBiome(user)) {
+                msg = getString("command.get.has-affinity").replaceAll(pUser, user).replaceAll(number, af.getBiomeAffinity(user)+"").replaceAll(difficulty, af.calcDifficulty(user));
+                msg+="\n"+getString("command.get.currently-on").replaceAll(number, af.getBiomeAffinity(user)+"").replaceAll(difficulty, af.calcDifficulty(user));
+                if(af.getMaxAffinity(user) != -1)
+                    msg+="\n"+getString("command.get.max-affinity").replaceAll(number, af.getMaxAffinity(user)+"");
+                if(af.getMinAffinity(user) != -1)
+                    msg+="\n"+getString("command.get.min-affinity").replaceAll(number, af.getMinAffinity(user)+"");
+            } else {
+                UUID uuid = !user.equalsIgnoreCase("world") ? af.getPlayerUUID(user) : null;
+                msg = getString("command.get.has-affinity").replaceAll(pUser, user).replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+                msg+="\n"+getString("command.get.currently-on").replaceAll(number, af.getAffinity(uuid)+"").replaceAll(difficulty, af.calcDifficulty(uuid));
+                if(uuid != null && af.getMaxAffinity(uuid) != -1)
+                    msg+="\n"+getString("command.get.max-affinity").replaceAll(number, af.getMaxAffinity(uuid)+"");
+                if(uuid != null && af.getMinAffinity(uuid) != -1)
+                    msg+="\n"+getString("command.get.min-affinity").replaceAll(number, af.getMinAffinity(uuid)+"");
+            }
             return msg;
         } catch(Exception e) {
             Bukkit.getLogger().log(Level.WARNING, "Exception caught: "+e);

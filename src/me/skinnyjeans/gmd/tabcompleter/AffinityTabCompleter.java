@@ -24,34 +24,30 @@ public class AffinityTabCompleter implements TabCompleter {
         numbers.addAll(af.getDifficulties());
         if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world"))
             extraNames.add("world");
+        if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("biome"))
+            for(Biome b : Biome.values())
+                extraNames.add(b.toString());
     }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
-        if (args.length == 1) {
-            ArrayList<String> l = new ArrayList<>();
+        ArrayList<String> l = new ArrayList<>();
+        if (args.length == 1)
             for(String c : commands)
                 if(c.contains(args[0]))
                     l.add(c);
-            return l;
-        }
         if (args.length == 2)
             if (!noArg.contains(args[0])) {
                 ArrayList<String> names = extraNames;
                 Bukkit.getOnlinePlayers().forEach(name -> names.add(name.getName()));
-                ArrayList<String> l = new ArrayList<>();
                 for(String c : names)
                     if(c.contains(args[1]))
                         l.add(c);
-                return l;
             }
         if (args.length == 3)
-            if (!oneArg.contains(args[0]) && !noArg.contains(args[0])) {
-                ArrayList<String> l = new ArrayList<>();
+            if (!oneArg.contains(args[0]) && !noArg.contains(args[0]))
                 for(String c : numbers)
                     if(c.contains(args[1]))
                         l.add(c);
-                return l;
-            }
-        return new ArrayList<>();
+        return l;
     }
 }

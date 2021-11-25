@@ -27,11 +27,13 @@ public class Main extends JavaPlugin {
 		af = new AffinityEvents(this);
 		checkData();
 		Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Thank you for installing DynamicDifficulty!");
-		if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("world")) {
+
+		String difficultyType = data.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
+		if(difficultyType.equals("world")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on World Difficulty mode!");
-		} else if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("biome")) {
+		} else if(difficultyType.equals("biome")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Biome Difficulty mode!");
-		} else if(data.getConfig().getString("difficulty-modifiers.type").equalsIgnoreCase("radius")) {
+		} else if(difficultyType.equals("radius")) {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Radius Difficulty mode!");
 		} else {
 			Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Currently on Per Player Difficulty mode!");
@@ -40,8 +42,10 @@ public class Main extends JavaPlugin {
 		this.getCommand("affinity").setExecutor(new AffinityCommands(af, data));
 		this.getCommand("affinity").setTabCompleter(new AffinityTabCompleter(af, data));
 
-		saveDataEveryFewMinutes();
-		onInterval();
+		if(!difficultyType.equals("radius")) {
+			saveDataEveryFewMinutes();
+			onInterval();
+		}
 	}
 	
 	@Override
@@ -103,8 +107,6 @@ public class Main extends JavaPlugin {
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))
 			if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
 				new PlaceholderAPIExpansion(this, af, data.getConfig().getBoolean("plugin-support.use-prefix")).register();
-
-
 	}
 }
 

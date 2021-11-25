@@ -15,11 +15,13 @@ public class File implements SaveManager {
 
     private final Main plugin;
     private final DataManager data;
+    private final String difficultyType;
 
     public File(Main m, DataManager d) {
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] using default 'file' mode to save and read data");
         data = d;
         plugin = m;
+        difficultyType = d.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
     }
 
     public boolean isConnected() { return data != null; }
@@ -32,7 +34,7 @@ public class File implements SaveManager {
             if (!isWorld) {
                 data.getDataFile().set(uuid + ".max-affinity", maxAf);
                 data.getDataFile().set(uuid + ".min-affinity", minAf);
-                data.getDataFile().set(uuid + ".name", Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName());
+                data.getDataFile().set(uuid + ".name", difficultyType.equals("biome") ? uuid : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName());
             }
         });
     }

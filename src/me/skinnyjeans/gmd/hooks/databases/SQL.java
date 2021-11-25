@@ -11,6 +11,7 @@ import java.util.*;
 
 public class SQL implements SaveManager {
     private final String tbName = "dynamicdifficulty";
+    private final String difficultyType;
     private final Main plugin;
     private final String host;
     private final String port;
@@ -28,6 +29,7 @@ public class SQL implements SaveManager {
         user = data.getConfig().getString("saving-data.username", "root");
         pwd = data.getConfig().getString("saving-data.password", "");
         saveType = sT.toLowerCase();
+        difficultyType = data.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
         connect();
         if(sT.equals("mysql"))
             addColumnsNotExists();
@@ -38,19 +40,18 @@ public class SQL implements SaveManager {
     public Connection getConnection() { return connection; }
 
     public void connect() throws SQLException, ClassNotFoundException {
-        if(!isConnected()){
+        if(!isConnected())
             if(saveType.equals("mysql")) {
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to MySQL!");
+                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to MySQL!");
             } else if (saveType.equals("sqlite")){
-                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true");
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to SQLite!");
+                connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
+                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to SQLite!");
             } else if (saveType.equals("postgresql")) {
                 Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to PostGreSQL!");
+                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to PostGreSQL!");
             }
-        }
     }
 
     public void addColumnsNotExists() {
@@ -90,12 +91,20 @@ public class SQL implements SaveManager {
                         ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
                         ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
-                        ps.setString(5, (uuid.equals("world") ? "world" : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName()));
+                        String name;
+                        if(uuid.equalsIgnoreCase("world")) {
+                            name = "world";
+                        } else if(difficultyType.equals("biome")) {
+                            name = uuid;
+                        } else {
+                            name = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName();
+                        }
+                        ps.setString(5, name);
                     }
                     ps.setInt(1, af);
                     ps.setInt(2, maxAf);
                     ps.setInt(3, minAf);
-                    ps.setString(4, (uuid.equals("world")  ? "world" : uuid));
+                    ps.setString(4, uuid);
                     ps.executeUpdate();
                 }
             } catch(SQLException e) { e.printStackTrace(); }

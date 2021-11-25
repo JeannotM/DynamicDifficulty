@@ -37,6 +37,7 @@ public class Affinity {
     protected ArrayList<Integer> ignoreMobs = new ArrayList<>();
     protected HashMap<String, Difficulty> difficultyList = new HashMap<>();
     protected HashMap<UUID, Minecrafter> playerList = new HashMap<>();
+    protected HashMap<String, Minecrafter> biomeList = new HashMap<>();
     protected HashMap<String, Integer> chancePerArmor = new HashMap<>();
     protected HashMap<String, Integer> chancePerWeapon = new HashMap<>();
     protected HashMap<String, ArrayList<String>> enchantmentList = new HashMap<>();
@@ -305,7 +306,7 @@ public class Affinity {
 
                 if(invalidDifficulties.size() != 0) {
                     Difficulty d = difficultyList.get(difficulties.get(0));
-                    String forgottenDifficulties = "";
+                    StringBuilder forgottenDifficulties = new StringBuilder("");
                     for(String diff : difficulties)
                         if(!Double.isNaN(difficultyList.get(diff).getChanceToEnchant()))
                             d = difficultyList.get(diff);
@@ -326,7 +327,7 @@ public class Affinity {
                         chances.put("leggings", d.getEnchantChance("leggings"));
                         chances.put("boots", d.getEnchantChance("boots"));
                         forgotten.setEnchantChances(chances);
-                        forgottenDifficulties += s + ", ";
+                        forgottenDifficulties.append(s + ", ");
                     }
                     Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] These difficulties don't have any custom enchant settings: "+ forgottenDifficulties.substring(0, forgottenDifficulties.length() - 2));
                 }
@@ -347,86 +348,75 @@ public class Affinity {
             }
         }
 
-//        if(difficultyType.equals("biome"))
-//            Bukkit.getScheduler().runTaskAsynchronously(m, () -> addBiomes());
+        if(difficultyType.equals("biome"))
+            Bukkit.getScheduler().runTaskAsynchronously(m, () -> addBiomes());
     }
 
-//    private void addBiomes() {
-//        for (Biome b : Biome.values()) {
-//            String uuid = b.toString();
-//            SQL.getAffinityValues(uuid, r -> {
-//                Minecrafter mc = new Minecrafter(uuid);
-//                if (r.get(0) == -1) {
-//                    mc.setAffinity(startAffinity);
-//                    if (calcMaxAffinity) {
-//                        mc.setMaxAffinity(maxAffinity);
-//                    } else {
-//                        mc.setMaxAffinity(calcAffinity(null, data.getConfig().getInt("starting-max-affinity", -1)));
-//                    }
-//                    if (calcMinAffinity) {
-//                        mc.setMinAffinity(minAffinity);
-//                    } else {
-//                        mc.setMinAffinity(calcAffinity(null, data.getConfig().getInt("starting-min-affinity", -1)));
-//                    }
-//                    SQL.updatePlayer(uuid, startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
-//                } else {
-//                    mc.setAffinity(r.get(0));
-//                    if (calcMaxAffinity && r.get(1) == -1) {
-//                        mc.setMaxAffinity(maxAffinity);
-//                    } else {
-//                        if(!calcMaxAffinity && r.get(1) == maxAffinity) {
-//                            mc.setMaxAffinity(-1);
-//                        } else {
-//                            mc.setMaxAffinity(r.get(1));
-//                        }
-//                    }
-//                    if (calcMinAffinity && r.get(2) == -1) {
-//                        mc.setMinAffinity(minAffinity);
-//                    } else {
-//                        if(!calcMinAffinity && r.get(2) == minAffinity) {
-//                            mc.setMinAffinity(-1);
-//                        } else {
-//                            mc.setMinAffinity(r.get(1));
-//                        }
-//                    }
-//                }
-//                biomeList.put(uuid, mc);
-//            });
-//        }
-//    }
+    private void addBiomes() {
+        for (Biome b : Biome.values()) {
+            String uuid = b.toString();
+            SQL.getAffinityValues(uuid, r -> {
+                Minecrafter mc = new Minecrafter(uuid);
+                if (r.get(0) == -1) {
+                    mc.setAffinity(startAffinity);
+                    if (calcMaxAffinity) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else {
+                        mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
+                    }
+                    if (calcMinAffinity) {
+                        mc.setMinAffinity(minAffinity);
+                    } else {
+                        mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
+                    }
+                    SQL.updatePlayer(uuid, startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
+                } else {
+                    mc.setAffinity(r.get(0));
+                    if (calcMaxAffinity && r.get(1) == -1) {
+                        mc.setMaxAffinity(maxAffinity);
+                    } else if(!calcMaxAffinity && r.get(1) == maxAffinity) {
+                        mc.setMaxAffinity(-1);
+                    } else {
+                        mc.setMaxAffinity(r.get(1));
+                    }
+                    if (calcMinAffinity && r.get(2) == -1) {
+                        mc.setMinAffinity(minAffinity);
+                    } else if(!calcMinAffinity && r.get(2) == minAffinity) {
+                        mc.setMinAffinity(-1);
+                    } else {
+                        mc.setMinAffinity(r.get(2));
+                    }
+                }
+                biomeList.put(uuid, mc);
+            });
+        }
+    }
 
     private void checkEquipmentEvery(){
-        if(calcMinAffinity)
+        if(calcMinAffinity || calcMaxAffinity)
             Bukkit.getOnlinePlayers().forEach(pl -> {
                 ArrayList<String> equipment = new ArrayList<>();
+                Minecrafter mc = playerList.get(pl.getUniqueId());
                 if(pl.getEquipment().getItemInMainHand() != null){ equipment.add(pl.getEquipment().getItemInMainHand().getType().toString());}
                 for(ItemStack item : pl.getEquipment().getArmorContents()){ if(item != null) {equipment.add(item.getType().toString());} }
-                for (String s : equipment)
-                    if (minAffinityListItems.contains(s)) {
-                        Minecrafter mc = playerList.get(pl.getUniqueId());
+                for (String s : equipment) {
+                    if (calcMinAffinity && minAffinityListItems.contains(s)) {
                         if (mc.getMinAffinity() == -1)
                             mc.setMinAffinity(minAffinity);
                         addAmountOfMinAffinity(pl.getUniqueId(), minAffinityItems.get(s));
                     }
-            });
-
-        if(calcMaxAffinity)
-            Bukkit.getOnlinePlayers().forEach(pl -> {
-                ArrayList<String> equipment = new ArrayList<>();
-                if(pl.getEquipment().getItemInMainHand() != null){ equipment.add(pl.getEquipment().getItemInMainHand().getType().toString());}
-                for(ItemStack item : pl.getEquipment().getArmorContents()){ if(item != null) {equipment.add(item.getType().toString());} }
-                for (String s : equipment)
-                    if (maxAffinityListItems.contains(s)) {
-                        Minecrafter mc = playerList.get(pl.getUniqueId());
+                    if (calcMaxAffinity && maxAffinityListItems.contains(s)) {
                         if (mc.getMaxAffinity() == -1)
                             mc.setMaxAffinity(maxAffinity);
                         addAmountOfMaxAffinity(pl.getUniqueId(), maxAffinityItems.get(s));
                     }
+                }
+
             });
     }
 
     private void loadWeapons() {
-        String weaponNames = "";
+        StringBuilder weaponNames = new StringBuilder("");
         int total = 0;
         Object[] weaponArray = config.getList("custom-mob-items-spawn-chance.weapons-include").toArray();
         for(Object s : weaponArray) {
@@ -434,13 +424,13 @@ public class Affinity {
             int count = 1;
             try {
                 if(Material.valueOf(sep[0].toUpperCase()) == null) {
-                    weaponNames += sep[0] + ", ";
+                    weaponNames.append(sep[0]).append(", ");
                     continue;
                 } else if(sep.length >= 2) {
                     count = Integer.parseInt(sep[1]);
                 }
             } catch(IllegalArgumentException e) {
-                weaponNames += sep[0] + ", ";
+                weaponNames.append(sep[0]).append(", ");
                 continue;
             }
             total += count;
@@ -453,13 +443,13 @@ public class Affinity {
     }
 
     private void loadMobs() {
-        String mobNames = "";
+        StringBuilder mobNames = new StringBuilder("");
         Object[] tmpMobs = config.getList("mobs-count-as-pve").toArray();
         for(Object s : tmpMobs){
             String[] sep = s.toString().replaceAll("[{|}]","").split("=");
             try{
                 if(NamespacedKey.fromString(EntityType.valueOf(sep[0]).getKey().toString()) == null) {
-                    mobNames += sep[0] + ", ";
+                    mobNames.append(sep[0]).append(", ");
                     continue;
                 }
 
@@ -469,7 +459,7 @@ public class Affinity {
                     mobsPVE.put(sep[0], config.getInt("pve-kill", 2));
                 }
             } catch(Exception e) {
-                mobNames += sep[0] + ", ";
+                mobNames.append(sep[0]).append(", ");
             }
         }
         if(mobNames.length() != 0)
@@ -477,13 +467,13 @@ public class Affinity {
     }
 
     private void loadBlocks() {
-        String blockNames = "";
+        StringBuilder blockNames = new StringBuilder("");
         Object[] tmpBlocks = config.getList("blocks").toArray();
         for(Object s : tmpBlocks) {
             String[] sep = s.toString().replaceAll("[{|}]","").split("=");
             try {
                 if(NamespacedKey.fromString(Material.valueOf(sep[0]).getKey().toString()) == null) {
-                    blockNames += sep[0] + ", ";
+                    blockNames.append(sep[0]).append(", ");
                     continue;
                 }
 
@@ -493,7 +483,7 @@ public class Affinity {
                     blocks.put(sep[0], config.getInt("block-mined", 2));
                 }
             } catch(Exception e) {
-                blockNames += sep[0] + ", ";
+                blockNames.append(sep[0]).append(", ");
             }
         }
         if(blockNames.length() != 0)
@@ -536,7 +526,13 @@ public class Affinity {
     public UUID getPlayerUUID(String name) {
         return playersUUID.getOrDefault(name, null);
     }
+    public boolean hasBiome(String name) { return biomeList.containsKey(name); }
 
+    public int getBiomeAffinity(String name) {
+        if(biomeList.containsKey(name))
+            return biomeList.get(name).getAffinity();
+        return -1;
+    }
     public int getAffinity(UUID uuid) {
         if(uuid == null)
             return worldAffinity;
@@ -546,8 +542,12 @@ public class Affinity {
     }
 
     public void setAffinity(UUID uuid, int x) {
-        if (uuid == null) { worldAffinity = calcAffinity(null, x); }
+        if (uuid == null) { worldAffinity = calcAffinity((UUID)null, x); }
         else { playerList.get(uuid).setAffinity(calcAffinity(uuid, x)); }
+    }
+    public void setAffinity(String uuid, int x) {
+        if (biomeList.containsKey(uuid))
+            biomeList.get(uuid).setAffinity(x);
     }
 
     protected void emptyHitMobsList() {
@@ -558,9 +558,13 @@ public class Affinity {
     }
 
     public int getMaxAffinity(UUID uuid) { return playerList.get(uuid).getMaxAffinity(); }
-    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity(null, x)); }
+    public int getMaxAffinity(String name) { return biomeList.get(name).getMaxAffinity(); }
     public int getMinAffinity(UUID uuid) { return playerList.get(uuid).getMinAffinity(); }
-    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity(null, x)); }
+    public int getMinAffinity(String name) { return biomeList.get(name).getMinAffinity(); }
+    public void setMaxAffinity(UUID uuid, int x) { playerList.get(uuid).setMaxAffinity(calcAffinity((UUID)null, x)); }
+    public void setMaxAffinity(String name, int x) { biomeList.get(name).setMaxAffinity(calcAffinity((UUID)null, x)); }
+    public void setMinAffinity(UUID uuid, int x) { playerList.get(uuid).setMinAffinity(calcAffinity((UUID)null, x)); }
+    public void setMinAffinity(String name, int x) { biomeList.get(name).setMinAffinity(calcAffinity((UUID)null, x)); }
     public boolean hasDifficulty(String x) { return difficulties.contains(x); }
     public int getDifficultyAffinity(String x) { return difficultyList.get(x).getAffinity(); }
     public ArrayList<String> getDifficulties() { return difficulties; }
@@ -575,11 +579,18 @@ public class Affinity {
 
     /** Saves all player and world data every few minutes. */
     public void saveData() {
-        SQL.updatePlayer("world", worldAffinity, -1, -1);
-        playersUUID.forEach((name, uuid) -> {
-            Minecrafter pl = playerList.get(uuid);
-            SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
-        });
+        if(difficultyType.equals("world")){
+            SQL.updatePlayer("world", worldAffinity, -1, -1);
+        } else if(difficultyType.equals("biome")) {
+            biomeList.forEach((name, mc) ->
+                SQL.updatePlayer(name, mc.getAffinity(), mc.getMaxAffinity(), mc.getMinAffinity())
+            );
+        } else {
+            playersUUID.forEach((name, uuid) -> {
+                Minecrafter pl = playerList.get(uuid);
+                SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
+            });
+        }
         if(saveType.equals("file"))
             data.saveData();
     }
@@ -601,7 +612,38 @@ public class Affinity {
         }
 
         if(uuid != null && playerList.containsKey(uuid)) {
-            Minecrafter p = playerList.get(uuid);
+            Player pl = Bukkit.getOfflinePlayer(uuid).getPlayer();
+            Minecrafter p = difficultyType.equals("biome") ? biomeList.get(pl.getWorld().getBiome(pl.getLocation()).toString()) : playerList.get(uuid);
+
+            if(p.getMaxAffinity() != -1 && x > p.getMaxAffinity()) {
+                x = p.getMaxAffinity();
+            } else if(p.getMinAffinity() != -1 && x < p.getMinAffinity()) {
+                x = p.getMinAffinity();
+            }
+        }
+
+        return x;
+    }
+
+    /**
+     * Calculates if the amount exceeds the users Maximum or the servers Minimum/Maximum
+     *
+     * @param name is the player whose affinity will be changed
+     * @param x is the affinity given to calculate
+     * @return INT the affinity after it has been checked
+     */
+    public int calcAffinity(String name, int x) {
+        if(x == -1) { return -1; }
+
+        if (x > maxAffinity) {
+            x = maxAffinity;
+        } else if (x < minAffinity) {
+            x = minAffinity;
+        }
+
+        if(biomeList.containsKey(name)) {
+            Minecrafter p = biomeList.get(name);
+
             if(p.getMaxAffinity() != -1 && x > p.getMaxAffinity()) {
                 x = p.getMaxAffinity();
             } else if(p.getMinAffinity() != -1 && x < p.getMinAffinity()) {
@@ -622,12 +664,12 @@ public class Affinity {
                     if (calcMaxAffinity) {
                         mc.setMaxAffinity(maxAffinity);
                     } else {
-                        mc.setMaxAffinity(calcAffinity(null, data.getConfig().getInt("starting-max-affinity", -1)));
+                        mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
                     }
                     if (calcMinAffinity) {
                         mc.setMinAffinity(minAffinity);
                     } else {
-                        mc.setMinAffinity(calcAffinity(null, data.getConfig().getInt("starting-min-affinity", -1)));
+                        mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
                     }
                     SQL.updatePlayer(uuid.toString(), startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
                 } else {
@@ -644,7 +686,7 @@ public class Affinity {
                     } else if(!calcMinAffinity && r.get(2) == minAffinity) {
                         mc.setMinAffinity(-1);
                     } else {
-                        mc.setMinAffinity(r.get(1));
+                        mc.setMinAffinity(r.get(2));
                     }
                 }
                 playerList.put(uuid, mc);
@@ -721,20 +763,47 @@ public class Affinity {
     }
 
     /**
-     * Gets the difficulty of an user or the world
+     * Gets the difficulty of a user or the world
+     *
+     * @param name of the user or the world if null
+     * @return String of the difficulty the world/user is on
+     */
+    public String calcDifficulty(String name) {
+        if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
+        if(biomeList.containsKey(name)) {
+            int af = biomeList.get(name).getAffinity();
+            int size = difficulties.size();
+            for (int i = 0; i < size; i++)
+                if(af <= difficultyList.get(difficulties.get(i)).getUntil())
+                    return difficulties.get(i);
+        }
+        return difficulties.get(0);
+    }
+
+    /**
+     * Gets the difficulty of a user or the world
      *
      * @param uuid of the user or the world if null
      * @return String of the difficulty the world/user is on
      */
     public String calcDifficulty(UUID uuid) {
         if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
-        int af = (uuid != null) ? playerList.get(uuid).getAffinity() : worldAffinity;
-        if(difficultyType.equals("radius")) {
+        int af;
+
+        if(difficultyType.equals("world") || uuid == null){
+            af = worldAffinity;
+        } else if(difficultyType.equals("biome")) {
+            Player player = Bukkit.getOfflinePlayer(uuid).getPlayer();
+            af = biomeList.get(player.getWorld().getBiome(player.getLocation()).toString()).getAffinity();
+        } else if(difficultyType.equals("radius")) {
             Location loc = Bukkit.getOfflinePlayer(uuid).getPlayer().getLocation();
             Location spawn = new Location(loc.getWorld(), config.getInt("difficulty-modifiers.radius-x", 0), loc.getY(), config.getInt("difficulty-modifiers.radius-z", 0));
             int difference = Math.max(config.getInt("difficulty-modifiers.max-radius-size", 10000) - (int) Math.floor(loc.distance(spawn)), 0);
             af = maxAffinity - Math.min(difference / (config.getInt("difficulty-modifiers.max-radius-size", 10000) / maxAffinity), maxAffinity);
+        } else {
+            af = playerList.get(uuid).getAffinity();
         }
+
         int size = difficulties.size();
         for (int i = 0; i < size; i++)
             if(af <= difficultyList.get(difficulties.get(i)).getUntil())
@@ -752,8 +821,14 @@ public class Affinity {
     protected double calcPercentage(UUID uuid, String mode) {
         if(randomizer) { return getHashData(mode, calcDifficulty(uuid)); }
         int thisDiff = difficulties.indexOf(calcDifficulty(uuid));
-        int affinity = (uuid == null) ? worldAffinity : playerList.get(uuid).getAffinity();
-        if(uuid != null && difficultyType.equals("radius")) {
+        int affinity;
+
+        if(uuid == null || difficultyType.equals("world")) {
+            affinity = worldAffinity;
+        }else if(difficultyType.equals("biome")) {
+            Player player = Bukkit.getOfflinePlayer(uuid).getPlayer();
+            affinity = biomeList.get(player.getWorld().getBiome(player.getLocation()).toString()).getAffinity();
+        }else if(difficultyType.equals("radius")) {
             Location loc = Bukkit.getOfflinePlayer(uuid).getPlayer().getLocation();
             Location spawn = new Location(loc.getWorld(), config.getInt("difficulty-modifiers.radius-x", 0), loc.getY(), config.getInt("difficulty-modifiers.radius-z", 0));
             int difference = Math.max(config.getInt("difficulty-modifiers.max-radius-size", 10000) - (int) Math.floor(loc.distance(spawn)), 0);
@@ -764,6 +839,8 @@ public class Affinity {
                     thisDiff = i;
                     break;
                 }
+        } else {
+            affinity = playerList.get(uuid).getAffinity();
         }
 
         if (thisDiff + 1 != difficulties.size() && config.getBoolean("difficulty-modifiers.exact-percentage", true)) {
@@ -817,20 +894,25 @@ public class Affinity {
 
     protected void addAmountOfAffinity(UUID uuid, int x) {
         if(x != 0) {
-            if (difficultyType.equals("world")) { worldAffinity = calcAffinity(null, worldAffinity + x); }
+            if (difficultyType.equals("world") || uuid == null) { worldAffinity = calcAffinity((UUID)null, worldAffinity + x); }
+            else if (difficultyType.equals("biome")) {
+                Player p = Bukkit.getOfflinePlayer(uuid).getPlayer();
+                Minecrafter biome = biomeList.get(p.getWorld().getBiome(p.getLocation()).toString());
+                biome.setAffinity(calcAffinity(p.getWorld().getBiome(p.getLocation()).toString(), biome.getAffinity() + x));
+            }
             else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
         }
     }
     protected void addAmountOfMinAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            p.setMinAffinity(calcAffinity(null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
+            p.setMinAffinity(calcAffinity((UUID)null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
         }
     }
     protected void addAmountOfMaxAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            p.setMaxAffinity(calcAffinity(null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
+            p.setMaxAffinity(calcAffinity((UUID)null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
         }
     }
 
@@ -838,7 +920,13 @@ public class Affinity {
     public void onInterval() {
         if(onInterval != 0) {
             if(difficultyType.equals("world")) {
-                worldAffinity = calcAffinity(null, worldAffinity + onInterval);
+                worldAffinity = calcAffinity((UUID)null, worldAffinity + onInterval);
+            } else if (difficultyType.equals("biome")) {
+                Set<String> biomes = biomeList.keySet();
+                for(String biome : biomes) {
+                    Minecrafter b = biomeList.get(biome);
+                    b.setAffinity(calcAffinity(biome, b.getAffinity() + onInterval));
+                }
             } else {
                 Bukkit.getOnlinePlayers().forEach(pl -> {
                     Minecrafter p = playerList.get(pl.getUniqueId());

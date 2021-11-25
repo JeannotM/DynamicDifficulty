@@ -60,7 +60,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
             if(identifier.equals("world_text_difficulty")){
                 if(usePrefix)
                     return affinity.getPrefix(null);
-                return affinity.calcDifficulty(null);
+                return affinity.calcDifficulty((UUID)null);
             }
             if(identifier.equals("world_affinity_points"))
                 return Integer.toString(affinity.getAffinity(null));
@@ -87,7 +87,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
             if(identifier.equals("world_text_difficulty")){
                 if(usePrefix)
                     return affinity.getPrefix(null);
-                return affinity.calcDifficulty(null);
+                return affinity.calcDifficulty((UUID)null);
             }
             if(identifier.equals("world_affinity_points"))
                 return Integer.toString(affinity.getAffinity(null));
