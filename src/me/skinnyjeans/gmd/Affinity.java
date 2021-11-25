@@ -222,6 +222,7 @@ public class Affinity {
             int dmgOnMobs = (int) Math.ceil(section.getDouble(key + ".damage-done-on-mobs", 100.0) * config.getDouble(d+"damage-done-on-mobs-multiplier", 1.0));
 
             tmp.setAffinity(section.getInt(key + ".affinity-required"));
+
             if(section.isSet(key + ".mobs-ignore-player"))
                 tmp.setIgnoredMobs(section.getStringList(key + ".mobs-ignore-player"));
 
@@ -257,7 +258,8 @@ public class Affinity {
         createIndividualPlayerInventories();
 
         // Everything beneath this comment is to sort the difficulties by their affinity requirement
-        for (String s : tmpList) tmpMap.put(difficultyList.get(s).getAffinity(), s);
+        for (String s : tmpList)
+            tmpMap.put(difficultyList.get(s).getAffinity(), s);
         TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);
         String lastKey = null;
         for (int key : tm.keySet()) {
@@ -852,8 +854,8 @@ public class Affinity {
             if(differencePercentage < 0)
                 differencePercentage*=-1;
 
-            int a = difficultyList.get(difficulties.get(thisDiff)).getAffinity();
-            int b = difficultyList.get(difficulties.get(thisDiff+1)).getAffinity();
+            int a = difficultyList.get(difficulties.get(thisDiff+1)).getAffinity();
+            int b = difficultyList.get(difficulties.get(thisDiff)).getAffinity();
             double c = (100.0 / (a - b) * (affinity - b));
             double extraPercentage = (differencePercentage / 100.0) * c;
 

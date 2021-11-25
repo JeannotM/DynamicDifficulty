@@ -514,9 +514,9 @@ Feel free to contact me if you have any idea's that could expand/improve the Dyn
 - [x] Mob armor spawn chance
 - [x] Block commands per difficulty
 - [x] radial difficulty (gets harder the further you get away from spawn)
+- [x] per biome difficulty
 
 ## Possible Future Updates
-- [ ] per biome difficulty
 - [ ] per biome difficulty adjustments (extra)
 - [ ] promoted/demoted message
 
