@@ -215,10 +215,10 @@ public class AffinityCommands implements CommandExecutor {
         return user.hasPermission("affinity." + perm) || user.hasPermission("affinity.*") || user.isOp() ;
     }
     private boolean hasSelfPermission(Player user, String perm) {
-        return user.hasPermission("affinity." + perm + ".self") || hasPermission(user, perm) ;
+        return user.hasPermission("affinity." + perm + ".self") || user.hasPermission("affinity.*.self") || hasPermission(user, perm) ;
     }
     private boolean hasOtherPermission(Player user, String perm) {
-        return user.hasPermission("affinity." + perm + ".other") || hasPermission(user, perm) ;
+        return user.hasPermission("affinity." + perm + ".other") || user.hasPermission("affinity.*.other") || hasPermission(user, perm) ;
     }
 
     /**

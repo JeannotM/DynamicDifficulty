@@ -16,18 +16,6 @@ public class Minecrafter {
     public String getName() { return name; }
 
     public void setAffinity(int value) { affinity = value; }
-    public void setMinAffinity(int value) {
-        if(maxAffinity != -1 && maxAffinity < value) {
-            minAffinity = maxAffinity;
-        } else {
-            minAffinity = value;
-        }
-    }
-    public void setMaxAffinity(int value) {
-        if(minAffinity != -1 && minAffinity > value) {
-            maxAffinity = minAffinity;
-        } else {
-            maxAffinity = value;
-        }
-    }
+    public void setMinAffinity(int value) { minAffinity = value; }
+    public void setMaxAffinity(int value) { maxAffinity = value; }
 }

@@ -106,7 +106,7 @@ disabled-mobs:
 - WITHER
 
 difficulty-modifiers:
-  type: player # Supported: player, world, radius
+  type: player # Supported: player, world, radius, biome
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
   # needs type: radius for this to work. Will calculate the difficulties based on how far they are from the given x & y coordinates
@@ -191,11 +191,6 @@ difficulty:
       iron: 2
       diamond: 4
       netherite: 5
-
-# Messages that are sent to the player when the attacker or attackee has allow-pvp on false
-messages:
-  attacker-no-pvp: "You cannot attack this player because you're still having a hard time!"
-  attackee-no-pvp: "You cannot attack this player because he's already having a hard time!"
 
 # Some of these features are experimental, change existing features or have a chance to reduce performance
 advanced-features:
@@ -421,10 +416,11 @@ I made this a separate option so you can decide yourself if you would like to ke
 If you'd like to read more about the psychology behind it: https://en.wikipedia.org/wiki/Flow_(psychology)
 
 ## Commands, Permissions and explanations
-The Commands aren't case sensitive, meaning both remove and ReMoVe will result in the same function being executed. Also applies to /aFFinIty. This may not work on player names though
+The Commands aren't case-sensitive, meaning both remove and ReMoVe will result in the same function being executed. Also applies to /aFFinIty. This may not work on player names though
 If you want to change the settings of the world you'll need to replace the <user> part with world
 ```
-You can also add .other or .self after the permissions to only support 1 kind of change
+You can also add .other or .self after the permissions to only allow commands for oneself.
+affinity.*.self / affinity.*.other is also allowed.
 
 /Affinity set <user> <number>
 perm: affinity.set
@@ -472,7 +468,11 @@ Force saves the current data to the yml or database.
 
 /Affinity playergui
 perm: affinity.playergui
-Allows you to change all player settings in a chestGUI
+Allows you to change all player settings in a chestGUI.
+
+/Affinity help
+perm: affinity.help
+Sends all the commands in DD to the player.
 ```
 ## Plugin Support
 #### PlaceholderAPI [[Link](https://www.spigotmc.org/resources/placeholderapi.6245/)]

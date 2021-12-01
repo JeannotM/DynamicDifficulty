@@ -423,8 +423,8 @@ public class AffinityEvents extends Affinity implements Listener {
                 if (e.getCurrentItem().getType().toString().equals("RED_WOOL")) {
                     Minecrafter pl = playerList.get(uuid);
                     if(e.getSlot() / 9 < 1) { pl.setAffinity(startAffinity); }
-                    else if(e.getSlot() / 9 < 2) { pl.setMinAffinity(-1); }
-                    else if(e.getSlot() / 9 < 3) { pl.setMaxAffinity(-1); }
+                    else if(e.getSlot() / 9 < 2) { pl.setMinAffinity(data.getConfig().getInt("starting-min-affinity", -1)); }
+                    else if(e.getSlot() / 9 < 3) { pl.setMaxAffinity(data.getConfig().getInt("starting-max-affinity", -1)); }
                 } else {
                     int add = Integer.parseInt(e.getCurrentItem().getItemMeta().getDisplayName());
                     if(e.getSlot() / 9 < 1) { addAmountOfAffinity(uuid, add); }

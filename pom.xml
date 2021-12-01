@@ -58,7 +58,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                         <option>-ignorewarnings</option>
                     </options>
                     <libs>
-                        <lib>C:\Program Files\Java\jre1.8.0_301/lib/rt.jar</lib>
+                        <lib>C:\Program Files\Java\jre1.8.0_311/lib/rt.jar</lib>
                     </libs>
                 </configuration>
                 <dependencies>
@@ -102,7 +102,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.18-rc3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

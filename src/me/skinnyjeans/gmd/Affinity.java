@@ -908,13 +908,21 @@ public class Affinity {
     protected void addAmountOfMinAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            p.setMinAffinity(calcAffinity((UUID)null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
+            if(minAffinity == minAffinityLimit) {
+                p.setMinAffinity(calcAffinity((UUID)null, p.getMinAffinity() + x));
+            } else {
+                p.setMinAffinity(calcAffinity((UUID)null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
+            }
         }
     }
     protected void addAmountOfMaxAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            p.setMaxAffinity(calcAffinity((UUID)null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
+            if(maxAffinity == maxAffinityLimit) {
+                p.setMaxAffinity(calcAffinity((UUID)null, p.getMaxAffinity() + (x * -1)));
+            } else {
+                p.setMaxAffinity(calcAffinity((UUID)null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
+            }
         }
     }
 
