@@ -230,15 +230,15 @@ public class AffinityEvents extends Affinity implements Listener {
                     if(calcMinAffinity)
                         addAmountOfMinAffinity(prey.getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.player-hit"));
                 } else if(hunter instanceof Player) {
-                    if(playerList.get(hunter.getUniqueId()) == null)
+                    if(!playerList.containsKey(hunter.getUniqueId()))
                         addPlayerData(hunter.getUniqueId());
                     if (!difficultyList.get(calcDifficulty(hunter.getUniqueId())).getAllowPVP()) {
                         if(data.getLang().isSet("in-game.attacker-no-pvp") && data.getLang().getString("in-game.attacker-no-pvp").length() != 0)
-                            hunter.sendMessage(config.getString("in-game.attacker-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
+                            hunter.sendMessage(data.getLang().getString("in-game.attacker-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
                         e.setCancelled(true);
                     } else if(!difficultyList.get(calcDifficulty(prey.getUniqueId())).getAllowPVP()) {
                         if(data.getLang().isSet("in-game.attackee-no-pvp") && data.getLang().getString("in-game.attackee-no-pvp").length() != 0)
-                            hunter.sendMessage(config.getString("in-game.attackee-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
+                            hunter.sendMessage(data.getLang().getString("in-game.attackee-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
                         e.setCancelled(true);
                     }
                 }

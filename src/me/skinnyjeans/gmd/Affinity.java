@@ -298,7 +298,7 @@ public class Affinity {
                         weirdDifficulty.append(key + ", ");
                     }
 
-                if(weirdDifficulty.length() == 0)
+                if(weirdDifficulty.length() != 0)
                     Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] These difficulties don't exist and can't have custom enchants: " + weirdDifficulty.substring(0, weirdDifficulty.length() - 2));
 
                 ArrayList<String> invalidDifficulties = new ArrayList<>();
