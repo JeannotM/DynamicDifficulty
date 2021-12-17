@@ -108,6 +108,8 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
+            if(e.getEntity().hasMetadata("NPC"))
+                return;
             if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
 
@@ -128,6 +130,8 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onItemDamage(PlayerItemDamageEvent e) {
         if(!disabledWorlds.contains(e.getPlayer().getWorld().getName())) {
+            if(e.getPlayer().hasMetadata("NPC"))
+                return;
             UUID uuid = e.getPlayer().getUniqueId();
             if(!playerList.containsKey(uuid))
                 addPlayerData(uuid);
@@ -141,6 +145,8 @@ public class AffinityEvents extends Affinity implements Listener {
     public void onKill(EntityDeathEvent e) {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName()))
             if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
+                if(e.getEntity().hasMetadata("NPC") || e.getEntity().getKiller().hasMetadata("NPC"))
+                    return;
                 UUID uuid = e.getEntity().getKiller().getUniqueId();
                 if(!playerList.containsKey(uuid))
                     addPlayerData(uuid);
@@ -175,6 +181,8 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
+        if(e.getPlayer().hasMetadata("NPC"))
+            return;
         if(!playerList.containsKey(e.getPlayer().getUniqueId()))
             addPlayerData(e.getPlayer().getUniqueId());
 
@@ -197,6 +205,8 @@ public class AffinityEvents extends Affinity implements Listener {
         if(!disabledWorlds.contains(e.getEntity().getWorld().getName())) {
             Entity prey = e.getEntity();
             Entity hunter = e.getDamager();
+            if(prey.hasMetadata("NPC") || hunter.hasMetadata("NPC"))
+                return;
             if (prey instanceof Player) {
                 if(!playerList.containsKey(prey.getUniqueId()))
                     addPlayerData(prey.getUniqueId());
@@ -348,6 +358,8 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
         if(e.getEntity() instanceof Player) {
+            if(e.getEntity().hasMetadata("NPC"))
+                return;
             if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
             if(e.getEntity().getFoodLevel() > e.getFoodLevel())
@@ -359,6 +371,8 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(e.getEntity() instanceof Player) {
+            if(e.getEntity().hasMetadata("NPC"))
+                return;
             if(!playerList.containsKey(e.getEntity().getUniqueId()))
                 addPlayerData(e.getEntity().getUniqueId());
             if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
@@ -370,6 +384,8 @@ public class AffinityEvents extends Affinity implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(e.getTarget() instanceof Player) {
+            if(e.getTarget().hasMetadata("NPC"))
+                return;
             if(!playerList.containsKey(e.getTarget().getUniqueId()))
                 addPlayerData(e.getTarget().getUniqueId());
             if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
@@ -380,12 +396,16 @@ public class AffinityEvents extends Affinity implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        if(e.getPlayer().hasMetadata("NPC"))
+            return;
         if(!playerList.containsKey(e.getPlayer().getUniqueId()))
             addPlayerData(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
+        if(e.getPlayer().hasMetadata("NPC"))
+            return;
         UUID uuid = e.getPlayer().getUniqueId();
         Minecrafter pl = playerList.get(uuid);
         SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
