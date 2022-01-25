@@ -12,9 +12,10 @@ version: 1.5
 points-per-minute: 3
 block-mined: 2
 player-hit: -1
+affinity-per-heart-loss: -1 # So 1.5 hearts of damage (counts as 2) amounts to (-1 * 2) = -2 affinity
 pvp-kill: 20
 pve-kill: 2
-death: -80
+death: -100
 
 # How Much Affinity a Player Starts With When Joining For The First Time.
 starting-affinity: 600
@@ -63,9 +64,12 @@ blocks:
 # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
 silk-touch-allowed: false
 
+# People won't lose affinity if they die by their own hands.
+prevent-affinity-loss-on-suicide: true
+
 # Whether to Hook Into certain Plugins or not
 plugin-support:
-  allow-papi: false # Check the Github or Spigot page for the commands
+  allow-papi: false # Check the GitHub or Spigot page for the commands
   use-prefix: true
   no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
@@ -85,6 +89,7 @@ disabled-worlds:
 # These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
 disabled-mobs:
 - ENDER_DRAGON
+- ENDER_CRYSTAL
 - ELDER_GUARDIAN
 - WITHER
 
@@ -177,10 +182,6 @@ difficulty:
 
 # Some of these features are experimental, change existing features or have a chance to reduce server performance
 advanced-features:
-  # The 'auto-calculate' features will, add and remove min/max affinity from players depending on configured settings
-  # These WILL override existing min/max affinity settings.
-  auto-calculate-min-affinity: false
-  auto-calculate-max-affinity: false
   custom-mob-items-spawn-chance: false
 
 # Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
@@ -315,76 +316,3 @@ custom-mob-items-spawn-chance:
       chest-chance: 90.0
       leggings-chance: 81.0
       boots-chance: 72.9
-
-# This section is to calculate the min & max affinity of players automatically, WILL OVERRIDE existing values.
-calculating-affinity:
-  # Will check equipment every few minutes
-  minute-interval-per-checking-equipment: 5
-  min-affinity-changes:
-    # Affinity limit is counted from the min-affinity set at the top (0 + 700 = 700)
-    affinity-limit: 700
-    points-per-minute: 1
-    block-mined: 1
-    player-hit: -1
-    pvp-kill: 5
-    pve-kill: 1
-    death: -100
-    items-held-or-worn:
-    - IRON_HELMET: 2
-    - IRON_CHESTPLATE: 4
-    - IRON_LEGGINGS: 2
-    - IRON_BOOTS: 2
-    - DIAMOND_HELMET: 4
-    - DIAMOND_CHESTPLATE: 6
-    - DIAMOND_LEGGINGS: 4
-    - DIAMOND_BOOTS: 4
-    - NETHERITE_HELMET: 6
-    - NETHERITE_CHESTPLATE: 8
-    - NETHERITE_LEGGINGS: 6
-    - NETHERITE_BOOTS: 6
-    - ELYTRA: 10
-    - IRON_SWORD: 1
-    - IRON_PICKAXE: 1
-    - IRON_AXE: 1
-    - DIAMOND_SWORD: 3
-    - DIAMOND_PICKAXE: 3
-    - DIAMOND_AXE: 3
-    - NETHERITE_SWORD: 5
-    - NETHERITE_PICKAXE: 5
-    - NETHERITE_AXE: 5
-    - GOLDEN_APPLE: 5
-    - ENCHANTED_GOLDEN_APPLE: 10
-  max-affinity-changes:
-    # Affinity limit is counted from the max-affinity set at the top (1500 - 700 = 800)
-    affinity-limit: 700
-    points-per-minute: -2
-    block-mined: -1
-    player-hit: 1
-    pvp-kill: -4
-    pve-kill: -1
-    death: 100
-    items-held-or-worn:
-    - IRON_HELMET: -1
-    - IRON_CHESTPLATE: -2
-    - IRON_LEGGINGS: -1
-    - IRON_BOOTS: -1
-    - DIAMOND_HELMET: -3
-    - DIAMOND_CHESTPLATE: -4
-    - DIAMOND_LEGGINGS: -3
-    - DIAMOND_BOOTS: -3
-    - NETHERITE_HELMET: -5
-    - NETHERITE_CHESTPLATE: -8
-    - NETHERITE_LEGGINGS: -5
-    - NETHERITE_BOOTS: -5
-    - ELYTRA: -10
-    - IRON_SWORD: -1
-    - IRON_PICKAXE: -1
-    - IRON_AXE: -1
-    - DIAMOND_SWORD: -3
-    - DIAMOND_PICKAXE: -3
-    - DIAMOND_AXE: -3
-    - NETHERITE_SWORD: -5
-    - NETHERITE_PICKAXE: -5
-    - NETHERITE_AXE: -5
-    - GOLDEN_APPLE: -5
-    - ENCHANTED_GOLDEN_APPLE: -15

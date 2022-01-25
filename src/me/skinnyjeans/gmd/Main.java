@@ -79,7 +79,7 @@ public class Main extends JavaPlugin {
 		StringBuilder worldNames = new StringBuilder("");
 		for(int x=0;x<Bukkit.getWorlds().size();x++)
 			if(Bukkit.getWorlds().get(x).getDifficulty() != Difficulty.HARD)
-				worldNames.append(Bukkit.getWorlds().get(x).getName() + ", ");
+				worldNames.append(Bukkit.getWorlds().get(x).getName()).append(", ");
 
 		if(worldNames.length() != 0)
 			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] The following worlds do not have their difficulty on Hard mode: "+worldNames.substring(0, worldNames.length() - 2));
@@ -96,12 +96,6 @@ public class Main extends JavaPlugin {
 		));
 		m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
 			data.getConfig().getString("advanced-features.custom-mob-items-spawn-chance", "false").toLowerCase()
-		));
-		m.addCustomChart(new Metrics.SimplePie("auto_calculate_minaffinity", () ->
-			data.getConfig().getString("advanced-features.auto-calculate-min-affinity", "false").toLowerCase()
-		));
-		m.addCustomChart(new Metrics.SimplePie("auto_calculate_maxaffinity", () ->
-			data.getConfig().getString("advanced-features.auto-calculate-max-affinity", "false").toLowerCase()
 		));
 
 		if(data.getConfig().getBoolean("plugin-support.allow-papi"))

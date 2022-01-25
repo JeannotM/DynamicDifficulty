@@ -115,7 +115,7 @@ public class AffinityCommands implements CommandExecutor {
             }
 
         } else if(twoArg.contains(cmd)) {
-            int numberGiven = -1;
+            int numberGiven;
             if (args.length == 1) {
                 return sendMSG(getString("error.include-number"), sender, false);
             } else if (args.length == 2) {

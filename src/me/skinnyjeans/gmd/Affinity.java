@@ -26,8 +26,8 @@ public class Affinity {
     protected SaveManager SQL;
     protected DataManager data;
     protected FileConfiguration config;
-    protected int minAffinity,maxAffinity,onDeath,onPVPKill,startAffinity,onInterval,onPlayerHit,worldAffinity,maxAffinityLimit,minAffinityLimit;
-    protected boolean randomizer,calcMinAffinity,calcMaxAffinity,customArmorSpawnChance,calculateExtraArmorDamage;
+    protected int minAffinity,maxAffinity,onDeath,onPVPKill,startAffinity,onInterval,onPlayerHit,worldAffinity,affinityPerHeart;
+    protected boolean randomizer,customArmorSpawnChance,calculateExtraArmorDamage,preventAffinityLossOnSuicide;
     protected String difficultyType,saveType;
     protected List<String> disabledMobs = new ArrayList<>();
     protected List<String> disabledWorlds = new ArrayList<>();
@@ -43,8 +43,6 @@ public class Affinity {
     protected HashMap<String, ArrayList<String>> enchantmentList = new HashMap<>();
     protected HashMap<String, Integer> mobsPVE = new HashMap<>();
     protected HashMap<String, Integer> blocks = new HashMap<>();
-    protected HashMap<String, Integer> minAffinityItems = new HashMap<>();
-    protected HashMap<String, Integer> maxAffinityItems = new HashMap<>();
     protected HashMap<String, Inventory> inventorySettings = new HashMap<>();
     protected HashMap<String, UUID> playersUUID = new HashMap<>();
     protected ArrayList<String> difficulties = new ArrayList<>();
@@ -94,8 +92,7 @@ public class Affinity {
         minAffinityListItems.clear(); mobsOverrideIgnore.clear(); ignoreMobs.clear();
         difficultyList.clear(); chancePerArmor.clear(); customSpawnWeapons.clear();
         chancePerWeapon.clear(); enchantmentList.clear(); mobsPVE.clear();
-        blocks.clear(); minAffinityItems.clear(); maxAffinityItems.clear();
-        inventorySettings.clear(); difficulties.clear();
+        blocks.clear(); inventorySettings.clear(); difficulties.clear();
         loadConfig();
     }
 
@@ -104,74 +101,28 @@ public class Affinity {
         data = new DataManager(m);
         config = data.getConfig();
         saveType = config.getString("saving-data.type", "file").toLowerCase();
-        randomizer = config.getBoolean("difficulty-modifiers.randomize");
-        minAffinity = config.getInt("min-affinity");
-        maxAffinity = config.getInt("max-affinity");
-        onDeath = config.getInt("death");
-        onPVPKill = config.getInt("pvp-kill");
-        startAffinity = config.getInt("starting-affinity");
-        onInterval = config.getInt("points-per-minute");
-        onPlayerHit = config.getInt("player-hit");
+        randomizer = config.getBoolean("difficulty-modifiers.randomize", false);
+        minAffinity = config.getInt("min-affinity", 0);
+        maxAffinity = config.getInt("max-affinity", 1500);
+        onDeath = config.getInt("death", -100);
+        onPVPKill = config.getInt("pvp-kill", 20);
+        startAffinity = config.getInt("starting-affinity", 600);
+        onInterval = config.getInt("points-per-minute", 3);
+        onPlayerHit = config.getInt("player-hit", -1);
         difficultyType = config.getString("difficulty-modifiers.type", "player").toLowerCase();
         disabledWorlds = config.getStringList("disabled-worlds");
         disabledMobs = config.getStringList("disabled-mobs");
+        affinityPerHeart = data.getConfig().getInt("affinity-per-heart-loss", -1);
         customArmorSpawnChance = config.getBoolean("advanced-features.custom-mob-items-spawn-chance", false);
+        preventAffinityLossOnSuicide = config.getBoolean("prevent-affinity-loss-on-suicide", false);
         calculateExtraArmorDamage = false;
         HashMap<Integer, String> tmpMap = new HashMap<>();
         ArrayList<String> tmpList = new ArrayList<>();
         ConfigurationSection section = config.getConfigurationSection("difficulty");
-        calcMinAffinity = difficultyType.equals("player") && config.getBoolean("advanced-features.auto-calculate-min-affinity", false);
-        calcMaxAffinity = difficultyType.equals("player") && config.getBoolean("advanced-features.auto-calculate-max-affinity", false);
-        minAffinityLimit = minAffinity;
-        maxAffinityLimit = maxAffinity;
 
         if(section.getKeys(false).size() == 0) {
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] You don't have any custom difficulties!!! Disabling Dynamic Difficulty.");
             Bukkit.getPluginManager().disablePlugin(m);
-        }
-
-        if((calcMinAffinity || calcMaxAffinity) && config.getInt("calculating-affinity.minute-interval-per-checking-equipment") > 0) {
-            boolean onIntervalAllowed = false;
-            if(calcMinAffinity) {
-                if(config.getInt("calculating-affinity.min-affinity-changes.points-per-minute") != 0)
-                    onIntervalAllowed = true;
-                minAffinityLimit = config.getInt("calculating-affinity.min-affinity-changes.affinity-limit");
-                for(Object s : config.getList("calculating-affinity.min-affinity-changes.items-held-or-worn").toArray()) {
-                    String[] sep = s.toString().replaceAll("[{|}]","").split("=");
-                    minAffinityListItems.add(sep[0]);
-                    try {
-                        minAffinityItems.put(sep[0], Integer.parseInt(sep[1]));
-                    } catch(Exception e) {
-                        minAffinityItems.put(sep[0], 1);
-                    }
-                }
-            }
-
-            if(calcMaxAffinity) {
-                maxAffinityLimit = maxAffinity - config.getInt("calculating-affinity.max-affinity-changes.affinity-limit");
-                if(config.getInt("calculating-affinity.min-affinity-changes.points-per-minute") != 0)
-                    onIntervalAllowed = true;
-                for(Object s : config.getList("calculating-affinity.max-affinity-changes.items-held-or-worn").toArray()) {
-                    String[] sep = s.toString().replaceAll("[{|}]","").split("=");
-                    maxAffinityListItems.add(sep[0]);
-                    try {
-                        maxAffinityItems.put(sep[0], Integer.parseInt(sep[1]));
-                    } catch(Exception e) {
-                        maxAffinityItems.put(sep[0], 1);
-                    }
-                }
-            }
-            long time = 1200L * config.getInt("calculating-affinity.minute-interval-per-checking-equipment");
-            Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(m, () -> {
-                if (Bukkit.getOnlinePlayers().size() > 0)
-                    checkEquipmentEvery();
-            }, 0L, time);
-
-            if(onIntervalAllowed)
-                Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(m, () -> {
-                    if (Bukkit.getOnlinePlayers().size() > 0)
-                        onIntervalMinMaxAffinity();
-                }, 0L, 1200);
         }
 
         if(SQL == null) {
@@ -276,7 +227,7 @@ public class Affinity {
         if(customArmorSpawnChance) {
             section = config.getConfigurationSection("custom-mob-items-spawn-chance.difficulties");
             if(section.getKeys(false).size() != 0) {
-                StringBuilder weirdDifficulty = new StringBuilder("");
+                StringBuilder weirdDifficulty = new StringBuilder();
                 for (String key : section.getKeys(false))
                     if(difficultyList.containsKey(key)) {
                         Difficulty d = difficultyList.get(key);
@@ -295,7 +246,7 @@ public class Affinity {
                         chances.put("boots", section.getDouble(key + ".boots-chance"));
                         d.setEnchantChances(chances);
                     } else {
-                        weirdDifficulty.append(key + ", ");
+                        weirdDifficulty.append(key).append(", ");
                     }
 
                 if(weirdDifficulty.length() != 0)
@@ -308,7 +259,7 @@ public class Affinity {
 
                 if(invalidDifficulties.size() != 0) {
                     Difficulty d = difficultyList.get(difficulties.get(0));
-                    StringBuilder forgottenDifficulties = new StringBuilder("");
+                    StringBuilder forgottenDifficulties = new StringBuilder();
                     for(String diff : difficulties)
                         if(!Double.isNaN(difficultyList.get(diff).getChanceToEnchant()))
                             d = difficultyList.get(diff);
@@ -329,7 +280,7 @@ public class Affinity {
                         chances.put("leggings", d.getEnchantChance("leggings"));
                         chances.put("boots", d.getEnchantChance("boots"));
                         forgotten.setEnchantChances(chances);
-                        forgottenDifficulties.append(s + ", ");
+                        forgottenDifficulties.append(s).append(", ");
                     }
                     Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DynamicDifficulty] These difficulties don't have any custom enchant settings: "+ forgottenDifficulties.substring(0, forgottenDifficulties.length() - 2));
                 }
@@ -351,7 +302,7 @@ public class Affinity {
         }
 
         if(difficultyType.equals("biome"))
-            Bukkit.getScheduler().runTaskAsynchronously(m, () -> addBiomes());
+            Bukkit.getScheduler().runTaskAsynchronously(m, this::addBiomes);
     }
 
     private void addBiomes() {
@@ -361,64 +312,21 @@ public class Affinity {
                 Minecrafter mc = new Minecrafter(uuid);
                 if (r.get(0) == -1) {
                     mc.setAffinity(startAffinity);
-                    if (calcMaxAffinity) {
-                        mc.setMaxAffinity(maxAffinity);
-                    } else {
-                        mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
-                    }
-                    if (calcMinAffinity) {
-                        mc.setMinAffinity(minAffinity);
-                    } else {
-                        mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
-                    }
+                    mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
+                    mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
                     SQL.updatePlayer(uuid, startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
                 } else {
                     mc.setAffinity(r.get(0));
-                    if (calcMaxAffinity && r.get(1) == -1) {
-                        mc.setMaxAffinity(maxAffinity);
-                    } else if(!calcMaxAffinity && r.get(1) == maxAffinity) {
-                        mc.setMaxAffinity(-1);
-                    } else {
-                        mc.setMaxAffinity(r.get(1));
-                    }
-                    if (calcMinAffinity && r.get(2) == -1) {
-                        mc.setMinAffinity(minAffinity);
-                    } else if(!calcMinAffinity && r.get(2) == minAffinity) {
-                        mc.setMinAffinity(-1);
-                    } else {
-                        mc.setMinAffinity(r.get(2));
-                    }
+                    mc.setMaxAffinity(r.get(1));
+                    mc.setMinAffinity(r.get(2));
                 }
                 biomeList.put(uuid, mc);
             });
         }
     }
 
-    private void checkEquipmentEvery(){
-        if(calcMinAffinity || calcMaxAffinity)
-            Bukkit.getOnlinePlayers().forEach(pl -> {
-                ArrayList<String> equipment = new ArrayList<>();
-                Minecrafter mc = playerList.get(pl.getUniqueId());
-                if(pl.getEquipment().getItemInMainHand() != null){ equipment.add(pl.getEquipment().getItemInMainHand().getType().toString());}
-                for(ItemStack item : pl.getEquipment().getArmorContents()){ if(item != null) {equipment.add(item.getType().toString());} }
-                for (String s : equipment) {
-                    if (calcMinAffinity && minAffinityListItems.contains(s)) {
-                        if (mc.getMinAffinity() == -1)
-                            mc.setMinAffinity(minAffinity);
-                        addAmountOfMinAffinity(pl.getUniqueId(), minAffinityItems.get(s));
-                    }
-                    if (calcMaxAffinity && maxAffinityListItems.contains(s)) {
-                        if (mc.getMaxAffinity() == -1)
-                            mc.setMaxAffinity(maxAffinity);
-                        addAmountOfMaxAffinity(pl.getUniqueId(), maxAffinityItems.get(s));
-                    }
-                }
-
-            });
-    }
-
     private void loadWeapons() {
-        StringBuilder weaponNames = new StringBuilder("");
+        StringBuilder weaponNames = new StringBuilder();
         int total = 0;
         Object[] weaponArray = config.getList("custom-mob-items-spawn-chance.weapons-include").toArray();
         for(Object s : weaponArray) {
@@ -445,7 +353,7 @@ public class Affinity {
     }
 
     private void loadMobs() {
-        StringBuilder mobNames = new StringBuilder("");
+        StringBuilder mobNames = new StringBuilder();
         Object[] tmpMobs = config.getList("mobs-count-as-pve").toArray();
         for(Object s : tmpMobs){
             String[] sep = s.toString().replaceAll("[{|}]","").split("=");
@@ -469,7 +377,7 @@ public class Affinity {
     }
 
     private void loadBlocks() {
-        StringBuilder blockNames = new StringBuilder("");
+        StringBuilder blockNames = new StringBuilder();
         Object[] tmpBlocks = config.getList("blocks").toArray();
         for(Object s : tmpBlocks) {
             String[] sep = s.toString().replaceAll("[{|}]","").split("=");
@@ -494,7 +402,7 @@ public class Affinity {
 
     private void loadEnchants() {
         ArrayList<String> array = new ArrayList<>(Arrays.asList("helmet","chestplate","leggings","boots","weapon","bow"));
-        String weirdEnchants = "";
+        StringBuilder weirdEnchants = new StringBuilder();
         for(String piece : array) {
             int total = 0;
             ArrayList<String> enchants = new ArrayList<>();
@@ -504,15 +412,15 @@ public class Affinity {
                 int curr = 1;
                 try {
                     if(Enchantment.getByKey(NamespacedKey.minecraft(sep[0].toLowerCase())) == null) {
-                        if(!weirdEnchants.contains(sep[0]))
-                            weirdEnchants += sep[0] + ", ";
+                        if(!weirdEnchants.toString().contains(sep[0]))
+                            weirdEnchants.append(sep[0]).append(", ");
                         continue;
                     } else if(sep.length >= 2) {
                         curr = Integer.parseInt(sep[1]);
                     }
                 } catch (Exception e) {
-                    if(!weirdEnchants.contains(sep[0]))
-                        weirdEnchants += sep[0] + ", ";
+                    if(!weirdEnchants.toString().contains(sep[0]))
+                        weirdEnchants.append(sep[0]).append(", ");
                     continue;
                 }
                 total += curr;
@@ -530,16 +438,11 @@ public class Affinity {
     }
     public boolean hasBiome(String name) { return biomeList.containsKey(name); }
 
-    public int getBiomeAffinity(String name) {
-        if(biomeList.containsKey(name))
-            return biomeList.get(name).getAffinity();
-        return -1;
-    }
+    public int getBiomeAffinity(String name) { return (biomeList.containsKey(name)) ? biomeList.get(name).getAffinity() : -1; }
+
     public int getAffinity(UUID uuid) {
-        if(uuid == null)
-            return worldAffinity;
-        if(playerList.containsKey(uuid))
-            return playerList.get(uuid).getAffinity();
+        if(uuid == null) return worldAffinity;
+        if(playerList.containsKey(uuid)) return playerList.get(uuid).getAffinity();
         return -1;
     }
 
@@ -605,7 +508,7 @@ public class Affinity {
      * @return INT the affinity after it has been checked
      */
     public int calcAffinity(UUID uuid, int x) {
-        if(x == -1) { return -1; }
+        if(x == -1) return -1;
 
         if (x > maxAffinity) {
             x = maxAffinity;
@@ -635,7 +538,7 @@ public class Affinity {
      * @return INT the affinity after it has been checked
      */
     public int calcAffinity(String name, int x) {
-        if(x == -1) { return -1; }
+        if(x == -1) return -1;
 
         if (x > maxAffinity) {
             x = maxAffinity;
@@ -663,33 +566,13 @@ public class Affinity {
                 Minecrafter mc = new Minecrafter(usr.getName());
                 if (r.get(0) == -1) {
                     mc.setAffinity(startAffinity);
-                    if (calcMaxAffinity) {
-                        mc.setMaxAffinity(maxAffinity);
-                    } else {
-                        mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
-                    }
-                    if (calcMinAffinity) {
-                        mc.setMinAffinity(minAffinity);
-                    } else {
-                        mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
-                    }
+                    mc.setMaxAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-max-affinity", -1)));
+                    mc.setMinAffinity(calcAffinity((UUID)null, data.getConfig().getInt("starting-min-affinity", -1)));
                     SQL.updatePlayer(uuid.toString(), startAffinity, mc.getMaxAffinity(), mc.getMinAffinity());
                 } else {
                     mc.setAffinity(r.get(0));
-                    if (calcMaxAffinity && r.get(1) == -1) {
-                        mc.setMaxAffinity(maxAffinity);
-                    } else if(!calcMaxAffinity && r.get(1) == maxAffinity) {
-                        mc.setMaxAffinity(-1);
-                    } else {
-                        mc.setMaxAffinity(r.get(1));
-                    }
-                    if (calcMinAffinity && r.get(2) == -1) {
-                        mc.setMinAffinity(minAffinity);
-                    } else if(!calcMinAffinity && r.get(2) == minAffinity) {
-                        mc.setMinAffinity(-1);
-                    } else {
-                        mc.setMinAffinity(r.get(2));
-                    }
+                    mc.setMaxAffinity(r.get(1));
+                    mc.setMinAffinity(r.get(2));
                 }
                 playerList.put(uuid, mc);
                 playersUUID.put(usr.getName(), uuid);
@@ -771,7 +654,7 @@ public class Affinity {
      * @return String of the difficulty the world/user is on
      */
     public String calcDifficulty(String name) {
-        if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
+        if(randomizer) return difficulties.get(new Random().nextInt(difficulties.size() - 1));
         if(biomeList.containsKey(name)) {
             int af = biomeList.get(name).getAffinity();
             int size = difficulties.size();
@@ -789,7 +672,7 @@ public class Affinity {
      * @return String of the difficulty the world/user is on
      */
     public String calcDifficulty(UUID uuid) {
-        if(randomizer) { return difficulties.get(new Random().nextInt(difficulties.size() - 1)); }
+        if(randomizer) return difficulties.get(new Random().nextInt(difficulties.size() - 1));
         int af;
 
         if(difficultyType.equals("world") || uuid == null){
@@ -821,7 +704,7 @@ public class Affinity {
      * @return Double of the exact or the difficulty based percentage
      */
     protected double calcPercentage(UUID uuid, String mode) {
-        if(randomizer) { return getHashData(mode, calcDifficulty(uuid)); }
+        if(randomizer) return getHashData(mode, calcDifficulty(uuid));
         int thisDiff = difficulties.indexOf(calcDifficulty(uuid));
         int affinity;
 
@@ -905,24 +788,17 @@ public class Affinity {
             else { playerList.get(uuid).setAffinity(calcAffinity(uuid, playerList.get(uuid).getAffinity() + x)); }
         }
     }
+
     protected void addAmountOfMinAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            if(minAffinity == minAffinityLimit) {
-                p.setMinAffinity(calcAffinity((UUID)null, p.getMinAffinity() + x));
-            } else {
-                p.setMinAffinity(calcAffinity((UUID)null, Math.min(p.getMinAffinity() + x, minAffinityLimit)));
-            }
+            p.setMinAffinity(calcAffinity((UUID)null, p.getMinAffinity() + x));
         }
     }
     protected void addAmountOfMaxAffinity(UUID uuid, int x) {
         if(x != 0) {
             Minecrafter p = playerList.get(uuid);
-            if(maxAffinity == maxAffinityLimit) {
-                p.setMaxAffinity(calcAffinity((UUID)null, p.getMaxAffinity() + (x * -1)));
-            } else {
-                p.setMaxAffinity(calcAffinity((UUID)null, Math.max(p.getMaxAffinity() + (x * -1), maxAffinityLimit)));
-            }
+            p.setMaxAffinity(calcAffinity((UUID)null, p.getMaxAffinity() + (x * -1)));
         }
     }
 
@@ -946,16 +822,6 @@ public class Affinity {
         }
     }
 
-    /** To increase/decrease players Min & Max Affinity every minute */
-    public void onIntervalMinMaxAffinity() {
-        Bukkit.getOnlinePlayers().forEach(pl -> {
-            if(calcMaxAffinity)
-                addAmountOfMaxAffinity(pl.getUniqueId(), config.getInt("calculating-affinity.max-affinity-changes.points-per-minute"));
-            if(calcMinAffinity)
-                addAmountOfMinAffinity(pl.getUniqueId(), config.getInt("calculating-affinity.min-affinity-changes.points-per-minute"));
-        });
-    }
-
     public void openPlayersInventory(Player user, int page) {
         Inventory tmp = inventorySettings.get("player");
         if(Bukkit.getOnlinePlayers().size() < 45) {
@@ -976,13 +842,13 @@ public class Affinity {
             Bukkit.getConsoleSender().sendMessage("page: "+page + " curr: "+curr);
             Player[] pl = Bukkit.getOnlinePlayers().toArray(new Player[0]);
             ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT);
-            setLore(goldIngot, new ArrayList<>(Arrays.asList(String.valueOf(page > 0 ? page-1 : 0))));
+            setLore(goldIngot, new ArrayList<>(Collections.singletonList(String.valueOf(page > 0 ? page - 1 : 0))));
             setItemStackName(goldIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Previous page");
             ItemStack chestPlate = new ItemStack(Material.IRON_CHESTPLATE);
-            setLore(chestPlate, new ArrayList<>(Arrays.asList(String.valueOf(page))));
+            setLore(chestPlate, new ArrayList<>(Collections.singletonList(String.valueOf(page))));
             setItemStackName(chestPlate, ChatColor.AQUA+""+ChatColor.BOLD+"Current page");
             ItemStack ironIngot = new ItemStack(Material.IRON_INGOT);
-            setLore(ironIngot, new ArrayList<>(Arrays.asList(String.valueOf(page+1))));
+            setLore(ironIngot, new ArrayList<>(Collections.singletonList(String.valueOf(page + 1))));
             setItemStackName(ironIngot, ChatColor.AQUA+""+ChatColor.BOLD+"Next page");
             tmp.setItem(3, goldIngot);
             tmp.setItem(4, chestPlate);
@@ -1024,7 +890,7 @@ public class Affinity {
                     if(i != 0) { tmp = i / 9; }
                     setItemStackName(wool, settings.get(tmp));
                 } else {
-                    if(woolColors.get((i % 9)) == "") { continue; }
+                    if(woolColors.get((i % 9)).equals("")) continue;
                     wool = new ItemStack(Material.getMaterial(woolColors.get((i % 9)) + "_WOOL"), 1);
                     setItemStackName(wool, changeSettings.get(i % 9));
                 }
