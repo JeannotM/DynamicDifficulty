@@ -48,10 +48,6 @@ public class Affinity {
     protected ArrayList<String> difficulties = new ArrayList<>();
     protected ArrayList<String> customSpawnWeapons = new ArrayList<>();
     protected ArrayList<Material> ranged = new ArrayList<>(Arrays.asList(Material.BOW, Material.CROSSBOW));
-    protected ArrayList<PotionEffectType> effects = new ArrayList<>(Arrays.asList(PotionEffectType.WITHER, PotionEffectType.POISON,
-            PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS, PotionEffectType.SLOW, PotionEffectType.CONFUSION, PotionEffectType.HUNGER));
-    protected ArrayList<EntityPotionEffectEvent.Cause> effectCauses = new ArrayList<>(Arrays.asList(EntityPotionEffectEvent.Cause.ATTACK,
-            EntityPotionEffectEvent.Cause.ARROW, EntityPotionEffectEvent.Cause.POTION_SPLASH));
     protected ArrayList<List<Enchantment>> enchantmentConflict = new ArrayList<>(Arrays.asList(
             Arrays.asList(Enchantment.MENDING, Enchantment.ARROW_INFINITE),
             Arrays.asList(Enchantment.PROTECTION_ENVIRONMENTAL, Enchantment.PROTECTION_EXPLOSIONS, Enchantment.PROTECTION_FIRE, Enchantment.PROTECTION_PROJECTILE),

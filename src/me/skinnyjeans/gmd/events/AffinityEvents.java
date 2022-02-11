@@ -106,43 +106,6 @@ public class AffinityEvents extends Affinity implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onDeath(PlayerDeathEvent e) {
-        if(disabledWorlds.contains(e.getEntity().getWorld().getName())) return;
-        if(e.getEntity().hasMetadata("NPC")) return;
-        List<EntityDamageEvent.DamageCause> countsAsSuicide = new ArrayList<>(Arrays.asList(EntityDamageEvent.DamageCause.FALL, EntityDamageEvent.DamageCause.SUFFOCATION, null, EntityDamageEvent.DamageCause.SUICIDE));
-
-        if(!playerList.containsKey(e.getEntity().getUniqueId()))
-            addPlayerData(e.getEntity().getUniqueId());
-
-        if(difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getKeepInventory()) {
-            e.setKeepInventory(true);
-            e.setKeepLevel(true);
-            e.getDrops().clear();
-        }
-
-        if(preventAffinityLossOnSuicide)
-            if(countsAsSuicide.contains(e.getEntity().getLastDamageCause()))
-                return;
-
-        if(onDeath != 0)
-            addAmountOfAffinity(e.getEntity().getUniqueId(), onDeath);
-
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onItemDamage(PlayerItemDamageEvent e) {
-        if(disabledWorlds.contains(e.getPlayer().getWorld().getName())) return;
-        if(e.getPlayer().hasMetadata("NPC")) return;
-
-        UUID uuid = e.getPlayer().getUniqueId();
-        if(!playerList.containsKey(uuid))
-            addPlayerData(uuid);
-
-        if(new Random().nextDouble() < calcPercentage(uuid, "double-durability-damage") / 100)
-            e.setDamage(e.getDamage() * 2);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
         if(disabledWorlds.contains(e.getEntity().getWorld().getName())) return;
 
@@ -174,21 +137,7 @@ public class AffinityEvents extends Affinity implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onMined(BlockBreakEvent e) {
-        if(disabledWorlds.contains(e.getPlayer().getWorld().getName())) return;
-        if(e.getPlayer().hasMetadata("NPC")) return;
 
-        if(!playerList.containsKey(e.getPlayer().getUniqueId()))
-            addPlayerData(e.getPlayer().getUniqueId());
-
-        Bukkit.getScheduler().runTaskAsynchronously(m, () -> Bukkit.getScheduler().runTask(m, () -> {
-            if (blocks.get(e.getBlock().getBlockData().getMaterial().name()) != null)
-                if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || config.getBoolean("silk-touch-allowed"))
-                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
-                        addAmountOfAffinity(e.getPlayer().getUniqueId(), blocks.get(e.getBlock().getBlockData().getMaterial().name()));
-        }));
-    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHit(EntityDamageByEntityEvent e) {
@@ -340,48 +289,6 @@ public class AffinityEvents extends Affinity implements Listener {
         } else if(spawnReasons.contains(e.getSpawnReason())) {
             if(config.getBoolean("plugin-support.no-changes-to-spawned-mobs", false))
                 ignoreMobs.add(e.getEntity().getEntityId());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onHungerDrain(FoodLevelChangeEvent e) {
-        if(disabledWorlds.contains(e.getEntity().getWorld().getName())) return;
-        if(e.getEntity().hasMetadata("NPC")) return;
-
-        if(e.getEntity() instanceof Player) {
-            if(!playerList.containsKey(e.getEntity().getUniqueId()))
-                addPlayerData(e.getEntity().getUniqueId());
-            if(e.getEntity().getFoodLevel() > e.getFoodLevel())
-                if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
-                    e.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPotionEffect(EntityPotionEffectEvent e) {
-        if(disabledWorlds.contains(e.getEntity().getWorld().getName())) return;
-        if(e.getEntity().hasMetadata("NPC")) return;
-
-        if(e.getEntity() instanceof Player) {
-            if(!playerList.containsKey(e.getEntity().getUniqueId()))
-                addPlayerData(e.getEntity().getUniqueId());
-            if(effectCauses.contains(e.getCause()) && effects.contains(e.getModifiedType()))
-                if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
-                    e.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        if(disabledWorlds.contains(e.getEntity().getWorld().getName())) return;
-        if(e.getEntity().hasMetadata("NPC")) return;
-
-        if(e.getTarget() instanceof Player) {
-            if(!playerList.containsKey(e.getTarget().getUniqueId()))
-                addPlayerData(e.getTarget().getUniqueId());
-            if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
-                if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
-                    e.setCancelled(true);
         }
     }
 
