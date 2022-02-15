@@ -11,7 +11,6 @@ import java.util.UUID;
 public class PlayerManager {
 
     private final MainManager MAIN_MANAGER;
-
     private final HashMap<UUID, Minecrafter> PLAYER_LIST = new HashMap<>();
 
     public PlayerManager(MainManager mainManager) {

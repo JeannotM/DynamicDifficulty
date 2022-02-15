@@ -13,4 +13,6 @@ public class DifficultyManager {
     }
 
     public Difficulty getDifficulty(UUID uuid) { return new Difficulty(""); }
+
+    public Difficulty getDifficultyType() { return new Difficulty(""); }
 }

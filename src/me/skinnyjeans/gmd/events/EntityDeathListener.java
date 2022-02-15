@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
