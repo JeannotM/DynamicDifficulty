@@ -12,6 +12,8 @@ public class PlayerLeaveListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
 
+    private boolean unloadLeavingPlayers;
+
     public PlayerLeaveListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }
@@ -23,9 +25,14 @@ public class PlayerLeaveListener extends BaseListener {
         UUID uuid = e.getPlayer().getUniqueId();
         Minecrafter pl = playerList.get(uuid);
         SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
-        if(config.getBoolean("plugin-support.unload-leaving-player", false)) {
+        if(unloadLeavingPlayers) {
             playerList.remove(uuid);
             playersUUID.remove(e.getPlayer().getName());
         }
+    }
+
+    @Override
+    public void reloadConfig() {
+        unloadLeavingPlayers = MAIN_MANAGER.getDataManager().getConfig().getBoolean("plugin-support.unload-leaving-player", false);
     }
 }

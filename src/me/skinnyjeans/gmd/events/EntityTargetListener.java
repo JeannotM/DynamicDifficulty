@@ -17,10 +17,10 @@ public class EntityTargetListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
-        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
+        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getTarget())) return;
 
         if(e.getTarget() instanceof Player) {
-            if(difficultyList.get(calcDifficulty(e.getTarget().getUniqueId())).getIgnoredMobs().contains(e.getEntity().getType().toString()))
+            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).getIgnoredMobs().contains(e.getEntity().getType().toString()))
                 if(!mobsOverrideIgnore.contains(e.getEntity().getEntityId()) && !ignoreMobs.contains(e.getEntity().getEntityId()))
                     e.setCancelled(true);
         }

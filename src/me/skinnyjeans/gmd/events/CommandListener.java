@@ -23,7 +23,7 @@ public class CommandListener extends BaseListener {
         if(p.isOp()) return;
         MAIN_MANAGER.getPlayerManager().isPlayerValid(p);
 
-        List<String> list = difficultyList.get(calcDifficulty(p.getUniqueId())).getDisabledCommands();
+        List<String> list = MAIN_MANAGER.getDifficultyManager().getDifficulty(p.getUniqueId()).getDisabledCommands();
         StringBuilder cmd = new StringBuilder();
         String[] args = e.getMessage().replace("/","").split(" ");
         if(!list.isEmpty())

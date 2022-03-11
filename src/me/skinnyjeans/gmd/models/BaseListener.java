@@ -4,6 +4,6 @@ import org.bukkit.event.Listener;
 
 public class BaseListener implements Listener {
 
-    public void reloadConfig() { }
+    public void reloadConfig() {  }
 
 }

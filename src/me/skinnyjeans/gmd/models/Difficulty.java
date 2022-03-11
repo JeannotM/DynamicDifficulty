@@ -32,6 +32,7 @@ public class Difficulty {
 
     public Difficulty(String name) { difficultyName = name; }
 
+    public String getDifficultyName() { return difficultyName; }
     public String getPrefix() { return userPrefix; }
     public int getAffinity() { return affinityRequirement; }
     public int getUntil() { return difficultyUntil; }
@@ -44,11 +45,7 @@ public class Difficulty {
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
-    public int getArmorDamageMultiplier(String type) {
-        if(armorDamageMultipliers.containsKey(type))
-            return armorDamageMultipliers.get(type);
-        return -505;
-    }
+    public int getArmorDamageMultiplier(String type) { return armorDamageMultipliers.getOrDefault(type, -505); }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }

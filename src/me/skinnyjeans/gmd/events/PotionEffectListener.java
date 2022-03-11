@@ -34,7 +34,7 @@ public class PotionEffectListener extends BaseListener {
 
         if(e.getEntity() instanceof Player)
             if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
-                if(!difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getEffectsOnAttack())
+                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
                     e.setCancelled(true);
     }
 }

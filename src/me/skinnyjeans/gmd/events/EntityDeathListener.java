@@ -3,6 +3,10 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +19,8 @@ import java.util.UUID;
 public class EntityDeathListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
+
+    private final HashMap<EntityType, Integer> MOBS = new HashMap<>();
 
     private int onPVPKill;
 
@@ -30,17 +36,17 @@ public class EntityDeathListener extends BaseListener {
 
         Bukkit.getScheduler().runTaskAsynchronously(m, () -> {
             if (e.getEntity() instanceof Player) {
-                addAmountOfAffinity(uuid, onPVPKill);
-            } else if (mobsPVE.get(e.getEntityType().toString()) != null) {
-                addAmountOfAffinity(uuid, mobsPVE.get(e.getEntityType().toString()));
-                if(ignoreMobs.contains(e.getEntity().getEntityId()))
+                MAIN_MANAGER.getPlayerManager().addAffinity(uuid, onPVPKill);
+            } else if (MOBS.containsKey(e.getEntityType())) {
+                MAIN_MANAGER.getPlayerManager().addAffinity(uuid, MOBS.get(e.getEntityType()));
+                if(MAIN_MANAGER.getEntityManager().isEntityIgnored(e.getEntity()))
                     ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
             }
         });
 
-        if (!(e.getEntity() instanceof Player) && !disabledMobs.contains(e.getEntityType().toString())) {
-            e.setDroppedExp((int) (e.getDroppedExp() * calcPercentage(uuid, "experience-multiplier") / 100.0));
-            double DoubleLoot = calcPercentage(uuid, "double-loot-chance");
+        if (!(e.getEntity() instanceof Player) && !MAIN_MANAGER.getEntityManager().isEntityDisabled(e.getEntity())) {
+            e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getExperienceMultiplier() / 100.0));
+            double DoubleLoot = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getDoubleLoot();
             if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0 && !e.getEntity().getCanPickupItems())
                 for (int i = 0; i < e.getDrops().size(); i++)
                     Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
@@ -49,6 +55,17 @@ public class EntityDeathListener extends BaseListener {
 
     @Override
     public void reloadConfig() {
+        FileConfiguration config = MAIN_MANAGER.getDataManager().getConfig();
 
+        MOBS.clear();
+        onPVPKill = config.getInt("pvp-kill", 20);
+
+        for(Object key : config.getList("mobs-count-as-pve").toArray()) {
+            String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+            if(EntityType.valueOf(sep[0]) != null) {
+                int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : config.getInt("pve-kill", 2);
+                MOBS.put(EntityType.valueOf(sep[0]), value);
+            }
+        }
     }
 }

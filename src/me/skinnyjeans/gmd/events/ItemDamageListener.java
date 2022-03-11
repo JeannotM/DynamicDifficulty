@@ -7,7 +7,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 
 import java.util.Random;
-import java.util.UUID;
 
 public class ItemDamageListener extends BaseListener {
 
@@ -21,9 +20,7 @@ public class ItemDamageListener extends BaseListener {
     public void onItemDamage(PlayerItemDamageEvent e) {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
 
-        UUID uuid = e.getPlayer().getUniqueId();
-
-        if(new Random().nextDouble() < calcPercentage(uuid, "double-durability-damage") / 100)
+        if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).getDoubleDurabilityDamageChance() / 100.0)
             e.setDamage(e.getDamage() * 2);
     }
 }

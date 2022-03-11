@@ -27,7 +27,7 @@ public class PlayerDeathListener extends BaseListener {
     public void onDeath(PlayerDeathEvent e) {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
 
-        if(difficultyList.get(calcDifficulty(e.getEntity().getUniqueId())).getKeepInventory()) {
+        if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getKeepInventory()) {
             e.setKeepInventory(true);
             e.setKeepLevel(true);
             e.getDrops().clear();
@@ -42,7 +42,7 @@ public class PlayerDeathListener extends BaseListener {
 
     @Override
     public void reloadConfig() {
-        preventAffinityLossOnSuicide = MAIN_MANAGER.getDataManager().getConfig().getBoolean();
-        onDeath = MAIN_MANAGER.getDataManager().getConfig().getBoolean();
+        preventAffinityLossOnSuicide = MAIN_MANAGER.getDataManager().getConfig().getBoolean("prevent-affinity-loss-on-suicide", true);
+        onDeath = MAIN_MANAGER.getDataManager().getConfig().getInt("death", -100);
     }
 }

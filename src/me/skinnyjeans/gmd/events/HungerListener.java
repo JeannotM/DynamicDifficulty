@@ -23,7 +23,7 @@ public class HungerListener extends BaseListener {
 
         if(e.getEntity() instanceof Player)
             if(e.getEntity().getFoodLevel() > e.getFoodLevel())
-                if(new Random().nextDouble() > (calcPercentage(e.getEntity().getUniqueId(), "hunger-drain-chance") / 100.0))
+                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getHungerDrain() / 100.0)
                     e.setCancelled(true);
     }
 }
