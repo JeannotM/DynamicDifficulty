@@ -2,9 +2,14 @@ package me.skinnyjeans.gmd.events;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
+import me.skinnyjeans.gmd.models.Difficulty;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
@@ -12,6 +17,8 @@ import java.util.List;
 public class CommandListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
+
+    private String commandNotAllowed;
 
     public CommandListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -33,10 +40,30 @@ public class CommandListener extends BaseListener {
                 cmd.append(arg);
                 if(list.contains(cmd.toString())) {
                     e.setCancelled(true);
-                    if(data.getLang().isSet("in-game.command-not-allowed") && data.getLang().getString("in-game.command-not-allowed").length() != 0)
-                        e.getPlayer().sendMessage(data.getLang().getString("in-game.command-not-allowed"));
+                    if(commandNotAllowed != null) e.getPlayer().sendMessage(commandNotAllowed);
                     return;
                 }
             }
+    }
+
+    @Override
+    public void reloadConfig() {
+        boolean shouldDisable = false;
+
+        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
+            if (difficulty.getDisabledCommands().size() != 0) {
+                shouldDisable = true;
+                break;
+            }
+
+        if(MAIN_MANAGER.getDataManager().langExists("in-game.command-not-allowed")) {
+            commandNotAllowed = ChatColor.translateAlternateColorCodes('&', MAIN_MANAGER.getDataManager().getLang().getString("in-game.command-not-allowed"));
+        } else commandNotAllowed = null;
+
+        if(shouldDisable) {
+            BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
+        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
+            Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
+        }
     }
 }

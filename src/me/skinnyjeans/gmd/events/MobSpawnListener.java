@@ -3,9 +3,12 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
+import me.skinnyjeans.gmd.models.EquipmentItems;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,9 +28,15 @@ public class MobSpawnListener extends BaseListener {
     private final HashSet<CreatureSpawnEvent.SpawnReason> NATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.DEFAULT, CreatureSpawnEvent.SpawnReason.NATURAL));
     private final HashSet<CreatureSpawnEvent.SpawnReason> UNNATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.SPAWNER_EGG, CreatureSpawnEvent.SpawnReason.SPAWNER, CreatureSpawnEvent.SpawnReason.DISPENSE_EGG));
     private final HashSet<Material> RANGED = new HashSet<>(Arrays.asList(Material.CROSSBOW, Material.BOW));
+    private final HashMap<Material, Integer> CUSTOM_SPAWN_WEAPONS = new HashMap<>();
+    private final HashMap<String, Integer> ARMOR_TYPES = new HashMap<>();
+    private final HashMap<EquipmentItems, HashSet<NamespacedKey>> ENCHANTMENTS = new HashMap<>();
+    private final HashMap<NamespacedKey, Integer> ENCHANTMENT_WEIGHT = new HashMap<>();
+    private final Random random = new Random();
 
     private boolean overrideConflictingEnchants;
     private boolean customArmorSpawnChance;
+    private boolean overrideEnchantLimit;
     private boolean changeSpawnedMobs;
 
     public MobSpawnListener(MainManager mainManager) {
@@ -41,71 +50,67 @@ public class MobSpawnListener extends BaseListener {
         if(customArmorSpawnChance && NATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
             Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () -> {
                 Player closestPlayer = null;
-                double distance = 1024.0;
+                double distance = 512.0;
                 List<Player> onlinePlayers = Bukkit.getWorld(e.getEntity().getWorld().getUID()).getPlayers();
                 for(Player pl : onlinePlayers)
                     if(e.getEntity().getLocation().distance(pl.getLocation()) < distance) {
                         distance = e.getEntity().getLocation().distance(pl.getLocation());
                         closestPlayer = pl;
                     }
-                if(closestPlayer == null) return;
-                MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer);
+                if(closestPlayer == null || !MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)) return;
 
                 Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer.getUniqueId());
                 double chanceToEnchant = difficulty.getChanceToEnchant() / 100.0;
                 EntityEquipment eq = e.getEntity().getEquipment();
-                if(new Random().nextDouble() < difficulty.getWeaponDropChance() / 100.0)
+                int rnd = random.nextInt(CUSTOM_SPAWN_WEAPONS.values().stream().mapToInt(i -> i).sum() + 1);
+                if(random.nextDouble() < difficulty.getWeaponDropChance() / 100.0)
                     if (RANGED.contains(eq.getItemInMainHand().getType())) {
                         ItemStack item = new ItemStack(eq.getItemInMainHand().getType());
-                        eq.setItemInMainHand(calcEnchant(item, "bow", diff, chanceToEnchant));
+                        eq.setItemInMainHand(calcEnchant(item, difficulty, EquipmentItems.BOW, chanceToEnchant));
                         eq.setItemInMainHandDropChance((float) (difficulty.getWeaponDropChance() / 100.0));
                     } else {
                         int count = 0;
-                        int rnd = new Random().nextInt(chancePerWeapon.get("total") + 1);
-                        for (String customSpawnWeapon : customSpawnWeapons) {
-                            count += chancePerWeapon.get(customSpawnWeapon);
+                        for (Material weapon : CUSTOM_SPAWN_WEAPONS.keySet()) {
+                            count += CUSTOM_SPAWN_WEAPONS.get(weapon);
                             if (rnd <= count) {
-                                ItemStack item = new ItemStack(Material.getMaterial(customSpawnWeapon));
                                 e.getEntity().setCanPickupItems(true);
-                                eq.setItemInMainHand(calcEnchant(item, "weapon", diff, chanceToEnchant));
+                                eq.setItemInMainHand(calcEnchant(new ItemStack(weapon), difficulty, EquipmentItems.WEAPON, chanceToEnchant));
                                 eq.setItemInMainHandDropChance((float) (difficulty.getWeaponDropChance() / 100.0));
                                 break;
                             }
                         }
                     }
 
-                if(new Random().nextDouble() < calcPercentage(closestPlayer.getUniqueId(), "chance-to-have-armor") / 100.0 / 100.0) {
-                    ArrayList<String> array = new ArrayList<>(Arrays.asList("leather", "golden", "chainmail", "iron", "diamond", "netherite"));
-                    int rnd = new Random().nextInt(chancePerArmor.get("total") + 1);
+                if(random.nextDouble() < difficulty.getChanceToHaveArmor() / 100.0) {
                     int count = 0;
-                    for (String thisItem : array) {
+                    for (String thisItem : ARMOR_TYPES.keySet()) {
                         if (count >= rnd) {
-                            double randomChance = new Random().nextDouble();
-                            float armorDropChance = (float) calcPercentage(closestPlayer.getUniqueId(), "armor-drop-chance") / 100 / 100.0;
-                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "helmet-chance") / 100.0 / 100.0)) {
-                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_HELMET"));
-                                eq.setHelmet(calcEnchant(item, "helmet", diff, chanceToEnchant));
+                            double randomChance = random.nextDouble();
+                            float armorDropChance = (float) ((float) difficulty.getArmorDropChance() / 100.0);
+                            if (randomChance < difficulty.getEnchantChance(EquipmentItems.HELMET) / 100.0) {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem + "_HELMET"));
+                                eq.setHelmet(calcEnchant(item, difficulty, EquipmentItems.HELMET, chanceToEnchant));
                                 eq.setHelmetDropChance(armorDropChance);
                             }
-                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "chest-chance") / 100.0 / 100.0)) {
-                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_CHESTPLATE"));
-                                eq.setChestplate(calcEnchant(item, "chestplate", diff, chanceToEnchant));
+                            if (randomChance < difficulty.getEnchantChance(EquipmentItems.CHEST) / 100.0) {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem + "_CHESTPLATE"));
+                                eq.setChestplate(calcEnchant(item, difficulty, EquipmentItems.CHEST, chanceToEnchant));
                                 eq.setChestplateDropChance(armorDropChance);
                             }
-                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "leggings-chance") / 100.0 / 100.0)) {
-                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_LEGGINGS"));
-                                eq.setLeggings(calcEnchant(item, "leggings", diff, chanceToEnchant));
+                            if (randomChance < difficulty.getEnchantChance(EquipmentItems.LEGGINGS) / 100.0) {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem + "_LEGGINGS"));
+                                eq.setLeggings(calcEnchant(item, difficulty, EquipmentItems.LEGGINGS, chanceToEnchant));
                                 eq.setLeggingsDropChance(armorDropChance);
                             }
-                            if (randomChance < (calcPercentage(closestPlayer.getUniqueId(), "boots-chance") / 100.0 / 100.0)) {
-                                ItemStack item = new ItemStack(Material.getMaterial(thisItem.toUpperCase() + "_BOOTS"));
-                                eq.setBoots(calcEnchant(item, "boots", diff, chanceToEnchant));
+                            if (randomChance < difficulty.getEnchantChance(EquipmentItems.BOOTS) / 100.0) {
+                                ItemStack item = new ItemStack(Material.getMaterial(thisItem + "_BOOTS"));
+                                eq.setBoots(calcEnchant(item, difficulty, EquipmentItems.BOOTS, chanceToEnchant));
                                 eq.setBootsDropChance(armorDropChance);
                             }
                             e.getEntity().setCanPickupItems(true);
                             break;
                         }
-                        count += chancePerArmor.get(thisItem);
+                        count += ARMOR_TYPES.get(thisItem);
                     }
                 } else {
                     eq.setHelmet(null);
@@ -115,65 +120,49 @@ public class MobSpawnListener extends BaseListener {
                 }
             }));
         } else if(UNNATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
-            if(changeSpawnedMobs)
-                ignoreMobs.add(e.getEntity().getEntityId());
-        }
+            if(changeSpawnedMobs) MAIN_MANAGER.getEntityManager().entityIgnored(e.getEntity());
+         }
     }
 
-    public ItemStack calcEnchant(ItemStack item, Difficulty difficulty, Double chanceToEnchant) {
-        for(int j=0;j<new Random().nextInt(difficulty.getMaxEnchants());j++) {
+    public ItemStack calcEnchant(ItemStack item, Difficulty difficulty, EquipmentItems piece, Double chanceToEnchant) {
+        for(int j = 0; j < random.nextInt(difficulty.getMaxEnchants()); j++) {
             Enchantment chosenEnchant = null;
             int currentAmount = 0;
-            int chosenAmount = 0;
-            List<String> enchants = enchantmentList.get(piece);
-            for(String s : enchants) {
-                String[] spl = s.split(":");
-                if(s.startsWith("total")) {
-                    chosenAmount = new Random().nextInt(Integer.parseInt(spl[1])) + 1;
-                    continue;
-                }
-
+            int chosenAmount = random.nextInt(ENCHANTMENT_WEIGHT.values().stream().mapToInt(i -> i).sum()) + 1;
+            for(NamespacedKey key : ENCHANTMENTS.get(piece)) {
                 if(chosenEnchant == null)
-                    chosenEnchant = Enchantment.getByKey(NamespacedKey.minecraft(spl[0]));
+                    chosenEnchant = Enchantment.getByKey(key);
 
                 if(currentAmount >= chosenAmount) {
-                    chosenEnchant = Enchantment.getByKey(NamespacedKey.minecraft(spl[0]));
+                    chosenEnchant = Enchantment.getByKey(key);
                     break;
                 }
-                currentAmount += Integer.parseInt(spl[1]);
+                currentAmount += ENCHANTMENT_WEIGHT.get(key);
             }
 
-            if(!config.getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts", false)) {
-                boolean allowed = true;
-                for(List<Enchantment> enchantList : enchantmentConflict)
-                    if(allowed) {
-                        if(enchantList.contains(chosenEnchant))
-                            for(Enchantment currentEnchant : enchantList)
-                                if(item.containsEnchantment(currentEnchant)) {
-                                    allowed = false;
-                                    break;
-                                }
-                    } else {
+            if(!overrideConflictingEnchants) {
+                boolean disallow = false;
+                for(Enchantment enchant : item.getEnchantments().keySet())
+                    if(enchant.conflictsWith(chosenEnchant)) {
+                        disallow = true;
                         break;
                     }
-                if (!allowed)
-                    continue;
+                if (disallow) continue;
             }
 
             int chosenLevel;
-            int maxlvl = Math.round(difficultyList.get(diff).getMaxEnchantLevel());
+            int maxlvl = difficulty.getMaxEnchantLevel();
+
             if(chosenEnchant.getMaxLevel() == 1) {
                 chosenLevel = chosenEnchant.getMaxLevel();
-            } else if (config.getBoolean("custom-mob-items-spawn-chance.override-default-limits", false)) {
-                chosenLevel = new Random().nextInt(Math.round(difficultyList.get(diff).getMaxEnchantLevel())) + 1;
+            } else if (overrideEnchantLimit) {
+                chosenLevel = random.nextInt(maxlvl) + 1;
             } else if (maxlvl > chosenEnchant.getMaxLevel()) {
-                chosenLevel = new Random().nextInt(chosenEnchant.getMaxLevel()) + 1;
-            } else {
-                chosenLevel = new Random().nextInt(maxlvl);
-            }
+                chosenLevel = random.nextInt(chosenEnchant.getMaxLevel()) + 1;
+            } else chosenLevel = random.nextInt(maxlvl);
+
             item.addUnsafeEnchantment(chosenEnchant, chosenLevel);
-            if(new Random().nextDouble() > chanceToEnchant)
-                break;
+            if(random.nextDouble() > chanceToEnchant) break;
         }
         return item;
     }
@@ -181,12 +170,52 @@ public class MobSpawnListener extends BaseListener {
     @Override
     public void reloadConfig() {
         AFFECTED_MOBS.clear();
+        ARMOR_TYPES.clear();
+        FileConfiguration config = MAIN_MANAGER.getDataManager().getConfig();
+        ConfigurationSection customMobs = MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("custom-mob-items-spawn-chance");
 
-        overrideConflictingEnchants = MAIN_MANAGER.getDataManager().getConfig().getBoolean("custom-mob-items-spawn-chance.override-enchant-conflicts", false)
-        customArmorSpawnChance = MAIN_MANAGER.getDataManager().getConfig().getBoolean("advanced-features.custom-mob-items-spawn-chance", false);
-        changeSpawnedMobs = MAIN_MANAGER.getDataManager().getConfig().getBoolean("plugin-support.no-changes-to-spawned-mobs", false);
+        overrideConflictingEnchants = customMobs.getBoolean("override-enchant-conflicts", false);
+        overrideEnchantLimit = customMobs.getBoolean("override-default-limits", false);
+        customArmorSpawnChance = config.getBoolean("advanced-features.custom-mob-items-spawn-chance", false);
+        changeSpawnedMobs = config.getBoolean("plugin-support.no-changes-to-spawned-mobs", false);
 
-        for(String entity : MAIN_MANAGER.getDataManager().getConfig().getStringList("custom-mob-items-spawn-chance.includes-mobs"))
-            AFFECTED_MOBS.add(EntityType.valueOf(entity));
+        if(customArmorSpawnChance) {
+            for(String armor_type : customMobs.getConfigurationSection("armor-set-weight").getKeys(false))
+                ARMOR_TYPES.put(armor_type.toUpperCase(), customMobs.getInt("armor-set-weight." + armor_type));
+
+            for(String entity : customMobs.getStringList("includes-mobs"))
+                if(EntityType.valueOf(entity) != null) AFFECTED_MOBS.add(EntityType.valueOf(entity));
+
+            HashMap<EquipmentItems, String> itemSlot = new HashMap<>() {{
+                put(EquipmentItems.HELMET, "helmet-enchants-include");
+                put(EquipmentItems.CHEST, "chestplate-enchants-include");
+                put(EquipmentItems.LEGGINGS, "leggings-enchants-include");
+                put(EquipmentItems.BOOTS, "boots-enchants-include");
+                put(EquipmentItems.WEAPON, "weapon-enchants-include");
+                put(EquipmentItems.BOW, "bow-enchants-include");
+            }};
+
+            for(EquipmentItems equipmentItem : itemSlot.keySet()) {
+                HashSet<NamespacedKey> enchants = new HashSet<>();
+                for(Object key : customMobs.getList(itemSlot.get(equipmentItem)).toArray()) {
+                    String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+                    NamespacedKey name = NamespacedKey.minecraft(sep[0]);
+
+                    if(name != null) {
+                        ENCHANTMENT_WEIGHT.put(name, (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
+                        enchants.add(name);
+                    }
+                }
+                ENCHANTMENTS.put(equipmentItem, enchants);
+            }
+
+            for(Object key : customMobs.getStringList("weapons-include").toArray()) {
+                String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+                Material material = Material.valueOf(sep[0]);
+
+                if(material != null) CUSTOM_SPAWN_WEAPONS.put(material, (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
+            }
+        }
+
     }
 }

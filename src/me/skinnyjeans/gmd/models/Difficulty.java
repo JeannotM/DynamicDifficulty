@@ -27,8 +27,8 @@ public class Difficulty {
     private boolean effectsWhenAttacked;
     private List<String> disabledCommands = new ArrayList<>();
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
-    private HashMap<String, Double> armorChance = new HashMap<>();
-    private HashMap<String, Integer> armorDamageMultipliers = new HashMap<>();
+    private HashMap<EquipmentItems, Double> armorChance = new HashMap<>();
+    private HashMap<EquipmentItems, Integer> armorDamageMultipliers = new HashMap<>();
 
     public Difficulty(String name) { difficultyName = name; }
 
@@ -46,12 +46,14 @@ public class Difficulty {
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
     public int getArmorDamageMultiplier(String type) { return armorDamageMultipliers.getOrDefault(type, -505); }
+    public HashMap<String, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
     public List<String> getDisabledCommands() { return disabledCommands; }
-    public double getEnchantChance(String type) { return armorChance.get(type); }
+    public double getEnchantChance(EquipmentItems type) { return armorChance.get(type); }
+    public HashMap<EquipmentItems, Double> getEnchantChance() { return armorChance; }
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
     public double getChanceToHaveArmor() { return chanceToHaveArmor; }
@@ -69,13 +71,13 @@ public class Difficulty {
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
     public void setDamageByRangedMobs(int value) { damageByRangedMobs = value; }
     public void setDoubleDurabilityDamageChance(int value) { doubleDurabilityDamageChance = value; }
-    public void setArmorDamageMultiplier(HashMap<String, Integer> value) { armorDamageMultipliers = value; }
+    public void setArmorDamageMultiplier(HashMap<EquipmentItems, Integer> value) { armorDamageMultipliers = value; }
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }
     public void setDisabledCommands(List<String> value) { disabledCommands = value; }
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
-    public void setEnchantChances(HashMap<String, Double> value) { armorChance = value; }
+    public void setEnchantChances(HashMap<EquipmentItems, Double> value) { armorChance = value; }
     public void setArmorDropChance(Double value) { armorDropChance = value; }
     public void setWeaponDropChance(Double value) { weaponDropChance = value; }
     public void setChanceToEnchant(Double value) { chanceToEnchant = value; }

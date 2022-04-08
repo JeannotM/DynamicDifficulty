@@ -2,9 +2,13 @@ package me.skinnyjeans.gmd.events;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
+import me.skinnyjeans.gmd.models.Difficulty;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.potion.PotionEffectType;
 
@@ -32,9 +36,24 @@ public class PotionEffectListener extends BaseListener {
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
 
-        if(e.getEntity() instanceof Player)
-            if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
-                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
-                    e.setCancelled(true);
+        if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
+            if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
+                e.setCancelled(true);
+    }
+
+    @Override
+    public void reloadConfig() {
+        boolean shouldDisable = true;
+        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
+            if (!difficulty.getEffectsOnAttack()) {
+                shouldDisable = false;
+                break;
+            }
+
+        if(shouldDisable) {
+            BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
+        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
+            Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
+        }
     }
 }

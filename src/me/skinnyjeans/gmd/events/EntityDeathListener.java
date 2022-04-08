@@ -10,6 +10,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.HashMap;
@@ -34,13 +36,11 @@ public class EntityDeathListener extends BaseListener {
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity().getKiller())) return;
         UUID uuid = e.getEntity().getKiller().getUniqueId();
 
-        Bukkit.getScheduler().runTaskAsynchronously(m, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             if (e.getEntity() instanceof Player) {
                 MAIN_MANAGER.getPlayerManager().addAffinity(uuid, onPVPKill);
             } else if (MOBS.containsKey(e.getEntityType())) {
                 MAIN_MANAGER.getPlayerManager().addAffinity(uuid, MOBS.get(e.getEntityType()));
-                if(MAIN_MANAGER.getEntityManager().isEntityIgnored(e.getEntity()))
-                    ignoreMobs.remove(ignoreMobs.indexOf(e.getEntity().getEntityId()));
             }
         });
 
@@ -56,16 +56,21 @@ public class EntityDeathListener extends BaseListener {
     @Override
     public void reloadConfig() {
         FileConfiguration config = MAIN_MANAGER.getDataManager().getConfig();
-
-        MOBS.clear();
         onPVPKill = config.getInt("pvp-kill", 20);
 
+        MOBS.clear();
         for(Object key : config.getList("mobs-count-as-pve").toArray()) {
             String[] sep = key.toString().replaceAll("[{|}]","").split("=");
             if(EntityType.valueOf(sep[0]) != null) {
                 int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : config.getInt("pve-kill", 2);
                 MOBS.put(EntityType.valueOf(sep[0]), value);
             }
+        }
+
+        if(MOBS.isEmpty() && onPVPKill == 0) {
+            BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
+        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
+            Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
         }
     }
 }

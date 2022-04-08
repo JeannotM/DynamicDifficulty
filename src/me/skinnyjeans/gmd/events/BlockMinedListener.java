@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -42,16 +43,21 @@ public class BlockMinedListener extends BaseListener {
         BLOCKS.clear();
 
         silkTouchAllowed = MAIN_MANAGER.getDataManager().getConfig().getBoolean("silk-touch-allowed", false);
-        ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("blocks");
+        ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 
-        int blockMined = MAIN_MANAGER.getDataManager().getConfig().getInt("block-mined", 2);
+        int blockMined = config.getInt("block-mined", 2);
 
-        for(String key : config.getKeys(false))
-           BLOCKS.put(Material.valueOf(key), config.getInt(key, blockMined));
+        for(Object key : config.getList("blocks").toArray()) {
+            String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+            if(Material.valueOf(sep[0]) != null) {
+                int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : blockMined;
+                BLOCKS.put(Material.valueOf(sep[0]), value);
+            }
+        }
 
         if(BLOCKS.isEmpty()) {
             BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
-        } else if (HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
+        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
             Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
         }
     }

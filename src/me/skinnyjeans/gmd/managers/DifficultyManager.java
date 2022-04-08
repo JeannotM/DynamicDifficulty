@@ -4,10 +4,7 @@ import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 
-import java.lang.reflect.Field;
 import java.util.*;
-
-import static me.skinnyjeans.gmd.models.DifficultyItemStates.*;
 
 public class DifficultyManager {
 
@@ -17,10 +14,6 @@ public class DifficultyManager {
     private final HashMap<UUID, Difficulty> PLAYER_LIST = new HashMap<>();
     private final HashMap<String, Difficulty> DIFFICULTY_LIST = new HashMap<>();
     private final ArrayList<String> DIFFICULTY_LIST_SORTED = new ArrayList<>();
-    private final EnumSet<DifficultyItemStates> CUSTOM_VALUES = EnumSet.of(
-        DamageByMobs, DamageOnMobs, HungerDrain, DoubleLoot, MaxEnchants, MaxEnchantLevel, DamageByRangedMobs, ExperienceMultiplier,
-        DoubleDurabilityDamageChance, ArmorDropChance, WeaponDropChance, ChanceToEnchant, ChanceToHaveArmor
-    );
 
     private Difficulty world;
     private DifficultyTypes DifficultyType;
@@ -31,6 +24,8 @@ public class DifficultyManager {
         reloadConfig();
         Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 60, 20 * 60);
     }
+
+    public ArrayList<Difficulty> getDifficulties() { return new ArrayList<>(DIFFICULTY_LIST.values()); }
 
     public Difficulty getDifficulty(UUID uuid) {
         switch(DifficultyType) {
@@ -84,20 +79,31 @@ public class DifficultyManager {
         int b = second.getAffinity();
         double c = (100.0 / (a - b) * (affinity.getAffinity() - b)) / 100.0 + 1.0;
 
-        Field[] fields = Difficulty.class.getFields();
-        for(Field field : fields)
-            try {
-                if(field.getType() == Integer.class) {
-                    difficulty.getClass().getField(field.getName()).set(field, ((int) difficulty.getClass().getField(field.getName()).get(difficulty)) * c);
-                } else if(field.getType() == Double.class) {
-                    difficulty.getClass().getField(field.getName()).set(field, ((double) difficulty.getClass().getField(field.getName()).get(difficulty)) * c);
-                } else {
-                    difficulty.getClass().getField(field.getName()).set(field, difficulty.getClass().getField(field.getName()).get(difficulty));
-                }
-            } catch(Exception e) { e.printStackTrace(); }
+        difficulty.setDamageByMobs(multiplyInt(first.getDamageByMobs(), c));
+        difficulty.setDamageOnMobs(multiplyInt(first.getDamageOnMobs(), c));
+        difficulty.setExperienceMultiplier(multiplyInt(first.getExperienceMultiplier(), c));
+        difficulty.setHungerDrain(multiplyInt(first.getHungerDrain(), c));
+        difficulty.setDoubleLoot(multiplyInt(first.getDoubleLoot(), c));
+        difficulty.setMaxEnchants(multiplyInt(first.getMaxEnchants(), c));
+        difficulty.setMaxEnchantLevel(multiplyInt(first.getMaxEnchantLevel(), c));
+        difficulty.setDamageByRangedMobs(multiplyInt(first.getDamageByRangedMobs(), c));
+        difficulty.setDoubleDurabilityDamageChance(multiplyInt(first.getDoubleDurabilityDamageChance(), c));
+        difficulty.setArmorDamageMultiplier(first.getArmorDamageMultiplier());
+        difficulty.setAllowPVP(first.getAllowPVP());
+        difficulty.setKeepInventory(first.getKeepInventory());
+        difficulty.setEffectsOnAttack(first.getEffectsOnAttack());
+        difficulty.setDisabledCommands(first.getDisabledCommands());
+        difficulty.setIgnoredMobs(first.getIgnoredMobs());
+        difficulty.setEnchantChances(first.getEnchantChance());
+        difficulty.setArmorDropChance(first.getArmorDropChance() * c);
+        difficulty.setWeaponDropChance(first.getWeaponDropChance() * c);
+        difficulty.setChanceToEnchant(first.getChanceToEnchant() * c);
+        difficulty.setChanceToHaveArmor(first.getChanceToHaveArmor() * c);
 
         return difficulty;
     }
+
+    private int multiplyInt(int value, double times) { return (int) Math.round(value * times); }
 
     public void reloadConfig() {
         String type = MAIN_MANAGER.getDataManager().getConfig().getString("difficulty-modifiers.type", "player");

@@ -3,6 +3,7 @@ package me.skinnyjeans.gmd;
 import me.skinnyjeans.gmd.hooks.SaveManager;
 import me.skinnyjeans.gmd.hooks.databases.*;
 import me.skinnyjeans.gmd.models.Difficulty;
+import me.skinnyjeans.gmd.models.EquipmentItems;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -11,12 +12,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -234,12 +233,12 @@ public class Affinity {
                         d.setArmorDropChance(section.getDouble(key + ".armor-drop-chance"));
                         d.setWeaponDropChance(section.getDouble(key + ".weapon-drop-chance"));
 
-                        HashMap<String, Double> chances = new HashMap<>();
-                        chances.put("helmet", section.getDouble(key + ".helmet-chance"));
-                        chances.put("weapon", section.getDouble(key + ".weapon-chance"));
-                        chances.put("chest", section.getDouble(key + ".chest-chance"));
-                        chances.put("leggings", section.getDouble(key + ".leggings-chance"));
-                        chances.put("boots", section.getDouble(key + ".boots-chance"));
+                        HashMap<EquipmentItems, Double> chances = new HashMap<>();
+                        chances.put(EquipmentItems.WEAPON, section.getDouble(key + ".helmet-chance"));
+                        chances.put(EquipmentItems.HELMET, section.getDouble(key + ".weapon-chance"));
+                        chances.put(EquipmentItems.CHEST, section.getDouble(key + ".chest-chance"));
+                        chances.put(EquipmentItems.LEGGINGS, section.getDouble(key + ".leggings-chance"));
+                        chances.put(EquipmentItems.BOOTS, section.getDouble(key + ".boots-chance"));
                         d.setEnchantChances(chances);
                     } else {
                         weirdDifficulty.append(key).append(", ");
@@ -269,12 +268,12 @@ public class Affinity {
                         forgotten.setArmorDropChance(d.getArmorDropChance());
                         forgotten.setWeaponDropChance(d.getWeaponDropChance());
 
-                        HashMap<String, Double> chances = new HashMap<>();
-                        chances.put("weapon", d.getEnchantChance("weapon"));
-                        chances.put("helmet", d.getEnchantChance("helmet"));
-                        chances.put("chest", d.getEnchantChance("chest"));
-                        chances.put("leggings", d.getEnchantChance("leggings"));
-                        chances.put("boots", d.getEnchantChance("boots"));
+                        HashMap<EquipmentItems, Double> chances = new HashMap<>();
+                        chances.put(EquipmentItems.WEAPON, d.getEnchantChance(EquipmentItems.WEAPON));
+                        chances.put(EquipmentItems.HELMET, d.getEnchantChance(EquipmentItems.HELMET));
+                        chances.put(EquipmentItems.CHEST, d.getEnchantChance(EquipmentItems.CHEST));
+                        chances.put(EquipmentItems.LEGGINGS, d.getEnchantChance(EquipmentItems.LEGGINGS));
+                        chances.put(EquipmentItems.BOOTS, d.getEnchantChance(EquipmentItems.BOOTS));
                         forgotten.setEnchantChances(chances);
                         forgottenDifficulties.append(s).append(", ");
                     }

@@ -12,7 +12,7 @@ version: 1.5
 points-per-minute: 3
 block-mined: 2
 player-hit: -1
-affinity-per-heart-loss: -1 # So 1.5 hearts of damage (counts as 2) amounts to (-1 * 2) = -2 affinity
+affinity-per-heart-loss: -1 # So 1.5 hearts of damage (counts as 2 hearts) amounts to (-1 * 2) = -2 affinity
 pvp-kill: 20
 pve-kill: 2
 death: -100

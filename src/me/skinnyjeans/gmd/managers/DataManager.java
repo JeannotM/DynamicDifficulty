@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -44,6 +45,15 @@ public class DataManager {
     public FileConfiguration getConfig() { return config; }
 
     public FileConfiguration getLang() { return language; }
+
+    public String getString(String item, HashMap<String, String> replaceables) {
+        String entry = language.getString(item);
+
+        if(entry == null) return null;
+
+        for(String key : replaceables.keySet()) entry.replace(key, replaceables.get(key));
+        return entry;
+    }
 
     public boolean langExists(String location) {
         return language.isSet(location) && language.getString(location).length() != 0 && !language.getString(location).equals("");

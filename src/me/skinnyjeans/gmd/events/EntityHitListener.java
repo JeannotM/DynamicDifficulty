@@ -2,6 +2,8 @@ package me.skinnyjeans.gmd.events;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
+import me.skinnyjeans.gmd.models.Difficulty;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +12,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class EntityHitListener extends BaseListener {
@@ -28,8 +31,7 @@ public class EntityHitListener extends BaseListener {
     public void onHit(EntityDamageByEntityEvent e) {
         Entity prey = e.getEntity();
         Entity hunter = e.getDamager();
-        if (prey instanceof Player) {
-            MAIN_MANAGER.getPlayerManager().isPlayerValid(prey);
+        if (prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
             if (!(hunter instanceof Player) && MAIN_MANAGER.getEntityManager().isEntityValid(hunter)) {
                 if (((Player)prey).isBlocking()) return;
 
@@ -61,29 +63,38 @@ public class EntityHitListener extends BaseListener {
 
             } else if(hunter instanceof Player) {
                 MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter);
+                HashMap<String, String> entry = new HashMap<>() {{ put("%user%", ((Player) prey).getDisplayName()); }};
                 if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getAllowPVP()) {
-                    if(data.getLang().isSet("in-game.attacker-no-pvp") && data.getLang().getString("in-game.attacker-no-pvp").length() != 0)
-                        hunter.sendMessage(data.getLang().getString("in-game.attacker-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
+                    if(MAIN_MANAGER.getDataManager().langExists("in-game.attacker-no-pvp"))
+                        prey.sendMessage(MAIN_MANAGER.getDataManager().getString("in-game.attacker-no-pvp", entry));
                     e.setCancelled(true);
                 } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(prey.getUniqueId()).getAllowPVP()) {
-                    if(data.getLang().isSet("in-game.attackee-no-pvp") && data.getLang().getString("in-game.attackee-no-pvp").length() != 0)
-                        hunter.sendMessage(data.getLang().getString("in-game.attackee-no-pvp").replaceAll("%user%", ((Player) prey).getDisplayName()));
+                    if(MAIN_MANAGER.getDataManager().langExists("in-game.attackee-no-pvp"))
+                        prey.sendMessage(MAIN_MANAGER.getDataManager().getString("in-game.attackee-no-pvp", entry)) ;
                     e.setCancelled(true);
                 }
             }
         } else if (hunter instanceof Player && MAIN_MANAGER.getEntityManager().isEntityValid(prey)) {
             double dam = e.getFinalDamage() * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getDamageOnMobs() / 100.0;
             e.setDamage(dam);
-            if(!mobsOverrideIgnore.contains(prey.getEntityId()))
-                mobsOverrideIgnore.add(prey.getEntityId());
+            MAIN_MANAGER.getEntityManager().entityHit(prey);
         }
     }
 
 
     @Override
     public void reloadConfig() {
-        calculateExtraArmorDamage = true;
-        affinityPerHeart = 0;
-        onPlayerHit = 0;
+        FileConfiguration config = MAIN_MANAGER.getDataManager().getConfig();
+
+        calculateExtraArmorDamage = false;
+        affinityPerHeart = config.getInt("affinity-per-heart-loss", -1);
+        onPlayerHit = config.getInt("player-hit", -1);
+
+        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
+            if (difficulty.getArmorDamageMultiplier().size() != 0) {
+                calculateExtraArmorDamage = true;
+                break;
+            }
+
     }
 }
