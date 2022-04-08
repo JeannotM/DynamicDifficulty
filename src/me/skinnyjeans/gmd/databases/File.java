@@ -1,9 +1,9 @@
-package me.skinnyjeans.gmd.hooks.databases;
+package me.skinnyjeans.gmd.databases;
 
 import me.skinnyjeans.gmd.Affinity;
-import me.skinnyjeans.gmd.DataManager;
+import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.Main;
-import me.skinnyjeans.gmd.hooks.SaveManager;
+import me.skinnyjeans.gmd.models.ISaveManager;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class File implements SaveManager {
+public class File implements ISaveManager {
 
     private final Main plugin;
     private final DataManager data;
@@ -30,25 +30,25 @@ public class File implements SaveManager {
     public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             boolean isWorld = (uuid.equalsIgnoreCase("world"));
-            data.getDataFile().set(uuid + ".affinity", af);
+            data.getConfig().set(uuid + ".affinity", af);
             if (!isWorld) {
-                data.getDataFile().set(uuid + ".max-affinity", maxAf);
-                data.getDataFile().set(uuid + ".min-affinity", minAf);
-                data.getDataFile().set(uuid + ".name", difficultyType.equals("biome") ? uuid : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName());
+                data.getConfig().set(uuid + ".max-affinity", maxAf);
+                data.getConfig().set(uuid + ".min-affinity", minAf);
+                data.getConfig().set(uuid + ".name", difficultyType.equals("biome") ? uuid : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName());
             }
         });
     }
 
     @Override
-    public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
+    public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            boolean isWorld = (uuid.equalsIgnoreCase("world"));
+            boolean isWorld = (uuid == null);
             List<Integer> tmpArray = new ArrayList<>(Arrays.asList(-1));
-            if(data.getDataFile().isSet(uuid + ".affinity")) {
-                tmpArray.set(0, data.getDataFile().getInt(uuid + ".affinity"));
+            if(data.getConfig().isSet(uuid + ".affinity")) {
+                tmpArray.set(0, data.getConfig().getInt(uuid + ".affinity"));
                 if(!isWorld){
-                    tmpArray.add(data.getDataFile().getInt(uuid + ".max-affinity"));
-                    tmpArray.add(data.getDataFile().getInt(uuid + ".min-affinity"));
+                    tmpArray.add(data.getConfig().getInt(uuid + ".max-affinity"));
+                    tmpArray.add(data.getConfig().getInt(uuid + ".min-affinity"));
                 }
             }
             callback.onQueryDone(tmpArray);
@@ -56,9 +56,9 @@ public class File implements SaveManager {
     }
 
     @Override
-    public void playerExists(String uuid, findBooleanCallback callback) {
+    public void playerExists(UUID uuid, findBooleanCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-            callback.onQueryDone(data.getDataFile().isSet(uuid + ".affinity"))
+            callback.onQueryDone(data.getConfig().isSet(uuid + ".affinity"))
         );
     }
 

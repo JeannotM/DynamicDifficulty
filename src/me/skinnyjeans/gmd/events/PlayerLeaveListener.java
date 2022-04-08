@@ -23,12 +23,9 @@ public class PlayerLeaveListener extends BaseListener {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
 
         UUID uuid = e.getPlayer().getUniqueId();
-        Minecrafter pl = playerList.get(uuid);
-        SQL.updatePlayer(uuid.toString(), pl.getAffinity(), pl.getMaxAffinity(), pl.getMinAffinity());
-        if(unloadLeavingPlayers) {
-            playerList.remove(uuid);
-            playersUUID.remove(e.getPlayer().getName());
-        }
+        MAIN_MANAGER.getDataManager().updatePlayer(uuid);
+        if(unloadLeavingPlayers)
+            MAIN_MANAGER.getPlayerManager().unloadPlayer(uuid);
     }
 
     @Override

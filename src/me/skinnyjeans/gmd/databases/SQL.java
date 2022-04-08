@@ -1,15 +1,16 @@
-package me.skinnyjeans.gmd.hooks.databases;
+package me.skinnyjeans.gmd.databases;
 
 import me.skinnyjeans.gmd.Affinity;
-import me.skinnyjeans.gmd.DataManager;
 import me.skinnyjeans.gmd.Main;
-import me.skinnyjeans.gmd.hooks.SaveManager;
+import me.skinnyjeans.gmd.managers.DataManager;
+import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.util.*;
 
-public class SQL implements SaveManager {
+public class SQL implements ISaveManager {
     private final String tbName = "dynamicdifficulty";
     private final String difficultyType;
     private final Main plugin;
@@ -112,24 +113,22 @@ public class SQL implements SaveManager {
     }
 
     @Override
-    public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
+    public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            List<Integer> tmpArray = new ArrayList<>(Arrays.asList(-1));
+            Minecrafter data = new Minecrafter("", uuid);
             try {
                 if(isConnected()) {
                     PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
-                    ps.setString(1, uuid);
+                    ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()){
-                        tmpArray.set(0, result.getInt("Affinity"));
-                        tmpArray.add(result.getInt("MaxAffinity"));
-                        tmpArray.add(result.getInt("MinAffinity"));
-                        callback.onQueryDone(tmpArray);
-                        return;
+                        data.setAffinity(result.getInt("Affinity"));
+                        data.setMaxAffinity(result.getInt("MaxAffinity"));
+                        data.setMinAffinity(result.getInt("MinAffinity"));
                     }
                 }
             } catch(SQLException e) { e.printStackTrace(); }
-            callback.onQueryDone(tmpArray);
+            callback.onQueryDone(data);
         });
     }
 

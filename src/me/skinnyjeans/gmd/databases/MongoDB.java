@@ -1,10 +1,10 @@
-package me.skinnyjeans.gmd.hooks.databases;
+package me.skinnyjeans.gmd.databases;
 
 import com.mongodb.*;
 import me.skinnyjeans.gmd.Affinity;
-import me.skinnyjeans.gmd.DataManager;
 import me.skinnyjeans.gmd.Main;
-import me.skinnyjeans.gmd.hooks.SaveManager;
+import me.skinnyjeans.gmd.managers.DataManager;
+import me.skinnyjeans.gmd.models.ISaveManager;
 import org.bukkit.Bukkit;
 
 import java.net.UnknownHostException;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class MongoDB implements SaveManager {
+public class MongoDB implements ISaveManager {
     private final Main plugin;
     private final String host;
     private final String port;

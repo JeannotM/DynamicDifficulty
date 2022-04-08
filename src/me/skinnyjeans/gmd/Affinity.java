@@ -1,7 +1,7 @@
 package me.skinnyjeans.gmd;
 
-import me.skinnyjeans.gmd.hooks.SaveManager;
-import me.skinnyjeans.gmd.hooks.databases.*;
+import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.databases.*;
 import me.skinnyjeans.gmd.models.Difficulty;
 import me.skinnyjeans.gmd.models.EquipmentItems;
 import me.skinnyjeans.gmd.models.Minecrafter;
@@ -22,7 +22,7 @@ import java.util.logging.Level;
 
 public class Affinity {
     protected Main m;
-    protected SaveManager SQL;
+    protected ISaveManager SQL;
     protected DataManager data;
     protected FileConfiguration config;
     protected int minAffinity,maxAffinity,onDeath,onPVPKill,startAffinity,onInterval,onPlayerHit,worldAffinity,affinityPerHeart;
@@ -118,37 +118,6 @@ public class Affinity {
         if(section.getKeys(false).size() == 0) {
             Bukkit.getLogger().log(Level.WARNING, "[DynamicDifficulty] You don't have any custom difficulties!!! Disabling Dynamic Difficulty.");
             Bukkit.getPluginManager().disablePlugin(m);
-        }
-
-        if(SQL == null) {
-            try{
-                if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql")){
-                    SQL = new SQL(m, data, saveType);
-                } else if(saveType.equals("mongodb")) {
-                    SQL = new MongoDB(m, data);
-                } else if(saveType.equals("none")){
-                    SQL = new None();
-                } else {
-                    SQL = new File(m, data);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
-                SQL = new File(m, data);
-            }
-        }
-
-        try {
-            SQL.getAffinityValues("world", r -> {
-                if(r.get(0) == -1){
-                    SQL.updatePlayer("world", startAffinity, -1, -1);
-                    worldAffinity = startAffinity;
-                } else {
-                    worldAffinity = r.get(0);
-                }
-            });
-        } catch(Exception e){
-            e.printStackTrace();
         }
 
         if(minAffinity > maxAffinity) {

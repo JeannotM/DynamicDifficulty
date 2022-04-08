@@ -94,13 +94,9 @@ disabled-mobs:
 - WITHER
 
 difficulty-modifiers:
-  type: player # Supported: player, world, radius, biome
+  type: player # Supported: player
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
-  # needs type: radius for this to work. Will calculate the difficulties based on how far they are from the given x & y coordinates
-  radius-x: 0
-  radius-z: 0
-  max-radius-size: 10000
   # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
   damage-done-by-mobs-multiplier: 1.0
   damage-done-on-mobs-multiplier: 1.0

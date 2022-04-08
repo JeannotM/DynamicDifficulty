@@ -13,17 +13,16 @@ public class PlayerManager {
 
     private final MainManager MAIN_MANAGER;
     private final HashMap<UUID, Minecrafter> PLAYER_LIST = new HashMap<>();
-    private final HashMap<NamespacedKey, Minecrafter> BIOME_LIST = new HashMap<>();
-    private final Minecrafter WORLD;
 
     public PlayerManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-
-        WORLD = new Minecrafter("world");
     }
 
     public void addPlayer(Player player) {
-        MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+        MAIN_MANAGER.getDataManager().getAffinityValues(player.getUniqueId(), (Minecrafter playerData) -> {
+            PLAYER_LIST.put(player.getUniqueId(), playerData);
+            MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+        });
     }
 
     public boolean playerExist(Player player) { return PLAYER_LIST.containsKey(player.getUniqueId()); }
@@ -37,28 +36,16 @@ public class PlayerManager {
         return true;
     }
 
+    public void unloadPlayer(UUID uuid) {
+        PLAYER_LIST.remove(uuid);
+    }
+
     public HashMap<UUID, Minecrafter> getPlayerList() { return PLAYER_LIST; }
 
-    public Minecrafter getPlayerAffinity(UUID uuid) { return PLAYER_LIST.getOrDefault(uuid, WORLD); }
+    public Minecrafter getPlayerAffinity(UUID uuid) { return PLAYER_LIST.get(uuid); }
 
     public void addAffinity(UUID uuid, int x) {
-        if(x != 0) {
-            switch(MAIN_MANAGER.getDifficultyManager().getType()) {
-                case World:
-                    WORLD.setAffinity(WORLD.getAffinity() + x);
-                    break;
-                case Biome:
-                    Player p = Bukkit.getOfflinePlayer(uuid).getPlayer();
-                    NamespacedKey key = p.getWorld().getBiome(p.getLocation()).getKey();
-                    BIOME_LIST.get(key).setAffinity(BIOME_LIST.get(key).getAffinity() + x);
-                    break;
-                default:
-                    if(uuid == null) {
-                        WORLD.setAffinity(WORLD.getAffinity() + x);
-                    } else PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + x);
-                    break;
-            }
-        }
+        if(x != 0) PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + x);
     }
 
     public void savePlayer(UUID uuid) {

@@ -1,8 +1,11 @@
 package me.skinnyjeans.gmd.managers;
 
+import me.skinnyjeans.gmd.databases.*;
+import me.skinnyjeans.gmd.models.ISaveManager;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,12 +16,13 @@ public class DataManager {
 
     private final MainManager MAIN_MANAGER;
 
-    private HashSet<String> DISABLED_WORLDS = new HashSet<>();
+    private final HashSet<String> DISABLED_WORLDS = new HashSet<>();
 
     private File configFile;
     private File langFile;
     private FileConfiguration config;
     private FileConfiguration language;
+    private final ISaveManager DATABASE;
 
     private static DataManager instance;
 
@@ -38,6 +42,23 @@ public class DataManager {
             config.load(configFile);
             language.load(langFile);
         } catch(Exception e) { e.printStackTrace(); }
+
+        try {
+            String saveType = config.getString("saving-data.type", "file").toLowerCase();
+            if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql")){
+                DATABASE = new SQL(MAIN_MANAGER.getPlugin(), this, saveType);
+            } else if(saveType.equals("mongodb")) {
+                DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);
+            } else if(saveType.equals("none")){
+                DATABASE = new None();
+            } else {
+                DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
+            DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
+        }
     }
 
     public static DataManager getInstance() { return instance; }
@@ -45,6 +66,14 @@ public class DataManager {
     public FileConfiguration getConfig() { return config; }
 
     public FileConfiguration getLang() { return language; }
+
+    public void updatePlayer(UUID uuid) {
+        DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid));
+    }
+
+    public void getAffinityValues(UUID uuid, ISaveManager.findCallback callback) {
+        DATABASE.updatePlayer(uuid, callback);
+    }
 
     public String getString(String item, HashMap<String, String> replaceables) {
         String entry = language.getString(item);

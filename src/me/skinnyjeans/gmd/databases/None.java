@@ -1,14 +1,14 @@
-package me.skinnyjeans.gmd.hooks.databases;
+package me.skinnyjeans.gmd.databases;
 
 import me.skinnyjeans.gmd.Affinity;
-import me.skinnyjeans.gmd.hooks.SaveManager;
+import me.skinnyjeans.gmd.models.ISaveManager;
 import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class None implements SaveManager {
+public class None implements ISaveManager {
 
     public None(){ Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] 'None' mode selected, no data will be saved or read"); }
 
