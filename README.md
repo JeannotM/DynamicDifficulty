@@ -11,6 +11,10 @@
 ## About DynamicDifficulty
 I made the DynamicDifficulty for 3 reasons. I couldn't find any other DynamicDifficulty plugin for 1.16, the ones I saw from earlier versions weren't that customizable and I wanted experienced and new Minecraft players to be able to play on the same server without having to worry about it being too hard or too easy for them.
 
+## Config
+You can read the everything about the config here
+[Read the config here](https://github.com/JeannotM/DynamicDifficulty/wiki/Config)
+
 ## Settings with explanations
 ```
 # The amount of affinity a user or the world increases (or decreases):
