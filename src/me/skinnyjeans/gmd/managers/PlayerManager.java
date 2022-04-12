@@ -36,6 +36,10 @@ public class PlayerManager {
         return true;
     }
 
+    public void reloadConfig() {
+
+    }
+
     public void unloadPlayer(UUID uuid) {
         PLAYER_LIST.remove(uuid);
     }

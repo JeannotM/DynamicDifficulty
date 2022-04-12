@@ -1,6 +1,5 @@
 package me.skinnyjeans.gmd.databases;
 
-import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
 import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.models.ISaveManager;
@@ -12,7 +11,6 @@ import java.util.*;
 
 public class SQL implements ISaveManager {
     private final String tbName = "dynamicdifficulty";
-    private final String difficultyType;
     private final Main plugin;
     private final String host;
     private final String port;
@@ -30,7 +28,6 @@ public class SQL implements ISaveManager {
         user = data.getConfig().getString("saving-data.username", "root");
         pwd = data.getConfig().getString("saving-data.password", "");
         saveType = sT.toLowerCase();
-        difficultyType = data.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
         connect();
         if(sT.equals("mysql"))
             addColumnsNotExists();
@@ -83,8 +80,8 @@ public class SQL implements ISaveManager {
     }
 
     @Override
-    public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
-        playerExists(uuid, r -> {
+    public void updatePlayer(Minecrafter playerData) {
+        playerExists(playerData.getUUID(), r -> {
             try {
                 if(isConnected()) {
                     PreparedStatement ps;
@@ -92,20 +89,12 @@ public class SQL implements ISaveManager {
                         ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
                         ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
-                        String name;
-                        if(uuid.equalsIgnoreCase("world")) {
-                            name = "world";
-                        } else if(difficultyType.equals("biome")) {
-                            name = uuid;
-                        } else {
-                            name = Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName();
-                        }
-                        ps.setString(5, name);
+                        ps.setString(5, playerData.getName());
                     }
-                    ps.setInt(1, af);
-                    ps.setInt(2, maxAf);
-                    ps.setInt(3, minAf);
-                    ps.setString(4, uuid);
+                    ps.setInt(1, playerData.getAffinity());
+                    ps.setInt(2, playerData.getMaxAffinity());
+                    ps.setInt(3, playerData.getMinAffinity());
+                    ps.setString(4, playerData.getUUID().toString());
                     ps.executeUpdate();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
@@ -115,13 +104,15 @@ public class SQL implements ISaveManager {
     @Override
     public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            Minecrafter data = new Minecrafter("", uuid);
+            Minecrafter data = new Minecrafter();
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity FROM "+tbName+" WHERE UUID=?");
+                    PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity, Name FROM "+tbName+" WHERE UUID=?");
                     ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
-                    if(result.next()){
+                    if(result.next()) {
+                        data.setUUID(uuid);
+                        data.setName(result.getString("Name"));
                         data.setAffinity(result.getInt("Affinity"));
                         data.setMaxAffinity(result.getInt("MaxAffinity"));
                         data.setMinAffinity(result.getInt("MinAffinity"));
@@ -133,12 +124,12 @@ public class SQL implements ISaveManager {
     }
 
     @Override
-    public void playerExists(String uuid, final findBooleanCallback callback) {
+    public void playerExists(UUID uuid, final findBooleanCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("SELECT * FROM "+tbName+" WHERE UUID=?");
-                    ps.setString(1, uuid);
+                    PreparedStatement ps = getConnection().prepareStatement("SELECT id FROM "+tbName+" WHERE UUID=?");
+                    ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()){
                         callback.onQueryDone(true);

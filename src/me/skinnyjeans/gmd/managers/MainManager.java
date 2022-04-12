@@ -6,6 +6,7 @@ public class MainManager {
 
     private final DifficultyManager DIFFICULTY_MANAGER;
     private final AffinityManager AFFINITY_MANAGER;
+    private final CommandManager COMMAND_MANAGER;
     private final EntityManager ENTITY_MANAGER;
     private final PlayerManager PLAYER_MANAGER;
     private final EventManager EVENT_MANAGER;
@@ -16,6 +17,7 @@ public class MainManager {
         DATA_MANAGER = new DataManager(this);
 
         AFFINITY_MANAGER = new AffinityManager(this);
+        COMMAND_MANAGER = new CommandManager(this);
         ENTITY_MANAGER = new EntityManager(this);
         PLAYER_MANAGER = new PlayerManager(this);
         EVENT_MANAGER = new EventManager(this);
@@ -31,6 +33,7 @@ public class MainManager {
 
     public DifficultyManager getDifficultyManager() { return DIFFICULTY_MANAGER; }
     public AffinityManager getAffinityManager() { return AFFINITY_MANAGER; }
+    public CommandManager getCommandManager() { return COMMAND_MANAGER; }
     public PlayerManager getPlayerManager() { return PLAYER_MANAGER; }
     public EntityManager getEntityManager() { return ENTITY_MANAGER; }
     public EventManager getEventManager() { return EVENT_MANAGER; }

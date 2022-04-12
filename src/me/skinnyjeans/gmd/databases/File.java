@@ -1,14 +1,11 @@
 package me.skinnyjeans.gmd.databases;
 
-import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.Main;
 import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class File implements ISaveManager {
@@ -27,31 +24,26 @@ public class File implements ISaveManager {
     public boolean isConnected() { return data != null; }
 
     @Override
-    public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
+    public void updatePlayer(Minecrafter playerData) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            boolean isWorld = (uuid.equalsIgnoreCase("world"));
-            data.getConfig().set(uuid + ".affinity", af);
-            if (!isWorld) {
-                data.getConfig().set(uuid + ".max-affinity", maxAf);
-                data.getConfig().set(uuid + ".min-affinity", minAf);
-                data.getConfig().set(uuid + ".name", difficultyType.equals("biome") ? uuid : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName());
-            }
+            data.getConfig().set(playerData.getUUID() + ".affinity", playerData.getAffinity());
+            data.getConfig().set(playerData.getUUID() + ".max-affinity", playerData.getMaxAffinity());
+            data.getConfig().set(playerData.getUUID() + ".min-affinity", playerData.getMinAffinity());
+            data.getConfig().set(playerData.getUUID() + ".name", playerData.getName());
         });
     }
 
     @Override
     public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            boolean isWorld = (uuid == null);
-            List<Integer> tmpArray = new ArrayList<>(Arrays.asList(-1));
+            Minecrafter playerData = new Minecrafter(uuid);
             if(data.getConfig().isSet(uuid + ".affinity")) {
-                tmpArray.set(0, data.getConfig().getInt(uuid + ".affinity"));
-                if(!isWorld){
-                    tmpArray.add(data.getConfig().getInt(uuid + ".max-affinity"));
-                    tmpArray.add(data.getConfig().getInt(uuid + ".min-affinity"));
-                }
+                playerData.setAffinity(data.getConfig().getInt(uuid + ".affinity"));
+                playerData.setMinAffinity(data.getConfig().getInt(uuid + ".min-affinity"));
+                playerData.setMaxAffinity(data.getConfig().getInt(uuid + ".max-affinity"));
+                playerData.setName(data.getConfig().getString(uuid + ".name"));
             }
-            callback.onQueryDone(tmpArray);
+            callback.onQueryDone(playerData);
         });
     }
 
@@ -63,8 +55,5 @@ public class File implements ISaveManager {
     }
 
     @Override
-    public void disconnect() {
-        if(isConnected())
-            data.saveData();
-    }
+    public void disconnect() { return; }
 }

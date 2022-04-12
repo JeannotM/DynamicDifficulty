@@ -1,12 +1,11 @@
 package me.skinnyjeans.gmd.databases;
 
-import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.UUID;
 
 public class None implements ISaveManager {
 
@@ -16,13 +15,13 @@ public class None implements ISaveManager {
     public boolean isConnected() { return false; }
 
     @Override
-    public void updatePlayer(String uuid, int af, int maxAf, int minAf) { return; }
+    public void updatePlayer(Minecrafter playerData) { return; }
 
     @Override
-    public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) { callback.onQueryDone(new ArrayList<>(Arrays.asList(-1))); }
+    public void getAffinityValues(UUID uuid, findCallback callback) { callback.onQueryDone(null); }
 
     @Override
-    public void playerExists(String uuid, findBooleanCallback callback) { return; }
+    public void playerExists(UUID uuid, findBooleanCallback callback) { return; }
 
     @Override
     public void disconnect() throws SQLException { return; }

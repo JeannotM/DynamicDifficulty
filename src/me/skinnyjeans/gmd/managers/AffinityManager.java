@@ -7,4 +7,8 @@ public class AffinityManager {
     public AffinityManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }
+
+    public void reloadConfig() {
+
+    }
 }

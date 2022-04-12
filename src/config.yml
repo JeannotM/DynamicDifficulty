@@ -61,17 +61,20 @@ blocks:
 - DIAMOND_ORE
 - EMERALD_ORE
 
-# Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
-silk-touch-allowed: false
-
-# People won't lose affinity if they die by their own hands.
-prevent-affinity-loss-on-suicide: true
+toggle-settings:
+  silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
+  prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
+  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
+  randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  advanced:
+    # advanced features may decrease performance or are a little harder to configure
+    custom-mob-items-spawn-chance: false
+    exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
 
 # Whether to Hook Into certain Plugins or not
 plugin-support:
   allow-papi: false # Check the GitHub or Spigot page for the commands
   use-prefix: true
-  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
 
 saving-data:
@@ -95,8 +98,6 @@ disabled-mobs:
 
 difficulty-modifiers:
   type: player # Supported: player
-  randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
-  exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
   # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
   damage-done-by-mobs-multiplier: 1.0
   damage-done-on-mobs-multiplier: 1.0
@@ -176,10 +177,6 @@ difficulty:
       diamond: 4
       netherite: 5
 
-# Some of these features are experimental, change existing features or have a chance to reduce server performance
-advanced-features:
-  custom-mob-items-spawn-chance: false
-
 # Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
@@ -204,7 +201,7 @@ custom-mob-items-spawn-chance:
   - IRON_SWORD: 5
   armor-set-weight:
     leather: 3706
-    gold: 4872
+    golden: 4872
     chainmail: 1290
     iron: 127
     diamond: 4

@@ -18,18 +18,35 @@ public class DataManager {
 
     private final HashSet<String> DISABLED_WORLDS = new HashSet<>();
 
+    private String culture;
     private File configFile;
     private File langFile;
     private FileConfiguration config;
     private FileConfiguration language;
-    private final ISaveManager DATABASE;
-
-    private static DataManager instance;
+    private ISaveManager DATABASE;
 
     public DataManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-        instance = this;
 
+        loadConfig();
+
+        try {
+            String saveType = config.getString("saving-data.type", "file").toLowerCase();
+            if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql")){
+                DATABASE = new SQL(MAIN_MANAGER.getPlugin(), this, saveType);
+            } else if(saveType.equals("mongodb")) {
+                DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);
+            } else if(saveType.equals("none")){
+                DATABASE = new None();
+            } else DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
+        } catch(Exception e) {
+            e.printStackTrace();
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
+            DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
+        }
+    }
+
+    public void loadConfig() {
         configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
         langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
         config = new YamlConfiguration();
@@ -43,45 +60,38 @@ public class DataManager {
             language.load(langFile);
         } catch(Exception e) { e.printStackTrace(); }
 
-        try {
-            String saveType = config.getString("saving-data.type", "file").toLowerCase();
-            if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql")){
-                DATABASE = new SQL(MAIN_MANAGER.getPlugin(), this, saveType);
-            } else if(saveType.equals("mongodb")) {
-                DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);
-            } else if(saveType.equals("none")){
-                DATABASE = new None();
-            } else {
-                DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
-            DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
-        }
+        culture = "lang." + language.getString("culture", "en-US") + ".";
     }
-
-    public static DataManager getInstance() { return instance; }
 
     public FileConfiguration getConfig() { return config; }
-
     public FileConfiguration getLang() { return language; }
-
-    public void updatePlayer(UUID uuid) {
-        DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid));
-    }
-
-    public void getAffinityValues(UUID uuid, ISaveManager.findCallback callback) {
-        DATABASE.updatePlayer(uuid, callback);
-    }
+    public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
+    public void getAffinityValues(UUID uuid, ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
+    public void playerExists(UUID uuid, ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
 
     public String getString(String item, HashMap<String, String> replaceables) {
-        String entry = language.getString(item);
+        String entry = language.getString(culture + item);
 
         if(entry == null) return null;
 
         for(String key : replaceables.keySet()) entry.replace(key, replaceables.get(key));
-        return entry;
+        return ChatColor.translateAlternateColorCodes('&', entry);
+    }
+
+    public String getLanguageString(String item) {
+        String entry = language.getString(culture + item);
+
+        if(entry == null) return null;
+
+        return ChatColor.translateAlternateColorCodes('&', entry);
+    }
+
+    public String getLanguageString(String item, boolean isRight) {
+        String entry = language.getString(culture + item);
+
+        if(entry == null) return null;
+
+        return ChatColor.translateAlternateColorCodes('&', (isRight ? language.getString("command-right-prefix") : language.getString("command-wrong-prefix")) + entry);
     }
 
     public boolean langExists(String location) {
@@ -89,18 +99,14 @@ public class DataManager {
     }
 
     public void reloadConfig() {
-        configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
-        langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
-        config = new YamlConfiguration();
-        language = new YamlConfiguration();
+        loadConfig();
 
-        try {
-            config.load(configFile);
-            language.load(langFile);
-        } catch(Exception e) { e.printStackTrace(); }
-
+        MAIN_MANAGER.getDifficultyManager().reloadConfig();
+        MAIN_MANAGER.getAffinityManager().reloadConfig();
+        MAIN_MANAGER.getPlayerManager().reloadConfig();
         MAIN_MANAGER.getEntityManager().reloadConfig();
         MAIN_MANAGER.getEventManager().reloadConfig();
+        MAIN_MANAGER.getDataManager().reloadConfig();
     }
 
     public boolean isWorldDisabled(String worldName) { return DISABLED_WORLDS.contains(worldName); }

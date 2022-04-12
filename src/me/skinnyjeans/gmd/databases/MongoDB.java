@@ -1,16 +1,14 @@
 package me.skinnyjeans.gmd.databases;
 
 import com.mongodb.*;
-import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
 import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class MongoDB implements ISaveManager {
@@ -49,20 +47,16 @@ public class MongoDB implements ISaveManager {
     }
 
     @Override
-    public void updatePlayer(String uuid, int af, int maxAf, int minAf) {
-        playerExists(uuid, r -> {
+    public void updatePlayer(Minecrafter playerData) {
+        playerExists(playerData.getUUID(), r -> {
             try {
                 if(isConnected()) {
-                    BasicDBObject obj = new BasicDBObject("_id", uuid).append("Affinity", af)
-                            .append("MinAffinity", minAf).append("MaxAffinity", maxAf);
-                    try {
-                        obj.append("Name", (uuid.equalsIgnoreCase("world") ? "world" : Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName()));
-                    } catch(Exception e) {
-                        obj.append("Name", getConnection().find(new BasicDBObject("_id", uuid)).next().get("Name"));
-                    }
+                    BasicDBObject obj = new BasicDBObject("_id", playerData.getUUID().toString()).append("Affinity", playerData.getAffinity())
+                            .append("MinAffinity", playerData.getMinAffinity()).append("MaxAffinity", playerData.getMaxAffinity())
+                            .append("Name", playerData.getName());
 
                     if(r) {
-                        getConnection().update(new BasicDBObject("_id", uuid), obj);
+                        getConnection().update(new BasicDBObject("_id", playerData.getUUID().toString()), obj);
                     } else {
                         getConnection().insert(obj);
                     }
@@ -74,44 +68,35 @@ public class MongoDB implements ISaveManager {
     }
 
     @Override
-    public void getAffinityValues(String uuid, Affinity.findIntegerCallback callback) {
+    public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            List<Integer> tmpArray = new ArrayList<>();
+            Minecrafter data = new Minecrafter();
             try {
                 if(isConnected()) {
                     DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
                     if(find.hasNext()){
-                        DBObject tmp = find.next();
-                        tmpArray.add(Integer.parseInt(tmp.get("Affinity").toString()));
-                        tmpArray.add(Integer.parseInt(tmp.get("MaxAffinity").toString()));
-                        tmpArray.add(Integer.parseInt(tmp.get("MinAffinity").toString()));
-                        callback.onQueryDone(tmpArray);
-                        return;
+                        DBObject object = find.next();
+                        data.setName(object.get("Name").toString());
+                        data.setUUID(uuid);
+                        data.setAffinity(Integer.parseInt(object.get("Affinity").toString()));
+                        data.setMaxAffinity(Integer.parseInt(object.get("MaxAffinity").toString()));
+                        data.setMinAffinity(Integer.parseInt(object.get("MinAffinity").toString()));
                     }
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-            tmpArray.add(0, -1);
-            callback.onQueryDone(tmpArray);
-            return;
+            } catch(Exception e) { e.printStackTrace(); }
+            callback.onQueryDone(data);
         });
     }
 
     @Override
-    public void playerExists(String uuid, final findBooleanCallback callback) {
+    public void playerExists(UUID uuid, final findBooleanCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
-                    DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
-                    if(find.hasNext()){
-                        callback.onQueryDone(true);
-                        return;
-                    }
+                    DBCursor find = getConnection().find(new BasicDBObject("_id", uuid.toString()));
+                    if(find.hasNext()) callback.onQueryDone(true);
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+            } catch(Exception e) { e.printStackTrace(); }
             callback.onQueryDone(false);
         });
     }

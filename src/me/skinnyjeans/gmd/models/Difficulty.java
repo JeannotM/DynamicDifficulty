@@ -46,7 +46,7 @@ public class Difficulty {
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
     public int getArmorDamageMultiplier(String type) { return armorDamageMultipliers.getOrDefault(type, -505); }
-    public HashMap<String, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
+    public HashMap<EquipmentItems, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
