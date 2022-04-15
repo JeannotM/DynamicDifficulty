@@ -4,6 +4,7 @@ import me.skinnyjeans.gmd.databases.*;
 import me.skinnyjeans.gmd.models.ISaveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -60,17 +61,17 @@ public class DataManager {
             language.load(langFile);
         } catch(Exception e) { e.printStackTrace(); }
 
-        culture = "lang." + language.getString("culture", "en-US") + ".";
+        culture = "lang." + language.getString("culture", "en-US");
     }
 
     public FileConfiguration getConfig() { return config; }
-    public FileConfiguration getLang() { return language; }
+    public ConfigurationSection getLang() { return language.getConfigurationSection(culture); }
     public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
     public void getAffinityValues(UUID uuid, ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
     public void playerExists(UUID uuid, ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
 
     public String getString(String item, HashMap<String, String> replaceables) {
-        String entry = language.getString(culture + item);
+        String entry = language.getString(culture + "." + item);
 
         if(entry == null) return null;
 
@@ -79,7 +80,7 @@ public class DataManager {
     }
 
     public String getLanguageString(String item) {
-        String entry = language.getString(culture + item);
+        String entry = language.getString(culture + "." + item);
 
         if(entry == null) return null;
 
@@ -98,15 +99,12 @@ public class DataManager {
         return language.isSet(location) && language.getString(location).length() != 0 && !language.getString(location).equals("");
     }
 
+    public void saveData() {
+
+    }
+
     public void reloadConfig() {
         loadConfig();
-
-        MAIN_MANAGER.getDifficultyManager().reloadConfig();
-        MAIN_MANAGER.getAffinityManager().reloadConfig();
-        MAIN_MANAGER.getPlayerManager().reloadConfig();
-        MAIN_MANAGER.getEntityManager().reloadConfig();
-        MAIN_MANAGER.getEventManager().reloadConfig();
-        MAIN_MANAGER.getDataManager().reloadConfig();
     }
 
     public boolean isWorldDisabled(String worldName) { return DISABLED_WORLDS.contains(worldName); }

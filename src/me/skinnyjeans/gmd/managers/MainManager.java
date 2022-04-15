@@ -14,21 +14,27 @@ public class MainManager {
     private final Main PLUGIN;
 
     public MainManager(Main main) {
-        DATA_MANAGER = new DataManager(this);
+        PLUGIN = main;
 
+        DATA_MANAGER = new DataManager(this);
         AFFINITY_MANAGER = new AffinityManager(this);
         COMMAND_MANAGER = new CommandManager(this);
         ENTITY_MANAGER = new EntityManager(this);
         PLAYER_MANAGER = new PlayerManager(this);
         EVENT_MANAGER = new EventManager(this);
         DIFFICULTY_MANAGER = new DifficultyManager(this);
-        PLUGIN = main;
 
-        startUp();
+        reloadConfig();
     }
 
-    public void startUp() {
-
+    public void reloadConfig() {
+        DIFFICULTY_MANAGER.reloadConfig();
+        AFFINITY_MANAGER.reloadConfig();
+        COMMAND_MANAGER.reloadConfig();
+        ENTITY_MANAGER.reloadConfig();
+        PLAYER_MANAGER.reloadConfig();
+        EVENT_MANAGER.reloadConfig();
+        DATA_MANAGER.reloadConfig();
     }
 
     public DifficultyManager getDifficultyManager() { return DIFFICULTY_MANAGER; }

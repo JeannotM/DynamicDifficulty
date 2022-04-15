@@ -33,7 +33,6 @@ public class EventManager {
 
         for(BaseListener listener : LISTENERS)
             Bukkit.getPluginManager().registerEvents(listener, MAIN_MANAGER.getPlugin());
-        reloadConfig();
     }
 
     public void reloadConfig() {

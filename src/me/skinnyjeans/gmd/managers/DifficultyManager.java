@@ -17,15 +17,18 @@ public class DifficultyManager {
 
     private Difficulty world;
     private DifficultyTypes DifficultyType;
+    private boolean customPrefixAllowed;
 
     public DifficultyManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-
-        reloadConfig();
         Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 60, 20 * 60);
     }
 
     public ArrayList<Difficulty> getDifficulties() { return new ArrayList<>(DIFFICULTY_LIST.values()); }
+
+    public ArrayList<String> getDifficultyNames() { return DIFFICULTY_LIST_SORTED; }
+
+    public Difficulty getDifficulty(String name) { return DIFFICULTY_LIST.get(name); }
 
     public Difficulty getDifficulty(UUID uuid) {
         switch(DifficultyType) {
@@ -60,6 +63,16 @@ public class DifficultyManager {
     public void calculateAllPlayers() {
         MAIN_MANAGER.getPlayerManager().getPlayerList().forEach((key, value) -> calculateDifficulty(key));
         world = calculateDifficulty(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(null));
+    }
+
+    public String getPrefix(int value) {
+        Difficulty difficulty = calcDifficulty(value);
+        return (customPrefixAllowed) ? difficulty.getPrefix() : difficulty.getDifficultyName();
+    }
+
+    public String getPrefix(UUID uuid) {
+        Difficulty difficulty = getDifficulty(uuid);
+        return (customPrefixAllowed) ? difficulty.getPrefix() : difficulty.getDifficultyName();
     }
 
     public void calculateDifficulty(UUID uuid) {
@@ -106,6 +119,7 @@ public class DifficultyManager {
     private int multiplyInt(int value, double times) { return (int) Math.round(value * times); }
 
     public void reloadConfig() {
+        customPrefixAllowed = MAIN_MANAGER.getDataManager().getConfig().getBoolean("plugin-support.use-prefix", true);
         String type = MAIN_MANAGER.getDataManager().getConfig().getString("difficulty-modifiers.type", "player");
         DifficultyType = DifficultyTypes.valueOf(type.substring(0, 1).toUpperCase() + type.substring(1));
     }

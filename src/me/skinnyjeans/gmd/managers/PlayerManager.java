@@ -48,8 +48,30 @@ public class PlayerManager {
 
     public Minecrafter getPlayerAffinity(UUID uuid) { return PLAYER_LIST.get(uuid); }
 
-    public void addAffinity(UUID uuid, int x) {
-        if(x != 0) PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + x);
+    public int addAffinity(UUID uuid, int value) {
+        if(value != 0) {
+            value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, value);
+            PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + value);
+        }
+        return PLAYER_LIST.get(uuid).getAffinity();
+    }
+
+    public int setAffinity(UUID uuid, int value) {
+        value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, value);
+        PLAYER_LIST.get(uuid).setAffinity(value);
+        return value;
+    }
+
+    public int setMaxAffinity(UUID uuid, int value) {
+        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+        PLAYER_LIST.get(uuid).setMaxAffinity(value);
+        return value;
+    }
+
+    public int setMinAffinity(UUID uuid, int value) {
+        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+        PLAYER_LIST.get(uuid).setMinAffinity(value);
+        return value;
     }
 
     public void savePlayer(UUID uuid) {

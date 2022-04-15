@@ -11,15 +11,17 @@ command-right-prefix: "&f"
 command-wrong-prefix: "&c"
 
 lang:
-  en-US: # By SkinnyJeans
+  en-US:
+    translated-by: "Translated by: SkinnyJeans"
+    translator-url: "https://github.com/JeannotM"
     command:
       set:
         affinity: "%user% set to %difficulty% Difficulty with %number% Affinity Points"
         max-affinity: "Set the Max Affinity to %number% for %user%"
         min-affinity: "Set the Min Affinity to %number% for %user%"
         all: "Set Affinity to %number% for all Online Players!"
-        max-affinity-all: "Set MaxAffinity to %number% for all Online Players!"
-        min-affinity-all: "Set MinAffinity to %number% for all Online Players!"
+        max-affinity-all: "Set Max Affinity to %number% for all Online Players!"
+        min-affinity-all: "Set Min Affinity to %number% for all Online Players!"
       remove:
         max-affinity: "Removed the Max Affinity for %user%"
         min-affinity: "Removed the Min Affinity for %user%"
@@ -29,7 +31,7 @@ lang:
       add:
         all: "Added %number% Affinity points to all Online Players!"
       get:
-        cannot-use-get-for-all: "It's not recommended to use @a with the /get command"
+        cannot-use-get-for-all: "You can't use @a on the /get command"
         has-affinity: "%user% has %number% Affinity points"
         currently-on: "Currently on %difficulty% Difficulty"
         max-affinity: "Max affinity: %number%"
@@ -37,18 +39,39 @@ lang:
       other:
         reload-config: "Config has successfully been reloaded!"
         force-save: "Player data has been saved!"
+      help:
+        label: "&f/dd"
+        name-num: "<?Name> <Number>"
+        name: "<?Name>"
+        command:
+          0: "&c======== &6[&eDynamic Difficulty&6] &c========&f"
+          1: "Providing a Difficulty instead of a Number is also fine"
+          2: "Will use the user who sent the request if no name was given"
+          3: "Commands aren't case-sensitive, meaning that /dD sEtMaX is allowed"
+          4: "%label% setMax %name-num% &7>&6 Sets the Max Affinity of a Player"
+          5: "%label% setMin %name-num% &7>&6 Sets the Min Affinity of a Player"
+          6: "%label% remove %name-num% &7>&6 Removes n points from a Player's Affinity"
+          7: "%label% add %name-num% &7>&6 Adds n points to a Player's Affinity"
+          8: "%label% set %name-num% &7>&6 Sets the Affinity of a Player"
+          9: "%label% delMax %name% &7>&6 Removes the Max Affinity of a Player"
+          10: "%label% delMin %name% &7>&6 Removes the Min Affinity of a Player"
+          11: "%label% get %name% &7>&6 Gets a Player's Min, Max and normal Affinity"
+          12: "%label% author &7>&6 Returns the Authors & Translators name"
+          13: "%label% reload &7>&6 Reloads Dynamic Difficulty (safely)"
+          14: "%label% forceSave &7>&6 Saves the Players Affinity"
+          15: "%label% playerGUI &7>&6 Shows all players in a chest GUI"
+          16: "%label% help &7>&6 Shows this menu"
     in-game:
       attacker-no-pvp: "You cannot attack %user% because you're still having a hard time!"
       attackee-no-pvp: "You cannot attack %user% because he's already having a hard time!"
       command-not-allowed: "You're too good of a player too use this command!"
     error:
       no-permission: "You don't have permission to do that!"
-      cannot-find-self: "Can't find your username in the plugin, please rejoin the server"
       add-force: "You'll need to add 'force' at the end for @a to work here"
       include-number: "You need to include a Number or Difficulty with this command!"
       something-wrong: "Something went wrong, please check the console for more info"
       not-a-number: "%number% isn't a recognized Difficulty or Number"
-      cannot-be-found: "%user% Does not exist or hasn't been online yet"
+      cannot-be-found: "Cannot find the player"
       world:
         need-min-affinity: "The world doesn't need Min Affinity!"
         need-max-affinity: "The world doesn't need Max Affinity!"
@@ -58,7 +81,9 @@ lang:
         cannot-open-playergui: "The Console can't open the PlayerGUI!"
         console-selected: "You can't select the console or a command block!"
         no-player-name: "You can't use this command as the console without providing a Player's name!"
-  nl-NL: # By SkinnyJeans
+  nl-NL:
+    translated-by: "Vertaald door: SkinnyJeans"
+    translator-url: "https://github.com/JeannotM"
     command:
       set:
         affinity: "%user% gezet naar %difficulty% moeilijkheidsgraad met %number% Affiniteitspunten"
@@ -69,14 +94,14 @@ lang:
         min-affinity-all: "Min Affiniteit voor alle Online Spelers gezet naar %number%"
       remove:
         max-affinity: "Max Affiniteit van %user% verwijderd"
-        min-affinity: "Max Affiniteit van %user% verwijderd"
+        min-affinity: "Min Affiniteit van %user% verwijderd"
         all: "%number% Affiniteitspunten verwijderd van alle Online Spelers!"
         max-affinity-all: "Max Affiniteit van alle Online Spelers verwijderd!"
         min-affinity-all: "Min Affiniteit van alle Online Spelers verwijderd!"
       add:
         all: "%number% Affiniteitspunten toegevoegd aan alle Online Spelers!"
       get:
-        cannot-use-get-for-all: "Het is niet aangeraden om @a te gebruiken bij de /get commando"
+        cannot-use-get-for-all: "Je kan geen @a gebruiken bij de /get commando"
         has-affinity: "%user% heeft %number% Affiniteitspunten"
         currently-on: "Momenteel op de %difficulty% Moeilijkheidsgraad"
         max-affinity: "Max Affiniteit: %number%"
@@ -84,18 +109,40 @@ lang:
       other:
         reload-config: "Config is successvol herladen!"
         force-save: "Alle Speler data is opgeslagen!"
+      help:
+        label: "&f/dd"
+        name-num: "<?Naam> <Nummer>"
+        name: "<?Naam>"
+        command:
+          0: "&c======== &6[&eDynamic Difficulty&6] &c========&f"
+          1: "Een moeilijkheidsgraad inplaats van een nummer is ook goed"
+          2: "Zal de naam van de commando stuurder gebruiken als er geen is meegegven"
+          3: "Commando's zijn niet hoofdletter gevoelig, /dD sEtMaX is dus toegestaan"
+          4: "%label% setMax %name-num% &7>&6 Zet de Max Affiniteit van een Speler"
+          5: "%label% setMin %name-num% &7>&6 Zet de Min Affiniteit van een Speler"
+          6: "%label% remove %name-num% &7>&6 Verwijderd n punten van een Spelers Affiniteit"
+          7: "%label% add %name-num% &7>&6 Voegt n punten toe aan een Spelers Affiniteit"
+          8: "%label% set %name-num% &7>&6 Zet de Affiniteit van een Speler"
+          9: "%label% delMax %name% &7>&6 Verwijderd de Max Affiniteit van een Speler"
+          10: "%label% delMin %name% &7>&6 Verwijderd de Min Affiniteit van een Speler"
+          11: "%label% get %name% &7>&6 Haalt een Spelers Min, Max and normale Affiniteit op"
+          12: "%label% author &7>&6 Stuurt de Auteurs & Vertalers naam terug"
+          13: "%label% reload &7>&6 Herlaad Dynamic Difficulty (veilig)"
+          14: "%label% forceSave &7>&6 Slaat de Affiniteit van alle Spelers"
+          15: "%label% playerGUI &7>&6 Toont alle spelers in een kist GUI"
+          16: "%label% help &7>&6 Toont dit menu"
     in-game:
       attacker-no-pvp: "Je kan %user% niet aanvallen omdat jij het al moeilijk genoeg hebt!"
       attackee-no-pvp: "Je kan %user% niet aanvallen omdat die het al moeilijk genoeg heeft!"
       command-not-allowed: "Je bent te goed om dit commando te gebruiken!"
     error:
       no-permission: "Je hebt geen toestemming om dat te doen!"
-      cannot-find-self: "Kan je gebruikersnaam niet in vinden, herjoin alstjeblieft!"
+      cannot-find-self: "Kan je gebruikersnaam niet vinden, herjoin alstjeblieft!"
       add-force: "Je moet 'force' toevoegen aan het eind om de @a commando werkend te krijgen"
       include-number: "Je moet een Nummer of Moelijkheidsgraad hebben bij dit commando!"
       something-wrong: "Er ging iets fout, bekijk de Console om te kijken wat precies"
       not-a-number: "%number% is geen Nummer of Moeilijkheidsgraad!"
-      cannot-be-found: "%user% bestaat niet of is nog niet online geweest!"
+      cannot-be-found: "Kan de gebruiker niet vinden!"
       world:
         need-min-affinity: "De wereld mag geen Min Affiniteit!"
         need-max-affinity: "De wereld mag geen Max Affiniteit!"
