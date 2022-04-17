@@ -1,8 +1,6 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.models.Minecrafter;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -74,14 +72,12 @@ public class PlayerManager {
         return value;
     }
 
-    public void savePlayer(UUID uuid) {
+    public void savePlayer(UUID uuid) { }
 
+    public void addMinAffinity(UUID uuid, int value) {
+        if(value != 0) PLAYER_LIST.get(uuid).setMinAffinity(PLAYER_LIST.get(uuid).getMinAffinity() + value);
     }
-
-    public void addMinAffinity(UUID uuid, int x) {
-        if(x != 0) PLAYER_LIST.get(uuid).setMinAffinity(PLAYER_LIST.get(uuid).getMinAffinity() + x);
-    }
-    public void addMaxAffinity(UUID uuid, int x) {
-        if(x != 0) PLAYER_LIST.get(uuid).setMaxAffinity(PLAYER_LIST.get(uuid).getMaxAffinity() + x);
+    public void addMaxAffinity(UUID uuid, int value) {
+        if(value != 0) PLAYER_LIST.get(uuid).setMaxAffinity(PLAYER_LIST.get(uuid).getMaxAffinity() + value);
     }
 }

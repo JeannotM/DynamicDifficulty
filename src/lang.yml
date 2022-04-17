@@ -39,6 +39,14 @@ lang:
       other:
         reload-config: "Config has successfully been reloaded!"
         force-save: "Player data has been saved!"
+      player-gui:
+        next-page: "Next Page >"
+        previous-page: "< Previous Page"
+        reset-values: "Reset Affinity"
+        affinity: "Affinity: %number%"
+        current-page: "Current Page: %number%"
+        max-affinity: "Max Affinity: %number%"
+        min-affinity: "Min Affinity: %number%"
       help:
         label: "&f/dd"
         name-num: "<?Name> <Number>"
@@ -104,6 +112,14 @@ lang:
         cannot-use-get-for-all: "Je kan geen @a gebruiken bij de /get commando"
         has-affinity: "%user% heeft %number% Affiniteitspunten"
         currently-on: "Momenteel op de %difficulty% Moeilijkheidsgraad"
+        max-affinity: "Max Affiniteit: %number%"
+        min-affinity: "Min Affiniteit: %number%"
+      player-gui:
+        next-page: "Volgende Pagina >"
+        previous-page: "< Vorige Pagina"
+        reset-values: "Affiniteit resetten"
+        affinity: "Affiniteit: %number%"
+        current-page: "Huidige pagina: %number%"
         max-affinity: "Max Affiniteit: %number%"
         min-affinity: "Min Affiniteit: %number%"
       other:

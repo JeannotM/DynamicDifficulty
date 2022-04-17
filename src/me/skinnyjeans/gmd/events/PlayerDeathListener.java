@@ -30,6 +30,7 @@ public class PlayerDeathListener extends BaseListener {
         if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getKeepInventory()) {
             e.setKeepInventory(true);
             e.setKeepLevel(true);
+            e.setNewTotalExp(0);
             e.getDrops().clear();
         }
 

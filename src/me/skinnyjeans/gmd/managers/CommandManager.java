@@ -1,6 +1,10 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.models.Minecrafter;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -39,6 +43,8 @@ public class CommandManager implements CommandExecutor {
     private String userMaxAffinityGet;
     private String userMinAffinityGet;
 
+    private TextComponent authorMessage;
+    private TextComponent translatorMessage;
     private String maxAffinityRemoved;
     private String minAffinityRemoved;
     private String minAffinitySet;
@@ -68,6 +74,7 @@ public class CommandManager implements CommandExecutor {
 
         if(NO_ARG.contains(argument)) {
             if(hasPermission(sender, argument)) {
+                if(argument.equals("author")) return author(sender);
                 if(argument.equals("reload")) return sendMessage(sender, reloadPlugin(), true);
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
             }
@@ -155,6 +162,12 @@ public class CommandManager implements CommandExecutor {
     private String removeMinAffinity(Player player) {
         MAIN_MANAGER.getPlayerManager().setMinAffinity(player.getUniqueId(), -1);
         return minAffinityRemoved.replace(PREFIX_USER, player.getName());
+    }
+
+    private Boolean author(CommandSender sender) {
+        sender.spigot().sendMessage(authorMessage);
+        sender.spigot().sendMessage(translatorMessage);
+        return true;
     }
 
     private String getAffinity(Player player) {
@@ -271,6 +284,14 @@ public class CommandManager implements CommandExecutor {
         allUserMinAffinitySet = MAIN_MANAGER.getDataManager().getLanguageString("command.set.min-affinity-all", true);
         allUserMinAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.min-affinity-all", true);
         allUserMaxAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.max-affinity-all", true);
+
+        authorMessage = new TextComponent("DynamicDifficulty: SkinnyJeans");
+        authorMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me!")));
+        authorMessage.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/dynamic-difficulty.92025/"));
+
+        translatorMessage = new TextComponent(MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true));
+        translatorMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me!")));
+        translatorMessage.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, MAIN_MANAGER.getDataManager().getLanguageString("translated-url", true)));
 
         ConfigurationSection language = MAIN_MANAGER.getDataManager().getLang();
         String label = language.getString("command.help.label", "&f/dd");

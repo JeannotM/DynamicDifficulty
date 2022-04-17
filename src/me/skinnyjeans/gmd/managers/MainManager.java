@@ -1,10 +1,12 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.Main;
+import org.bukkit.inventory.Inventory;
 
 public class MainManager {
 
     private final DifficultyManager DIFFICULTY_MANAGER;
+    private final InventoryManager INVENTORY_MANAGER;
     private final AffinityManager AFFINITY_MANAGER;
     private final CommandManager COMMAND_MANAGER;
     private final EntityManager ENTITY_MANAGER;
@@ -17,18 +19,21 @@ public class MainManager {
         PLUGIN = main;
 
         DATA_MANAGER = new DataManager(this);
+        PLAYER_MANAGER = new PlayerManager(this);
+
+        DIFFICULTY_MANAGER = new DifficultyManager(this);
+        INVENTORY_MANAGER = new InventoryManager(this);
         AFFINITY_MANAGER = new AffinityManager(this);
         COMMAND_MANAGER = new CommandManager(this);
         ENTITY_MANAGER = new EntityManager(this);
-        PLAYER_MANAGER = new PlayerManager(this);
         EVENT_MANAGER = new EventManager(this);
-        DIFFICULTY_MANAGER = new DifficultyManager(this);
 
         reloadConfig();
     }
 
     public void reloadConfig() {
         DIFFICULTY_MANAGER.reloadConfig();
+        INVENTORY_MANAGER.reloadConfig();
         AFFINITY_MANAGER.reloadConfig();
         COMMAND_MANAGER.reloadConfig();
         ENTITY_MANAGER.reloadConfig();
@@ -38,6 +43,7 @@ public class MainManager {
     }
 
     public DifficultyManager getDifficultyManager() { return DIFFICULTY_MANAGER; }
+    public InventoryManager getInventoryManager() { return INVENTORY_MANAGER; }
     public AffinityManager getAffinityManager() { return AFFINITY_MANAGER; }
     public CommandManager getCommandManager() { return COMMAND_MANAGER; }
     public PlayerManager getPlayerManager() { return PLAYER_MANAGER; }
