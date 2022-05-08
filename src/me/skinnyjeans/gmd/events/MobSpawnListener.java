@@ -186,7 +186,7 @@ public class MobSpawnListener extends BaseListener {
             for(String entity : customMobs.getStringList("includes-mobs"))
                 if(EntityType.valueOf(entity) != null) AFFECTED_MOBS.add(EntityType.valueOf(entity));
 
-            HashMap<EquipmentItems, String> itemSlot = new HashMap<>() {{
+            HashMap<EquipmentItems, String> itemSlot = new HashMap<EquipmentItems, String>() {{
                 put(EquipmentItems.HELMET, "helmet-enchants-include");
                 put(EquipmentItems.CHEST, "chestplate-enchants-include");
                 put(EquipmentItems.LEGGINGS, "leggings-enchants-include");
@@ -197,24 +197,22 @@ public class MobSpawnListener extends BaseListener {
 
             for(EquipmentItems equipmentItem : itemSlot.keySet()) {
                 HashSet<NamespacedKey> enchants = new HashSet<>();
-                for(Object key : customMobs.getList(itemSlot.get(equipmentItem)).toArray()) {
-                    String[] sep = key.toString().replaceAll("[{|}]","").split("=");
-                    NamespacedKey name = NamespacedKey.minecraft(sep[0]);
-
-                    if(name != null) {
+                for(Object key : customMobs.getList(itemSlot.get(equipmentItem)).toArray())
+                    try {
+                        String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+                        NamespacedKey name = NamespacedKey.minecraft(sep[0]);
                         ENCHANTMENT_WEIGHT.put(name, (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
                         enchants.add(name);
-                    }
-                }
+                    } catch (Exception ignored) { }
                 ENCHANTMENTS.put(equipmentItem, enchants);
             }
 
-            for(Object key : customMobs.getStringList("weapons-include").toArray()) {
-                String[] sep = key.toString().replaceAll("[{|}]","").split("=");
-                Material material = Material.valueOf(sep[0]);
+            for(Object key : customMobs.getStringList("weapons-include").toArray())
+                try {
+                    String[] sep = key.toString().replaceAll("[{|}]","").split("=");
+                    CUSTOM_SPAWN_WEAPONS.put(Material.valueOf(sep[0]), (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
+                } catch (Exception ignored) { }
 
-                if(material != null) CUSTOM_SPAWN_WEAPONS.put(material, (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
-            }
         }
 
     }

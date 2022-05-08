@@ -1,8 +1,8 @@
 package me.skinnyjeans.gmd.hooks;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.skinnyjeans.gmd.Affinity;
 import me.skinnyjeans.gmd.Main;
+import me.skinnyjeans.gmd.managers.MainManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -11,13 +11,11 @@ import java.util.UUID;
 public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     private Main plugin;
-    private Affinity affinity;
-    private boolean usePrefix;
+    private final MainManager MAIN_MANAGER;
 
-    public PlaceholderAPIExpansion(Main plugin, Affinity af, boolean pr){
+    public PlaceholderAPIExpansion(Main plugin, MainManager mainManager){
         this.plugin = plugin;
-        this.affinity = af;
-        this.usePrefix = pr;
+        this.MAIN_MANAGER = mainManager;
     }
 
     @Override
@@ -47,55 +45,25 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
-        try {
-            UUID uuid = (player != null) ? player.getUniqueId() : null;
-
-            if(identifier.equals("text_difficulty")){
-                if(usePrefix)
-                    return affinity.getPrefix(uuid);
-                return affinity.calcDifficulty(uuid);
-            }
-            if(identifier.equals("affinity_points"))
-                return Integer.toString(affinity.getAffinity(player.getUniqueId()));
-            if(identifier.equals("world_text_difficulty")){
-                if(usePrefix)
-                    return affinity.getPrefix(null);
-                return affinity.calcDifficulty((UUID)null);
-            }
-            if(identifier.equals("world_affinity_points"))
-                return Integer.toString(affinity.getAffinity(null));
-            if(identifier.equals("max_affinity"))
-                return Integer.toString(affinity.getVariable("max-affinity"));
-            if(identifier.equals("min_affinity"))
-                return Integer.toString(affinity.getVariable("min-affinity"));
-        } catch (NullPointerException e) { }
+        if(player != null) {
+            UUID uuid = player.getUniqueId();
+            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getPrefix(uuid);
+            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity());
+            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMinAffinity());
+            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMaxAffinity());
+        }
         return null;
     }
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier){
-        try {
-            UUID uuid = (player != null) ? player.getUniqueId() : null;
-
-            if(identifier.equals("text_difficulty")){
-                if(usePrefix)
-                    return affinity.getPrefix(uuid);
-                return affinity.calcDifficulty(uuid);
-            }
-            if(identifier.equals("affinity_points"))
-                return Integer.toString(affinity.getAffinity(player.getUniqueId()));
-            if(identifier.equals("world_text_difficulty")){
-                if(usePrefix)
-                    return affinity.getPrefix(null);
-                return affinity.calcDifficulty((UUID)null);
-            }
-            if(identifier.equals("world_affinity_points"))
-                return Integer.toString(affinity.getAffinity(null));
-            if(identifier.equals("max_affinity"))
-                return Integer.toString(affinity.getVariable("max-affinity"));
-            if(identifier.equals("min_affinity"))
-                return Integer.toString(affinity.getVariable("min-affinity"));
-        } catch (NullPointerException e) { }
+        if(player != null) {
+            UUID uuid = player.getUniqueId();
+            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getPrefix(uuid);
+            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity());
+            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMinAffinity());
+            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMaxAffinity());
+        }
         return null;
     }
 }

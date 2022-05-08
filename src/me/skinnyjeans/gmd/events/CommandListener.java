@@ -4,7 +4,6 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,9 +55,7 @@ public class CommandListener extends BaseListener {
                 break;
             }
 
-        if(MAIN_MANAGER.getDataManager().langExists("in-game.command-not-allowed")) {
-            commandNotAllowed = ChatColor.translateAlternateColorCodes('&', MAIN_MANAGER.getDataManager().getLang().getString("in-game.command-not-allowed"));
-        } else commandNotAllowed = null;
+        commandNotAllowed = MAIN_MANAGER.getDataManager().getLanguageString("in-game.command-not-allowed", false);
 
         if(shouldDisable) {
             BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());

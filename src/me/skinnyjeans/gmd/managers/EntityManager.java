@@ -37,15 +37,10 @@ public class EntityManager {
 
         ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 
-        StringBuilder weirdMobs = new StringBuilder("");
         for(String key : config.getStringList("disabled-mobs"))
-            if(EntityType.valueOf(key) != null) {
+            try {
                 DISABLED_MOBS.add(EntityType.valueOf(key));
-            } else {
-                if(!weirdMobs.isEmpty()) weirdMobs.append(", ");
-                weirdMobs.append(key);
-            }
-
+            } catch (Exception ignored) { }
     }
 
 }

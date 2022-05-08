@@ -4,6 +4,7 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -22,11 +23,10 @@ public class HungerListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHungerDrain(FoodLevelChangeEvent e) {
-        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
-
-        if(e.getEntity().getFoodLevel() > e.getFoodLevel())
-            if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getHungerDrain() / 100.0)
-                e.setCancelled(true);
+        if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
+            if(((Player) e.getEntity()).getFoodLevel() > e.getFoodLevel())
+                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getHungerDrain() / 100.0)
+                    e.setCancelled(true);
     }
 
     @Override

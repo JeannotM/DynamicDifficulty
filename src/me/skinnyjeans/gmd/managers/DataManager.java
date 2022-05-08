@@ -20,8 +20,6 @@ public class DataManager {
     private final HashSet<String> DISABLED_WORLDS = new HashSet<>();
 
     private String culture;
-    private File configFile;
-    private File langFile;
     private FileConfiguration config;
     private FileConfiguration language;
     private ISaveManager DATABASE;
@@ -48,39 +46,40 @@ public class DataManager {
     }
 
     public void loadConfig() {
-        configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
-        langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
-        config = new YamlConfiguration();
-        language = new YamlConfiguration();
+        File configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
+        File langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
 
         if (!configFile.exists()) MAIN_MANAGER.getPlugin().saveResource("config.yml",false);
         if (!langFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang.yml",false);
 
         try {
-            config.load(configFile);
-            language.load(langFile);
+            config = YamlConfiguration.loadConfiguration(configFile);
+            language = YamlConfiguration.loadConfiguration(langFile);
         } catch(Exception e) { e.printStackTrace(); }
 
-        culture = "lang." + language.getString("culture", "en-US");
+        culture = "lang." + language.getString("culture", "en-US") + ".";
     }
 
     public FileConfiguration getConfig() { return config; }
     public ConfigurationSection getLang() { return language.getConfigurationSection(culture); }
     public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
-    public void getAffinityValues(UUID uuid, ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
-    public void playerExists(UUID uuid, ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
+    public void getAffinityValues(UUID uuid, final ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
+    public void playerExists(UUID uuid, final ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
 
     public String getString(String item, HashMap<String, String> replaceables) {
-        String entry = language.getString(culture + "." + item);
-
+        String entry = language.getString(culture + item);
         if(entry == null) return null;
-
-        for(String key : replaceables.keySet()) entry.replace(key, replaceables.get(key));
+        for(String key : replaceables.keySet()) entry = entry.replace(key, replaceables.get(key));
         return ChatColor.translateAlternateColorCodes('&', entry);
     }
 
+    public String replaceString(String item, HashMap<String, String> replaceables) {
+        for(String key : replaceables.keySet()) item = item.replace(key, replaceables.get(key));
+        return ChatColor.translateAlternateColorCodes('&', item);
+    }
+
     public String getLanguageString(String item) {
-        String entry = language.getString(culture + "." + item);
+        String entry = language.getString(culture + item);
 
         if(entry == null) return null;
 
@@ -96,7 +95,7 @@ public class DataManager {
     }
 
     public boolean langExists(String location) {
-        return language.isSet(location) && language.getString(location).length() != 0 && !language.getString(location).equals("");
+        return language.isSet(location) && language.getString(location).length() != 0;
     }
 
     public void saveData() {
@@ -104,6 +103,7 @@ public class DataManager {
     }
 
     public void reloadConfig() {
+        MAIN_MANAGER.getPlugin().reloadConfig();
         loadConfig();
     }
 

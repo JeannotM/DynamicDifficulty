@@ -3,8 +3,6 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -32,7 +30,7 @@ public class EntityDeathListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onKill(EntityDeathEvent e) {
-        if(e.getEntity().getKiller() != null) return;
+        if(e.getEntity().getKiller() == null) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity().getKiller())) return;
         UUID uuid = e.getEntity().getKiller().getUniqueId();
 
@@ -59,15 +57,14 @@ public class EntityDeathListener extends BaseListener {
         onPVPKill = config.getInt("pvp-kill", 20);
 
         MOBS.clear();
-        for(Object key : config.getList("mobs-count-as-pve").toArray()) {
-            String[] sep = key.toString().replaceAll("[{|}]","").split("=");
-            if(EntityType.valueOf(sep[0]) != null) {
+        for(Object key : config.getList("mobs-count-as-pve").toArray())
+            try {
+                String[] sep = key.toString().replaceAll("[{|}]","").split("=");
                 int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : config.getInt("pve-kill", 2);
                 MOBS.put(EntityType.valueOf(sep[0]), value);
-            }
-        }
+            } catch (Exception ignored) { }
 
-        if(MOBS.isEmpty() && onPVPKill == 0) {
+        if(MOBS.size() == 0 && onPVPKill == 0) {
             BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
         } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
             Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());

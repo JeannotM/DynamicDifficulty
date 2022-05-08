@@ -22,6 +22,8 @@ public class EntityHitListener extends BaseListener {
     private boolean calculateExtraArmorDamage;
     private int affinityPerHeart;
     private int onPlayerHit;
+    private String notAttackOthers;
+    private String notAttackPerson;
 
     public EntityHitListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -63,14 +65,12 @@ public class EntityHitListener extends BaseListener {
 
             } else if(hunter instanceof Player) {
                 MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter);
-                HashMap<String, String> entry = new HashMap<>() {{ put("%user%", ((Player) prey).getDisplayName()); }};
+                HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", ((Player) prey).getDisplayName()); }};
                 if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getAllowPVP()) {
-                    if(MAIN_MANAGER.getDataManager().langExists("in-game.attacker-no-pvp"))
-                        prey.sendMessage(MAIN_MANAGER.getDataManager().getString("in-game.attacker-no-pvp", entry));
+                    if(notAttackOthers.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackOthers, entry));
                     e.setCancelled(true);
                 } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(prey.getUniqueId()).getAllowPVP()) {
-                    if(MAIN_MANAGER.getDataManager().langExists("in-game.attackee-no-pvp"))
-                        prey.sendMessage(MAIN_MANAGER.getDataManager().getString("in-game.attackee-no-pvp", entry)) ;
+                    if(notAttackPerson.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackPerson, entry));
                     e.setCancelled(true);
                 }
             }
@@ -89,6 +89,9 @@ public class EntityHitListener extends BaseListener {
         calculateExtraArmorDamage = false;
         affinityPerHeart = config.getInt("affinity-per-heart-loss", -1);
         onPlayerHit = config.getInt("player-hit", -1);
+
+        notAttackOthers = MAIN_MANAGER.getDataManager().getLanguageString("in-game.attacker-no-pvp", false);
+        notAttackPerson = MAIN_MANAGER.getDataManager().getLanguageString("in-game.attackee-no-pvp", false);
 
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
             if (difficulty.getArmorDamageMultiplier().size() != 0) {

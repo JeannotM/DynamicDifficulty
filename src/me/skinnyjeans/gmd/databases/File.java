@@ -5,20 +5,25 @@ import me.skinnyjeans.gmd.Main;
 import me.skinnyjeans.gmd.models.ISaveManager;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.UUID;
 
 public class File implements ISaveManager {
 
     private final Main plugin;
-    private final DataManager data;
-    private final String difficultyType;
+    private final FileConfiguration data;
+    private final java.io.File dataFile;
 
     public File(Main m, DataManager d) {
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] using default 'file' mode to save and read data");
-        data = d;
         plugin = m;
-        difficultyType = d.getConfig().getString("difficulty-modifiers.type", "player").toLowerCase();
+        dataFile = new java.io.File(plugin.getDataFolder(), "data.yml");
+
+        if(!dataFile.exists()) plugin.saveResource("data.yml",false);
+
+        data = YamlConfiguration.loadConfiguration(dataFile);
     }
 
     public boolean isConnected() { return data != null; }
@@ -26,10 +31,13 @@ public class File implements ISaveManager {
     @Override
     public void updatePlayer(Minecrafter playerData) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            data.getConfig().set(playerData.getUUID() + ".affinity", playerData.getAffinity());
-            data.getConfig().set(playerData.getUUID() + ".max-affinity", playerData.getMaxAffinity());
-            data.getConfig().set(playerData.getUUID() + ".min-affinity", playerData.getMinAffinity());
-            data.getConfig().set(playerData.getUUID() + ".name", playerData.getName());
+            data.set(playerData.getUUID() + ".affinity", playerData.getAffinity());
+            data.set(playerData.getUUID() + ".max-affinity", playerData.getMaxAffinity());
+            data.set(playerData.getUUID() + ".min-affinity", playerData.getMinAffinity());
+            data.set(playerData.getUUID() + ".name", playerData.getName());
+            try {
+                data.save(dataFile);
+            } catch (Exception ignored) { }
         });
     }
 
@@ -37,11 +45,11 @@ public class File implements ISaveManager {
     public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Minecrafter playerData = new Minecrafter(uuid);
-            if(data.getConfig().isSet(uuid + ".affinity")) {
-                playerData.setAffinity(data.getConfig().getInt(uuid + ".affinity"));
-                playerData.setMinAffinity(data.getConfig().getInt(uuid + ".min-affinity"));
-                playerData.setMaxAffinity(data.getConfig().getInt(uuid + ".max-affinity"));
-                playerData.setName(data.getConfig().getString(uuid + ".name"));
+            if(data.isSet(String.valueOf(uuid))) {
+                playerData.setAffinity(data.getInt(uuid + ".affinity"));
+                playerData.setMinAffinity(data.getInt(uuid + ".min-affinity"));
+                playerData.setMaxAffinity(data.getInt(uuid + ".max-affinity"));
+                playerData.setName(data.getString(uuid + ".name"));
             }
             callback.onQueryDone(playerData);
         });
@@ -49,9 +57,7 @@ public class File implements ISaveManager {
 
     @Override
     public void playerExists(UUID uuid, findBooleanCallback callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-            callback.onQueryDone(data.getConfig().isSet(uuid + ".affinity"))
-        );
+        callback.onQueryDone(data.isSet(String.valueOf(uuid)));
     }
 
     @Override

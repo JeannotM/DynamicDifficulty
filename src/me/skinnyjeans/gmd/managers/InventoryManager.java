@@ -8,11 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class InventoryManager {
@@ -23,7 +22,7 @@ public class InventoryManager {
     private Inventory basePlayerInventory;
     private ItemStack playerHead;
 
-    private final HashMap<Material, String> MATERIAL_NAMES = new HashMap<>(){{
+    private final HashMap<Material, String> MATERIAL_NAMES = new HashMap<Material, String>(){{
         put(Material.GOLD_INGOT, "Next Page >");
         put(Material.IRON_INGOT, "< Previous Page");
         put(Material.RED_WOOL, "Reset Affinity");
@@ -36,7 +35,7 @@ public class InventoryManager {
         put(Material.LIGHT_BLUE_WOOL, "100");
     }};
 
-    private final HashMap<Integer, Material> INVENTORY_SLOTS = new HashMap<>(){{
+    private final HashMap<Integer, Material> INVENTORY_SLOTS = new HashMap<Integer, Material>(){{
         put(1, Material.PINK_WOOL);
         put(2, Material.MAGENTA_WOOL);
         put(3, Material.PURPLE_WOOL);
@@ -57,6 +56,8 @@ public class InventoryManager {
         inventory.setItem(3, prevPage);
         inventory.setItem(4, currentPage);
         inventory.setItem(5, nextPage);
+
+        baseInventory = inventory;
     }
 
     public void createBasePlayerInventory() {
@@ -109,7 +110,7 @@ public class InventoryManager {
         SkullMeta meta = (SkullMeta) item.getItemMeta();
         meta.setDisplayName(player.getName());
         meta.setOwningPlayer(player);
-        meta.setLore(List.of(
+        meta.setLore(Arrays.asList(
             uuid.toString(),
             item.getItemMeta().getLore().get(0).replace("%number%", data.getAffinity() + ""),
             item.getItemMeta().getLore().get(1).replace("%number%", data.getMinAffinity() + ""),
@@ -132,7 +133,7 @@ public class InventoryManager {
         MATERIAL_NAMES.put(Material.IRON_CHESTPLATE, MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.current-page"));
 
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        head.getItemMeta().setLore(List.of(
+        head.getItemMeta().setLore(Arrays.asList(
             MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.affinity"),
             MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.min-affinity"),
             MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.max-affinity")

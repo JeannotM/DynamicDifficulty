@@ -89,6 +89,7 @@ lang:
         cannot-open-playergui: "The Console can't open the PlayerGUI!"
         console-selected: "You can't select the console or a command block!"
         no-player-name: "You can't use this command as the console without providing a Player's name!"
+
   nl-NL:
     translated-by: "Vertaald door: SkinnyJeans"
     translator-url: "https://github.com/JeannotM"
@@ -165,7 +166,6 @@ lang:
         have-min-affinity: "De wereld heeft geen Min Affiniteit!"
         have-max-affinity: "De wereld heeft geen Max Affiniteit!"
       console:
-        cannot-open-playergui: "De Console kan de SpelerGUI niet openen!"
         console-selected: "Je kan de Console of commandoblok niet selecteren!"
         no-player-name: "Je kan dit commando niet gebruiken zonder gebruikersnaam!"
 

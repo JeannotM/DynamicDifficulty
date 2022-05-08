@@ -7,6 +7,7 @@ import java.util.UUID;
 public class AffinityManager {
 
     private final MainManager MAIN_MANAGER;
+    private Minecrafter defaultData;
     private int serverMinAffinity;
     private int serverMaxAffinity;
     private int defaultAffinity;
@@ -31,6 +32,8 @@ public class AffinityManager {
         return value;
     }
 
+    public Minecrafter getDefault() { return defaultData; }
+
     public void setAffinity(UUID uuid, int value) {
         value = withinPlayerLimits(uuid, value);
         MAIN_MANAGER.getPlayerManager().setAffinity(uuid, value);
@@ -49,5 +52,10 @@ public class AffinityManager {
         defaultAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-affinity", 600);
         defaultMinAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-min-affinity", -1);
         defaultMaxAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-max-affinity", -1);
+
+        defaultData = new Minecrafter();
+        defaultData.setAffinity(defaultAffinity);
+        defaultData.setMinAffinity(defaultMinAffinity);
+        defaultData.setMaxAffinity(defaultMaxAffinity);
     }
 }

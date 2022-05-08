@@ -16,21 +16,33 @@ public class PlayerManager {
         MAIN_MANAGER = mainManager;
     }
 
-    public void addPlayer(Player player) {
-        MAIN_MANAGER.getDataManager().getAffinityValues(player.getUniqueId(), (Minecrafter playerData) -> {
-            PLAYER_LIST.put(player.getUniqueId(), playerData);
-            MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+    public void addPlayer(Entity player) {
+        MAIN_MANAGER.getDataManager().playerExists(player.getUniqueId(), exists -> {
+            if(exists) {
+                MAIN_MANAGER.getDataManager().getAffinityValues(player.getUniqueId(), playerData -> {
+                    PLAYER_LIST.put(player.getUniqueId(), playerData);
+                    MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+                });
+            } else {
+                Minecrafter playerData = MAIN_MANAGER.getAffinityManager().getDefault();
+                playerData.setName(player.getName());
+                playerData.setUUID(player.getUniqueId());
+                PLAYER_LIST.put(player.getUniqueId(), playerData);
+                MAIN_MANAGER.getDataManager().updatePlayer(player.getUniqueId());
+                MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+            }
         });
+
     }
 
-    public boolean playerExist(Player player) { return PLAYER_LIST.containsKey(player.getUniqueId()); }
+    public boolean playerExist(Entity player) { return PLAYER_LIST.containsKey(player.getUniqueId()); }
 
     public boolean isPlayerValid(Entity player) {
         if(player == null) return false;
         if(MAIN_MANAGER.getDataManager().isWorldDisabled(player.getWorld().getName())) return false;
         if(!(player instanceof Player)) return false;
         if(player.hasMetadata("NPC")) return false;
-        if(!playerExist((Player) player)) addPlayer((Player) player);
+        if(!playerExist(player)) addPlayer(player);
         return true;
     }
 

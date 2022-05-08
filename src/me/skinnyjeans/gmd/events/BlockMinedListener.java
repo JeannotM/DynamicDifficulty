@@ -46,13 +46,13 @@ public class BlockMinedListener extends BaseListener {
 
         int blockMined = config.getInt("block-mined", 2);
 
-        for(Object key : config.getList("blocks").toArray()) {
-            String[] sep = key.toString().replaceAll("[{|}]","").split("=");
-            if(Material.valueOf(sep[0]) != null) {
+        for(Object key : config.getList("blocks").toArray())
+            try {
+                String[] sep = key.toString().replaceAll("[{|}]","").split("=");
                 int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : blockMined;
                 BLOCKS.put(Material.valueOf(sep[0]), value);
-            }
-        }
+            } catch (Exception ignored) { }
+
 
         if(BLOCKS.isEmpty()) {
             BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
