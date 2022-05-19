@@ -5,6 +5,7 @@
 # %user% Is used to display given names or player names
 # Add custom colors using &color https://minecraft.fandom.com/wiki/Formatting_codes
 
+#hoi
 # Culture .NET
 culture: "en-US"
 command-right-prefix: "&f"
