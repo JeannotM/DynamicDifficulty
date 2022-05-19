@@ -21,14 +21,15 @@ public class MongoDB implements ISaveManager {
     private final String pwd;
     private MongoClient connection;
 
-    public MongoDB(Main m, DataManager data) throws UnknownHostException {
+    public MongoDB(Main m, DataManager d) throws UnknownHostException {
         plugin = m;
-        host = data.getConfig().getString("saving-data.host");
-        port = data.getConfig().getString("saving-data.port");
-        dbName = data.getConfig().getString("saving-data.database");
-        user = data.getConfig().getString("saving-data.username");
-        pwd = data.getConfig().getString("saving-data.password");
+        host = d.getConfig().getString("saving-data.host");
+        port = d.getConfig().getString("saving-data.port");
+        dbName = d.getConfig().getString("saving-data.database");
+        user = d.getConfig().getString("saving-data.username");
+        pwd = d.getConfig().getString("saving-data.password");
         connect();
+        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "MongoDB"));
     }
 
     public DBCollection getConnection() { return connection.getDB(dbName).getCollection("dynamicdifficulty") ;}
@@ -43,7 +44,7 @@ public class MongoDB implements ISaveManager {
             } else {
                 connection = new MongoClient(address);
             }
-            Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Succesfully connected to MongoDB!");
+
         }
     }
 

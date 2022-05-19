@@ -28,38 +28,28 @@ public class SQL implements ISaveManager {
         user = data.getConfig().getString("saving-data.username", "root");
         pwd = data.getConfig().getString("saving-data.password", "");
         saveType = sT.toLowerCase();
-        connect();
-        if(sT.equals("mysql"))
-            addColumnsNotExists();
+        connect(data);
         createTable();
     }
 
     public boolean isConnected() { return connection != null; }
     public Connection getConnection() { return connection; }
 
-    public void connect() throws SQLException, ClassNotFoundException {
+    public void connect(DataManager d) throws SQLException, ClassNotFoundException {
+        String database = "";
         if(!isConnected())
             if(saveType.equals("mysql")) {
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to MySQL!");
+                database = "MySQL";
             } else if (saveType.equals("sqlite")){
                 connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to SQLite!");
+                database = "SQLite";
             } else if (saveType.equals("postgresql")) {
                 Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
-                Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] Successfully connected to PostGreSQL!");
+                database = "PostGreSQL";
             }
-    }
-
-    public void addColumnsNotExists() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                PreparedStatement ps = getConnection().prepareStatement("ALTER TABLE "+tbName+" "+
-                        "ADD COLUMN MinAffinity INT DEFAULT -1");
-                ps.executeUpdate();
-            } catch(Exception e) { e.printStackTrace(); }
-        });
+        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", database));
     }
 
     public void createTable() {

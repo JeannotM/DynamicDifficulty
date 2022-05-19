@@ -1,10 +1,6 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.models.Minecrafter;
-//import net.md_5.bungee.api.chat.ClickEvent;
-//import net.md_5.bungee.api.chat.HoverEvent;
-//import net.md_5.bungee.api.chat.TextComponent;
-//import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -25,10 +21,11 @@ public class CommandManager implements CommandExecutor {
 
     private final MainManager MAIN_MANAGER;
 
-    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("help", "reload", "author", "forcesave", "playergui"));
+    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("info", "help", "reload", "author", "forcesave", "playergui"));
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
+    private final String authorMessage = "/tellraw %user% {\"text\":\"DynamicDifficulty: SkinnyJeans\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/dynamic-difficulty.92025/\"}}";
     private final String PREFIX_NUMBER = "%number%";
     private final String PREFIX_USER = "%user%";
     private final String PREFIX_DIFFICULTY = "%difficulty%";
@@ -45,8 +42,7 @@ public class CommandManager implements CommandExecutor {
     private String userMaxAffinityGet;
     private String userMinAffinityGet;
 
-//    private TextComponent authorMessage;
-//    private TextComponent translatorMessage;
+    private String translatorMessage;
     private String maxAffinityRemoved;
     private String minAffinityRemoved;
     private String minAffinitySet;
@@ -78,6 +74,7 @@ public class CommandManager implements CommandExecutor {
                 if(argument.equals("reload")) return sendMessage(sender, reloadPlugin(), true);
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
+                if(argument.equals("info")) return sendMessage(sender, info(), true);
             }
         } else if(ONE_ARG.contains(argument)) {
             if(args.length > 1 && args[1].equals("@a")) {
@@ -111,23 +108,19 @@ public class CommandManager implements CommandExecutor {
 
             if(args[1].equals("@a")) {
                 if(hasAnyPermission(sender, argument, "other")) {
-                    if(argument.equals("setmin")) {
+                    if (argument.equals("setmin")) {
                         multipleUsers(this::setMinAffinity, number);
                         return sendMessage(sender, allUserMinAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
-                    }
-                    if(argument.equals("setmax")) {
+                    } else if (argument.equals("setmax")) {
                         multipleUsers(this::setMaxAffinity, number);
                         return sendMessage(sender, allUserMaxAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
-                    }
-                    if(argument.equals("set")) {
+                    } else if (argument.equals("set")) {
                         multipleUsers(this::setAffinity, number);
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
-                    }
-                    if(argument.equals("remove")) {
+                    } else if (argument.equals("remove")) {
                         multipleUsers(this::addAffinity, number * -1);
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
-                    }
-                    if(argument.equals("add")) {
+                    } else if (argument.equals("add")) {
                         multipleUsers(this::addAffinity, number);
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     }
@@ -136,12 +129,13 @@ public class CommandManager implements CommandExecutor {
                 Player affectedPlayer = needsPlayer(sender, args[1]);
                 if(affectedPlayer == null) return sendMessage(sender, notFound, false);
 
-                if(hasPermission(sender, affectedPlayer, argument))
+                if(hasPermission(sender, affectedPlayer, argument)) {
                     if(argument.equals("setmin")) return sendMessage(sender, setMinAffinity(affectedPlayer, number), true);
                     if(argument.equals("setmax")) return sendMessage(sender, setMaxAffinity(affectedPlayer, number), true);
                     if(argument.equals("set")) return sendMessage(sender, setAffinity(affectedPlayer, number), true);
                     if(argument.equals("remove")) return sendMessage(sender, addAffinity(affectedPlayer, number * -1), true);
                     if(argument.equals("add")) return sendMessage(sender, addAffinity(affectedPlayer, number), true);
+                }
             }
         }
         return sendMessage(sender, noPermission, false);
@@ -166,9 +160,17 @@ public class CommandManager implements CommandExecutor {
     }
 
     private boolean author(CommandSender sender) {
-//        sender.spigot().sendMessage(authorMessage);
-//        sender.spigot().sendMessage(translatorMessage);
+        String author = authorMessage.replace(PREFIX_USER, sender.getName());
+        String translator = translatorMessage.replace(PREFIX_USER, sender.getName());
+
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), author);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), translator);
+
         return true;
+    }
+
+    private String info() {
+        return MAIN_MANAGER.getDataManager().getLang().getCurrentPath();
     }
 
     private boolean openPlayerGUI(CommandSender sender) {
@@ -179,13 +181,13 @@ public class CommandManager implements CommandExecutor {
     }
 
     private String getAffinity(Player player) {
-        StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, player.getName()));
         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(player.getUniqueId());
-        message.append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getPrefix(data.getAffinity()))
-                .replace(PREFIX_NUMBER, data.getAffinity() + ""));
+        StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, data.getAffinity() + ""))
+                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getPrefix(data.getAffinity()))
+                        .replace(PREFIX_NUMBER, data.getAffinity() + ""));
 
-        if(data.getMaxAffinity() != -1) message.append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.getMaxAffinity() + ""));
-        if(data.getMinAffinity() != -1) message.append(userMinAffinityGet.replace(PREFIX_NUMBER, data.getMinAffinity() + ""));
+        if(data.getMaxAffinity() != -1) message.append("\n").append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.getMaxAffinity() + ""));
+        if(data.getMinAffinity() != -1) message.append("\n").append(userMinAffinityGet.replace(PREFIX_NUMBER, data.getMinAffinity() + ""));
 
         return message.toString();
     }
@@ -217,7 +219,7 @@ public class CommandManager implements CommandExecutor {
     }
 
     private String reloadPlugin() {
-        MAIN_MANAGER.getDataManager().reloadConfig();
+        MAIN_MANAGER.reloadConfig();
         return configReloaded;
     }
 
@@ -264,7 +266,6 @@ public class CommandManager implements CommandExecutor {
     public boolean sendMessage(CommandSender sender, String message, boolean success) {
         if(sender instanceof Player) {
             sender.sendMessage(message);
-
         } else Bukkit.getConsoleSender().sendMessage(ChatColor.stripColor(message));
         return success;
     }
@@ -296,13 +297,9 @@ public class CommandManager implements CommandExecutor {
         allUserMinAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.min-affinity-all", true);
         allUserMaxAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.max-affinity-all", true);
 
-//        authorMessage = new TextComponent("DynamicDifficulty: SkinnyJeans");
-//        authorMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me!")));
-//        authorMessage.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/dynamic-difficulty.92025/"));
-//
-//        translatorMessage = new TextComponent(MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true));
-//        translatorMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me!")));
-//        translatorMessage.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, MAIN_MANAGER.getDataManager().getLanguageString("translated-url", true)));
+        translatorMessage = "/tellraw %user% {\"text\":\"%message%\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"%url%\"}}";
+        translatorMessage = translatorMessage.replace("%message%", MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true))
+                .replace("%url%", MAIN_MANAGER.getDataManager().getLanguageString("translator-url", true));
 
         ConfigurationSection language = MAIN_MANAGER.getDataManager().getLang();
         String label = language.getString("command.help.label", "&f/dd");

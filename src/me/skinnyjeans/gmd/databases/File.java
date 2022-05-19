@@ -17,13 +17,12 @@ public class File implements ISaveManager {
     private final java.io.File dataFile;
 
     public File(Main m, DataManager d) {
-        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] using default 'file' mode to save and read data");
         plugin = m;
         dataFile = new java.io.File(plugin.getDataFolder(), "data.yml");
-
         if(!dataFile.exists()) plugin.saveResource("data.yml",false);
-
         data = YamlConfiguration.loadConfiguration(dataFile);
+
+        Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "File"));
     }
 
     public boolean isConnected() { return data != null; }

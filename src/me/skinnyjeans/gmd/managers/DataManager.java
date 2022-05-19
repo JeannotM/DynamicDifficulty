@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -22,6 +24,8 @@ public class DataManager {
     private String culture;
     private FileConfiguration config;
     private FileConfiguration language;
+    private File configFile;
+    private File langFile;
     private ISaveManager DATABASE;
 
     public DataManager(MainManager mainManager) {
@@ -36,7 +40,7 @@ public class DataManager {
             } else if(saveType.equals("mongodb")) {
                 DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);
             } else if(saveType.equals("none")){
-                DATABASE = new None();
+                DATABASE = new None(this);
             } else DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
         } catch(Exception e) {
             e.printStackTrace();
@@ -46,16 +50,25 @@ public class DataManager {
     }
 
     public void loadConfig() {
-        File configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
-        File langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
+        if (configFile == null) configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
+        if (langFile == null) langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
 
-        if (!configFile.exists()) MAIN_MANAGER.getPlugin().saveResource("config.yml",false);
-        if (!langFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang.yml",false);
+        config = YamlConfiguration.loadConfiguration(configFile);
+        language = YamlConfiguration.loadConfiguration(langFile);
 
-        try {
-            config = YamlConfiguration.loadConfiguration(configFile);
-            language = YamlConfiguration.loadConfiguration(langFile);
-        } catch(Exception e) { e.printStackTrace(); }
+        InputStream configStream = MAIN_MANAGER.getPlugin().getResource("config.yml");
+
+        if(configStream != null) {
+            YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(configStream));
+            config.setDefaults(defaultConfig);
+        }
+
+        InputStream languageStream = MAIN_MANAGER.getPlugin().getResource("lang.yml");
+
+        if(languageStream != null) {
+            YamlConfiguration defaultLang = YamlConfiguration.loadConfiguration(new InputStreamReader(languageStream));
+            language.setDefaults(defaultLang);
+        }
 
         culture = "lang." + language.getString("culture", "en-US") + ".";
     }
@@ -80,17 +93,13 @@ public class DataManager {
 
     public String getLanguageString(String item) {
         String entry = language.getString(culture + item);
-
-        if(entry == null) return null;
-
+        if(entry == null) return "";
         return ChatColor.translateAlternateColorCodes('&', entry);
     }
 
     public String getLanguageString(String item, boolean isRight) {
         String entry = language.getString(culture + item);
-
-        if(entry == null) return null;
-
+        if(entry == null) return "";
         return ChatColor.translateAlternateColorCodes('&', (isRight ? language.getString("command-right-prefix") : language.getString("command-wrong-prefix")) + entry);
     }
 

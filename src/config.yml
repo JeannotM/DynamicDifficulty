@@ -141,6 +141,18 @@ difficulty:
       leather: -1
     mobs-ignore-player:
     - CREEPER
+    enchanting:
+      max-enchants: 1
+      max-level: 1
+      chance-to-have-armor: 5.0
+      chance-to-enchant-a-piece: 15
+      armor-drop-chance: 10.0
+      weapon-drop-chance: 5.0
+      weapon-chance: 1.0
+      helmet-chance: 100.0
+      chest-chance: 75.0
+      leggings-chance: 56.25
+      boots-chance: 42.19
   Normal:
     affinity-required: 400
     damage-done-by-mobs: 75
@@ -154,6 +166,18 @@ difficulty:
     keep-inventory: false
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
+    enchanting:
+      max-enchants: 2
+      max-level: 1
+      chance-to-have-armor: 15.0
+      chance-to-enchant-a-piece: 30
+      armor-drop-chance: 15.0
+      weapon-drop-chance: 10.0
+      weapon-chance: 2.0
+      helmet-chance: 100.0
+      chest-chance: 75.0
+      leggings-chance: 56.25
+      boots-chance: 42.19
   Hard:
     affinity-required: 1100
     damage-done-by-mobs: 100
@@ -176,6 +200,18 @@ difficulty:
       iron: 2
       diamond: 4
       netherite: 5
+    enchanting:
+      max-enchants: 3
+      max-level: 2
+      chance-to-have-armor: 20.0
+      chance-to-enchant-a-piece: 45
+      armor-drop-chance: 20.0
+      weapon-drop-chance: 15.0
+      weapon-chance: 5.0
+      helmet-chance: 100.0
+      chest-chance: 90.0
+      leggings-chance: 81.0
+      boots-chance: 72.9
 
 # Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
 custom-mob-items-spawn-chance:
@@ -270,42 +306,3 @@ custom-mob-items-spawn-chance:
   - vanishing_curse
   - binding_curse
   - unbreaking: 5
-  # You'll need to use the EXACT same name as in difficulties.
-  # (E.g. if Extreme difficulty exists, but not here; will use the last difficulty that had any settings changed)
-  difficulties:
-    Easy:
-      max-enchants: 1
-      max-level: 1
-      chance-to-have-armor: 5.0
-      chance-to-enchant-a-piece: 15
-      armor-drop-chance: 10.0
-      weapon-drop-chance: 5.0
-      weapon-chance: 1.0
-      helmet-chance: 100.0
-      chest-chance: 75.0
-      leggings-chance: 56.25
-      boots-chance: 42.19
-    Normal:
-      max-enchants: 2
-      max-level: 1
-      chance-to-have-armor: 15.0
-      chance-to-enchant-a-piece: 30
-      armor-drop-chance: 15.0
-      weapon-drop-chance: 10.0
-      weapon-chance: 2.0
-      helmet-chance: 100.0
-      chest-chance: 75.0
-      leggings-chance: 56.25
-      boots-chance: 42.19
-    Hard:
-      max-enchants: 3
-      max-level: 2
-      chance-to-have-armor: 20.0
-      chance-to-enchant-a-piece: 45
-      armor-drop-chance: 20.0
-      weapon-drop-chance: 15.0
-      weapon-chance: 5.0
-      helmet-chance: 100.0
-      chest-chance: 90.0
-      leggings-chance: 81.0
-      boots-chance: 72.9

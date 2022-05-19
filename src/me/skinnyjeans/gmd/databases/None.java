@@ -1,5 +1,6 @@
 package me.skinnyjeans.gmd.databases;
 
+import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.models.ISaveManager;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 public class None implements ISaveManager {
 
-    public None(){ Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] 'None' mode selected, no data will be saved or read"); }
+    public None(DataManager d){ Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "None")); }
 
     @Override
     public boolean isConnected() { return false; }
