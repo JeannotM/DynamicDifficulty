@@ -1,5 +1,6 @@
 package me.skinnyjeans.gmd.managers;
 
+import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,11 +10,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -170,7 +169,14 @@ public class CommandManager implements CommandExecutor {
     }
 
     private String info() {
-        return MAIN_MANAGER.getDataManager().getLang().getCurrentPath();
+        StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getLang().getCurrentPath()).append("\n");
+
+        ArrayList<String> difficulties = MAIN_MANAGER.getDifficultyManager().getDifficultyNames();
+        message.append("Difficulties: (").append(difficulties.size()).append(") ");
+        for(String name : difficulties) message.append(name).append(", ");
+        message.append("\n");
+
+        return message.toString();
     }
 
     private boolean openPlayerGUI(CommandSender sender) {

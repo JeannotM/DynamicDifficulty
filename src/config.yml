@@ -3,7 +3,7 @@
 # enabled, but if you're not comfortable with this, you can turn this setting off. There is no
 # performance penalty associated with having metrics enabled, and data sent to bStats is fully anonymous.
 
-version: 1.5
+version: 1.6
 
 # Some info in the config have been typed shorter so as not to clutter it too much. Please visit for more detailed explanations with examples:
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
@@ -58,6 +58,7 @@ mobs-count-as-pve:
 # - BLOCKTYPE: <Affinity points>
 blocks:
 - ANCIENT_DEBRIS: 4
+- DEEPSLATE_DIAMOND_ORE
 - DIAMOND_ORE
 - EMERALD_ORE
 
@@ -66,6 +67,7 @@ toggle-settings:
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
+  allow-tamed-wolves-in-calculations: true # Whether to allow tamed wolves in the damage calculations
   advanced:
     # advanced features may decrease performance or are a little harder to configure
     custom-mob-items-spawn-chance: false
@@ -87,7 +89,7 @@ saving-data:
 
 # You can disable DynamicDifficulty in certain worlds
 disabled-worlds:
-- example_name
+- example_name_test
 
 # These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
 disabled-mobs:
@@ -115,25 +117,40 @@ difficulty-modifiers:
 #   double-durability-damage-chance: <percentage, Chance to take double damage on item durability>
 #   experience-multiplier: <percentage, Experience Multiplier>
 #   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
-#   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
 #   keep-inventory: <bool, Whether the player keeps everything on death or not>
+#   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
+#   allow-natural-regen <bool, Whether health regen from 'natural occurrences' (full foodbar) should be allowed.
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
 #   commands-not-allowed-on-difficulty: <list, What commands aren't allowed to be run by players on certain difficulties, spaces not recommended>
 #   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 x 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
 #   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
+#   enchanting: <Will only work if 'custom-mob-items-spawn-chance' in the toggle-settings is enabled>
+#     max-enchants: <number, Maximum amount of enchants on armor or weapons>
+#     max-level: <number, Maximum level of the enchants>
+#     chance-to-have-armor: <percentage, Chance for a mob to spawn with armor>
+#     chance-to-enchant-a-piece: <percentage, Chance for a piece to be enchanted>
+#     armor-drop-chance: <percentage, Chance to drop a piece of armor if killed>
+#     weapon-drop-chance: <percentage, Chance to drop the weapon if killed>
+#     weapon-chance: <percentage, Chance for a mob to spawn with weapons if armor is allowed>
+#     helmet-chance: <percentage, Chance for a mob to have a helmet if armor is allowed>
+#     chest-chance: <percentage, Chance for a mob to have a chestplate if armor is allowed>
+#     leggings-chance: <percentage, Chance for a mob to have a leggings if armor is allowed>
+#     boots-chance: <percentage, Chance for a mob to have a boots if armor is allowed>
 difficulty:
   Easy:
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
+    damage-done-on-tamed: 75
     hunger-drain-chance: 60
     damage-done-by-ranged-mobs: 75
     double-durability-damage-chance: 0
     experience-multiplier: 70
     double-loot-chance: 0
-    keep-inventory: true
     allow-pvp: true
+    keep-inventory: true
+    allow-natural-regen: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
     extra-damage-for-certain-armor-types:
@@ -157,6 +174,7 @@ difficulty:
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
+    damage-done-on-tamed: 100
     hunger-drain-chance: 80
     damage-done-by-ranged-mobs: 100
     double-durability-damage-chance: 1
@@ -164,6 +182,7 @@ difficulty:
     double-loot-chance: 0
     allow-pvp: true
     keep-inventory: false
+    allow-natural-regen: true
     effects-when-attacked: true
     prefix: '&7&l[&9&lNormal&7&l]&r'
     enchanting:
@@ -182,6 +201,7 @@ difficulty:
     affinity-required: 1100
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100
+    damage-done-on-tamed: 100
     hunger-drain-chance: 100
     damage-done-by-ranged-mobs: 125
     double-durability-damage-chance: 5
@@ -189,6 +209,7 @@ difficulty:
     double-loot-chance: 5
     allow-pvp: true
     keep-inventory: false
+    allow-natural-regen: true
     effects-when-attacked: true
     prefix: '&7&l[&4&lHard&7&l]&r'
     commands-not-allowed-on-difficulty:
@@ -213,7 +234,6 @@ difficulty:
       leggings-chance: 81.0
       boots-chance: 72.9
 
-# Difficulty name NEEDS to be EXACTLY the same as the ones in 'difficulty'
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
   override-enchant-conflicts: false # Allows conflicting enchants to occur on a single armor (E.g. Protection & Fire Protection)

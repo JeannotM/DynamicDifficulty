@@ -45,6 +45,7 @@ public class MobSpawnListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMobSpawn(CreatureSpawnEvent e) {
+        if(!customArmorSpawnChance && !changeSpawnedMobs) return;
         if(!AFFECTED_MOBS.contains(e.getEntity().getType())) return;
 
         if(customArmorSpawnChance && NATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
@@ -119,9 +120,9 @@ public class MobSpawnListener extends BaseListener {
                     eq.setBoots(null);
                 }
             }));
-        } else if(UNNATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
-            if(changeSpawnedMobs) MAIN_MANAGER.getEntityManager().entityIgnored(e.getEntity());
-         }
+        } else if(changeSpawnedMobs && UNNATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
+            MAIN_MANAGER.getEntityManager().entityIgnored(e.getEntity());
+        }
     }
 
     public ItemStack calcEnchant(ItemStack item, Difficulty difficulty, EquipmentItems piece, Double chanceToEnchant) {
@@ -212,8 +213,6 @@ public class MobSpawnListener extends BaseListener {
                     String[] sep = key.toString().replaceAll("[{|}]","").split("=");
                     CUSTOM_SPAWN_WEAPONS.put(Material.valueOf(sep[0]), (sep.length > 1 ? Integer.parseInt(sep[1]) : 1));
                 } catch (Exception ignored) { }
-
         }
-
     }
 }

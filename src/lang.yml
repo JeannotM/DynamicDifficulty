@@ -82,7 +82,6 @@ lang:
       console:
         console-selected: "You can't select the console or a commandblock!"
         cannot-open-playergui: "The Console can't open the PlayerGUI!"
-
   nl-NL:
     translated-by: "Vertaald door: SkinnyJeans"
     translator-url: "https://github.com/JeannotM"
@@ -184,7 +183,7 @@ lang:
         max-affinity: "吸引力上限: %number%"
         min-affinity: "吸引力下限: %number%"
       other:
-        reload-config: "配置已重载! 汉化 by 苦钻怕
+        reload-config: "配置已重载! 汉化 by 苦钻怕"
         force-save: "玩家数据已保存!"
       player-gui:
         next-page: "下一页 >"
@@ -232,4 +231,5 @@ lang:
       console:
         console-selected: "你不可以选择终端或命令方块!"
         cannot-open-playergui: "玩家GUI不能在终端打开!"
+
 # if you want to add a language that wasn't included here you can check out the Github page:

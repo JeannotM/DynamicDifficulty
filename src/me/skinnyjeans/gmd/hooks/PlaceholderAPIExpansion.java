@@ -44,22 +44,17 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String onPlaceholderRequest(Player player, String identifier){
-        if(player != null) {
-            UUID uuid = player.getUniqueId();
-            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getPrefix(uuid);
-            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity());
-            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMinAffinity());
-            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMaxAffinity());
-        }
-        return null;
-    }
+    public String onPlaceholderRequest(Player player, String identifier) { return placeholderRequest(player, identifier); }
 
     @Override
-    public String onRequest(OfflinePlayer player, String identifier){
+    public String onRequest(OfflinePlayer player, String identifier) { return placeholderRequest(player, identifier); }
+
+    public String placeholderRequest(OfflinePlayer player, String identifier) {
         if(player != null) {
             UUID uuid = player.getUniqueId();
             if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getPrefix(uuid);
+            if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(uuid);
+            if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getPrefix(MAIN_MANAGER.getDifficultyManager().getNextDifficulty(uuid).getAffinity());
             if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity());
             if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMinAffinity());
             if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getMaxAffinity());

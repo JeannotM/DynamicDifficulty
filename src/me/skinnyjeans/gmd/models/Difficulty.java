@@ -10,6 +10,7 @@ public class Difficulty {
     private int affinityRequirement;
     private int damageDoneByMobs;
     private int damageDoneOnMobs;
+    private int damageDoneOnTamed;
     private int experienceMultiplier;
     private int hungerDrainChance;
     private int doubleLootChance;
@@ -24,6 +25,7 @@ public class Difficulty {
     private double weaponDropChance;
     private boolean allowPVP;
     private boolean keepInventory;
+    private boolean allowHealthRegen;
     private boolean effectsWhenAttacked;
     private List<String> disabledCommands = new ArrayList<>();
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
@@ -38,6 +40,7 @@ public class Difficulty {
     public int getUntil() { return difficultyUntil; }
     public int getDamageByMobs() { return damageDoneByMobs; }
     public int getDamageOnMobs() { return damageDoneOnMobs; }
+    public int getDamageOnTamed() { return damageDoneOnTamed; }
     public int getExperienceMultiplier() { return experienceMultiplier; }
     public int getHungerDrain() { return hungerDrainChance; }
     public int getDoubleLoot() { return doubleLootChance; }
@@ -49,6 +52,7 @@ public class Difficulty {
     public HashMap<ArmorTypes, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
+    public boolean getAllowHealthRegen() { return allowHealthRegen; }
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
     public List<String> getDisabledCommands() { return disabledCommands; }
@@ -64,6 +68,7 @@ public class Difficulty {
     public void setUntil(int value) { difficultyUntil = value; }
     public void setDamageByMobs(int value) { damageDoneByMobs = value; }
     public void setDamageOnMobs(int value) { damageDoneOnMobs = value; }
+    public void setDamageOnTamed(int value) { damageDoneOnTamed = value; }
     public void setExperienceMultiplier(int value) { experienceMultiplier = value; }
     public void setHungerDrain(int value) { hungerDrainChance = value; }
     public void setDoubleLoot(int value) { doubleLootChance = value; }
@@ -75,6 +80,8 @@ public class Difficulty {
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }
+    public void setAllowHealthRegen(boolean value) { allowHealthRegen = value; }
+
     public void setDisabledCommands(List<String> value) { disabledCommands = value; }
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
     public void setEnchantChances(HashMap<EquipmentItems, Double> value) { armorChance = value; }

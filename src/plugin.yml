@@ -9,20 +9,24 @@ permissions:
   affinity.*:
     default: op
     children:
-    affinity.help: true
-    affinity.get: true
-    affinity.author: true
-    affinity.add: true
-    affinity.remove: true
-    affinity.set: true
-    affinity.setmax: true
-    affinity.delmax: true
-    affinity.setmin: true
-    affinity.delmin: true
-    affinity.reload: true
-    affinity.force-save: true
-    affinity.playergui: true
+      affinity.info: true
+      affinity.help: true
+      affinity.get: true
+      affinity.author: true
+      affinity.add: true
+      affinity.remove: true
+      affinity.set: true
+      affinity.setmax: true
+      affinity.delmax: true
+      affinity.setmin: true
+      affinity.delmin: true
+      affinity.reload: true
+      affinity.forcesave: true
+      affinity.playergui: true
 
+  affinity.info:
+    default: false
+    description: Returns some info from items in the plugin
   affinity.help:
     default: false
     description: Returns all the commands of Dynamic Difficulty to the player
@@ -56,7 +60,7 @@ permissions:
   affinity.reload:
     default: op
     description: Allows a player to reload the config
-  affinity.force-save:
+  affinity.forcesave:
     default: op
     description: Saves the player data
   affinity.playergui:

@@ -1,6 +1,7 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.Main;
+import me.skinnyjeans.gmd.hooks.Metrics;
 import me.skinnyjeans.gmd.hooks.PlaceholderAPIExpansion;
 import org.bukkit.Bukkit;
 
@@ -36,7 +37,7 @@ public class MainManager {
 
         reloadConfig();
 
-        if(DATA_MANAGER.getConfig().getBoolean("plugin-support.allow-papi"))
+        if(DATA_MANAGER.getConfig().getBoolean("plugin-support.allow-papi", false))
             if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
                 new PlaceholderAPIExpansion(PLUGIN, this).register();
     }
@@ -57,21 +58,19 @@ public class MainManager {
     }
 
     public void checkMetrics() {
-//        Metrics m = new Metrics(PLUGIN, 11417);
-//        m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
-//            DATA_MANAGER.getConfig().getString("difficulty-modifiers.type").toLowerCase()
-//        ));
-//        m.addCustomChart(new Metrics.SimplePie("save_type", () ->
-//            DATA_MANAGER.getConfig().getString("saving-data.type").toLowerCase()
-//        ));
-//        m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
-//            String.valueOf(DATA_MANAGER.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
-//        ));
-//        m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
-//            DATA_MANAGER.getConfig().getString("advanced-features.custom-mob-items-spawn-chance", "false").toLowerCase()
-//        ));
-
-
+        Metrics m = new Metrics(PLUGIN, 11417);
+        m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
+            DATA_MANAGER.getConfig().getString("difficulty-modifiers.type").toLowerCase()
+        ));
+        m.addCustomChart(new Metrics.SimplePie("save_type", () ->
+            DATA_MANAGER.getConfig().getString("saving-data.type").toLowerCase()
+        ));
+        m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
+            String.valueOf(DATA_MANAGER.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
+        ));
+        m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
+            DATA_MANAGER.getConfig().getString("advanced-features.custom-mob-items-spawn-chance", "false").toLowerCase()
+        ));
     }
 
     public DifficultyManager getDifficultyManager() { return DIFFICULTY_MANAGER; }

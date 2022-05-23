@@ -57,6 +57,27 @@ public class DifficultyManager {
         return (customPrefixAllowed) ? difficulty.getPrefix() : difficulty.getDifficultyName();
     }
 
+    public String getProgress(UUID uuid) {
+        Difficulty first = getDifficulty(uuid);
+        int index = DIFFICULTY_LIST_SORTED.indexOf(first.getDifficultyName());
+        if (index != DIFFICULTY_LIST_SORTED.size() - 1) index++;
+        Difficulty second = DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(index));
+
+        int a = first.getAffinity();
+        int b = second.getAffinity();
+        double c = Math.abs(1.0 - (100.0 / (a - b) * (MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity() - b)));
+
+        return (calculatePercentage(first.getAffinity(), second.getAffinity(), c) * 100) + "%";
+    }
+
+    public Difficulty getNextDifficulty(UUID uuid) {
+        Difficulty first = getDifficulty(uuid);
+        int index = DIFFICULTY_LIST_SORTED.indexOf(first.getDifficultyName());
+        if (index != DIFFICULTY_LIST_SORTED.size() - 1) index++;
+
+        return DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(index));
+    }
+
     public void calculateDifficulty(UUID uuid) {
         Difficulty difficulty = calculateDifficulty(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid));
         PLAYER_LIST.put(uuid, difficulty);
@@ -141,6 +162,7 @@ public class DifficultyManager {
             tmpMap.put(difficulty.getAffinity(), key.replace(" ", "_"));
             difficulty.setDamageByMobs(data.getInt("damage-done-by-mobs", 100));
             difficulty.setDamageOnMobs(data.getInt("damage-done-on-mobs", 100));
+            difficulty.setDamageOnTamed(data.getInt("damage-done-on-tamed", 100));
             difficulty.setHungerDrain(data.getInt("hunger-drain-chance", 100));
             difficulty.setDamageByRangedMobs(data.getInt("damage-done-by-ranged-mobs", 100));
             difficulty.setDoubleDurabilityDamageChance(data.getInt("double-durability-damage-chance", 0));
@@ -148,6 +170,7 @@ public class DifficultyManager {
             difficulty.setDoubleLoot(data.getInt("double-loot-chance", 1));
             difficulty.setKeepInventory(data.getBoolean("keep-inventory", false));
             difficulty.setAllowPVP(data.getBoolean("allow-pvp", true));
+            difficulty.setAllowHealthRegen(data.getBoolean("allow-natural-regen", true));
             difficulty.setEffectsOnAttack(data.getBoolean("effects-when-attacked", true));
             difficulty.setPrefix(ChatColor.translateAlternateColorCodes('&', data.getString("prefix", key)));
             if(data.isSet("commands-not-allowed-on-difficulty")) difficulty.setDisabledCommands(data.getStringList("commands-not-allowed-on-difficulty"));

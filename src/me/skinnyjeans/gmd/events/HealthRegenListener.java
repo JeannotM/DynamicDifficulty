@@ -3,37 +3,38 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 
-import java.util.Random;
+import java.util.EnumSet;
 
-public class HungerListener extends BaseListener {
+public class HealthRegenListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
+    private final EnumSet<EntityRegainHealthEvent.RegainReason> CANCEL_REGEN = EnumSet.of(
+            EntityRegainHealthEvent.RegainReason.REGEN, EntityRegainHealthEvent.RegainReason.SATIATED);
 
     private boolean shouldDisable;
 
-    public HungerListener(MainManager mainManager) {
+    public HealthRegenListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onHungerDrain(FoodLevelChangeEvent e) {
+    public void onHealthRegen(EntityRegainHealthEvent e) {
         if(shouldDisable) return;
+
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
-            if(((Player) e.getEntity()).getFoodLevel() > e.getFoodLevel())
-                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getHungerDrain() / 100.0)
-                    e.setCancelled(true);
+            if(CANCEL_REGEN.contains(e.getRegainReason()))
+                e.setCancelled(true);
     }
 
     @Override
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
-            if (difficulty.getHungerDrain() < 100) {
+            if (!difficulty.getAllowHealthRegen()) {
                 shouldDisable = false;
                 break;
             }

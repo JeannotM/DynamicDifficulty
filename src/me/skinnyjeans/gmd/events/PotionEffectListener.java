@@ -22,6 +22,8 @@ public class PotionEffectListener extends BaseListener {
     private final HashSet<PotionEffectType> EFFECTS;
     private final EnumSet<EntityPotionEffectEvent.Cause> EFFECT_CAUSES;
 
+    private boolean shouldDisable;
+
     public PotionEffectListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
 
@@ -33,6 +35,7 @@ public class PotionEffectListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
+        if(shouldDisable) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
 
         if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
@@ -42,17 +45,11 @@ public class PotionEffectListener extends BaseListener {
 
     @Override
     public void reloadConfig() {
-        boolean shouldDisable = true;
+        shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
             if (!difficulty.getEffectsOnAttack()) {
                 shouldDisable = false;
                 break;
             }
-
-        if(shouldDisable) {
-            BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
-        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
-            Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
-        }
     }
 }

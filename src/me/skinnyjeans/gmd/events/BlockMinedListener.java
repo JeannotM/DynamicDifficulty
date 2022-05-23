@@ -8,7 +8,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.HashMap;
@@ -20,14 +19,11 @@ public class BlockMinedListener extends BaseListener {
 
     private boolean silkTouchAllowed;
 
-    public BlockMinedListener(MainManager mainManager) {
-        MAIN_MANAGER = mainManager;
-
-        reloadConfig();
-    }
+    public BlockMinedListener(MainManager mainManager) { MAIN_MANAGER = mainManager; }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
+        if(BLOCKS.size() == 0) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
 
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
@@ -52,12 +48,5 @@ public class BlockMinedListener extends BaseListener {
                 int value = (sep.length > 1) ? Integer.parseInt(sep[1]) : blockMined;
                 BLOCKS.put(Material.valueOf(sep[0]), value);
             } catch (Exception ignored) { }
-
-
-        if(BLOCKS.isEmpty()) {
-            BlockBreakEvent.getHandlerList().unregister(MAIN_MANAGER.getPlugin());
-        } else if (!HandlerList.getRegisteredListeners(MAIN_MANAGER.getPlugin()).contains(this)) {
-            Bukkit.getPluginManager().registerEvents(this, MAIN_MANAGER.getPlugin());
-        }
     }
 }
