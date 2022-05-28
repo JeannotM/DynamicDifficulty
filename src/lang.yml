@@ -231,5 +231,82 @@ lang:
       console:
         console-selected: "你不可以选择终端或命令方块!"
         cannot-open-playergui: "玩家GUI不能在终端打开!"
+  es_MX:
+    translated-by: "ItsRea1Pers0n y Ale2512"
+    translator-url: "https://github.com/ItsRealPerson and https://github.com/ralx25"
+    command:
+      set:
+        set-affinity: "Se estableció la dificultad %difficulty% a %user% con %number% Puntos de Afinidad"
+        set-max-affinity-for-all: "Se estableció la maxima Afinidad a %number% para todos los Jugadores en linea!"
+        set-min-affinity-for-all: "Se estableció la minima Afinidad a %number% para todos los Jugadores en linea!"
+        set-affinity-for-all: "Se estableció la Afinidad a %number% para todos los Jugadores en linea!"
+        set-max-affinity: "Establecer el máximo de Afinidad a %number% para %user%"
+        set-min-affinity: "Establecer el mínimo de Afinidad a %number% para %user%"
+      remove:
+        remove-from-all: "Removido %number% puntos de Afinidad a todos los Jugadores en linea!"
+        all-max-affinity-removed: "Todos los Puntos maximos de Afinidad han sido removidos de todos los Jugadores en linea!"
+        all-min-affinity-removed: "Todos los Puntos minimos de Afinidad han sido removidos de todos los Jugadores en linea!"
+        max-affinity: "Se removió el máximo de Afinidad para %user%"
+        min-affinity: "Se removió el mínimo de Afinidad para %user%"
+      get:
+        cannot-use-get-for-all: "No es recomendable usar @a con el comando /get"
+        has-affinity: "%user% tiene %number% puntos de Afinidad"
+        currently-on: "La dificultad actual es: %difficulty%"
+        max-affinity: "Afinidad máxima: %number%"
+        min-affinity: "Afinidad mínima: %number%"
+      other:
+        command-right-prefix: "&f"
+        command-wrong-prefix: "&c"
+        reload-config: "Configuración recargada exitosamente!"
+        force-save: "Datos del jugador han sido guardados!"
+
+      player-gui:
+          next-page: "Siguiente Página >"
+          previous-page: "< Página Anterior"
+          reset-values: "Reiniciar Afinidad"
+          affinity: "Afinidad: %number%"
+          current-page: "Página Actual: %number%"
+          max-affinity: "Afinidad Máxima: %number%"
+          min-affinity: "Afinidad Mínima: %number%"
+      help:
+        label: "&f/dd"
+        name-num: "<?Nombre> <Numero>"
+        name: "<?Nombre>"
+        command:
+          0: "&c======== &6[&eDynamic Difficulty&6] &c========&f"
+          1: "Definir una dificultad en vez de un numero esta bien"
+          2: "Usará al usuario que realizó el comando si no provisiona uno"
+          3: "Los comandos no son de caracter sensitivo es decir /dD sEtMaX is allowed"
+          4: "%label% setMax %name-num% &7>&6 Define la afinidad Maxima a un jugador"
+          5: "%label% setMin %name-num% &7>&6 Define la afinidad Mínima a un Jugadores"
+          6: "%label% remove %name-num% &7>&6 Remueve n puntos de Afinidad a un jugador"
+          7: "%label% add %name-num% &7>&6 Agrega n puntos de Afinidad a un jugador"
+          8: "%label% set %name-num% &7>&6 Define la afinidad a un jugador"
+          9: "%label% delMax %name% &7>&6 Elimina la Afinidad Máxima de un jugador"
+          10: "%label% delMin %name% &7>&6 Elimina la Afinidad Mínima de un jugador"
+          11: "%label% get %name% &7>&6 Obtiene la afinidad Mínima, Máxima y la actual de un jugador"
+          12: "%label% author &7>&6 Muestra el autor y el nombre del traductor."
+          13: "%label% reload &7>&6 Recarga el plugin (forma segura)"
+          14: "%label% forceSave &7>&6 Guarda la afinidad de los jugadores"
+          15: "%label% playerGUI &7>&6 Muestra a todos los jugadores en una interfaz"
+          16: "%label% help &7>&6 Muestra este menú"
+          17: "%label% info &7>&6 Muestra la informacion de depuración"
+    in-game:
+        attacker-no-pvp: "No puedes a atacar a %user% porque eres muy debil!"
+        attackee-no-pvp: "No puedes atacar a %user% porque está llorando!"
+        command-not-allowed: "Eres muy bueno para usar ese comando :)!"
+    other:
+        database-chosen: "Conexión satisfactoria con %database%"
+        update-config: "Estas jugando con una configuración desactualizada, Asegúrese de actualizarlo!"
+
+    error:
+        no-permission: "No tienes permisos para hacer eso!"
+        add-force: "Debes agregar 'force' al final para que @a pueda trabajar aquí"
+        include-number: "Necesitar incluir un número o dificultad con este comando!"
+        not-a-number: "%number% no se reconoce como dificultad o número"
+        cannot-be-found: "No podemos encontrar al usuario"
+        console:
+           cannot-open-playergui: "La Consola no puede abrir el la interfaz de jugadores!"
+           console-selected: "No puedes seleccionar la consola o un bloque de comando!"
 
 # if you want to add a language that wasn't included here you can check out the Github page:
