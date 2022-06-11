@@ -47,7 +47,6 @@ public class CommandListener extends BaseListener {
     @Override
     public void reloadConfig() {
         shouldDisable = true;
-
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
             if (difficulty.getDisabledCommands().size() != 0) {
                 shouldDisable = false;

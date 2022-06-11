@@ -36,11 +36,10 @@ public class PotionEffectListener extends BaseListener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(shouldDisable) return;
-        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
-
-        if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
-            if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
-                e.setCancelled(true);
+        if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
+            if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
+                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
+                    e.setCancelled(true);
     }
 
     @Override

@@ -2,6 +2,7 @@ package me.skinnyjeans.gmd.events;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -34,11 +35,12 @@ public class PlayerDeathListener extends BaseListener {
             e.getDrops().clear();
         }
 
-        if(preventAffinityLossOnSuicide)
-            if(COUNTS_AS_SUICIDE.contains(e.getEntity().getLastDamageCause()))
-                return;
-
-        if(onDeath != 0) MAIN_MANAGER.getPlayerManager().addAffinity(e.getEntity().getUniqueId(), onDeath);
+        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
+            if(preventAffinityLossOnSuicide)
+                if(COUNTS_AS_SUICIDE.contains(e.getEntity().getLastDamageCause()))
+                    return;
+            MAIN_MANAGER.getPlayerManager().addAffinity(e.getEntity().getUniqueId(), onDeath);
+        });
     }
 
     @Override

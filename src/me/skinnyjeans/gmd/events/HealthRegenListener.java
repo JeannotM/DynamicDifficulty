@@ -24,7 +24,6 @@ public class HealthRegenListener extends BaseListener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHealthRegen(EntityRegainHealthEvent e) {
         if(shouldDisable) return;
-
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
             if(CANCEL_REGEN.contains(e.getRegainReason()))
                 e.setCancelled(true);

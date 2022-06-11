@@ -1,6 +1,7 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.models.Minecrafter;
+import org.bukkit.Bukkit;
 
 import java.util.UUID;
 
@@ -8,14 +9,16 @@ public class AffinityManager {
 
     private final MainManager MAIN_MANAGER;
     private Minecrafter defaultData;
+    private int intervalAffinity;
     private int serverMinAffinity;
     private int serverMaxAffinity;
-    private int defaultAffinity;
-    private int defaultMinAffinity;
-    private int defaultMaxAffinity;
 
     public AffinityManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () ->
+            Bukkit.getOnlinePlayers().forEach(player -> MAIN_MANAGER.getPlayerManager().addAffinity(player.getUniqueId(), intervalAffinity))
+        , 20 * 60, 20 * 60);
     }
 
     public int withinServerLimits(int value) {
@@ -34,28 +37,20 @@ public class AffinityManager {
 
     public Minecrafter getDefault() { return defaultData; }
 
-    public void setAffinity(UUID uuid, int value) {
-        value = withinPlayerLimits(uuid, value);
-        MAIN_MANAGER.getPlayerManager().setAffinity(uuid, value);
-    }
-
     public void resetAffinity(UUID uuid) {
-        MAIN_MANAGER.getPlayerManager().setAffinity(uuid, defaultAffinity);
-        MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, defaultMinAffinity);
-        MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, defaultMaxAffinity);
+        MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, defaultData.getMinAffinity());
+        MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, defaultData.getMaxAffinity());
+        MAIN_MANAGER.getPlayerManager().setAffinity(uuid, defaultData.getAffinity());
     }
 
     public void reloadConfig() {
         serverMinAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("min-affinity", 0);
         serverMaxAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("max-affinity", 1500);
-
-        defaultAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-affinity", 600);
-        defaultMinAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-min-affinity", -1);
-        defaultMaxAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-max-affinity", -1);
+        intervalAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("points-per-minute", 3);
 
         defaultData = new Minecrafter();
-        defaultData.setAffinity(defaultAffinity);
-        defaultData.setMinAffinity(defaultMinAffinity);
-        defaultData.setMaxAffinity(defaultMaxAffinity);
+        defaultData.setAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-affinity", 600));
+        defaultData.setMinAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-min-affinity", -1));
+        defaultData.setMaxAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-max-affinity", -1));
     }
 }

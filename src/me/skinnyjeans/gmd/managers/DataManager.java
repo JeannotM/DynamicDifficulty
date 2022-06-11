@@ -31,6 +31,9 @@ public class DataManager {
     public DataManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
 
+        if (!getConfig().getString("version").equals(Bukkit.getPluginManager().getPlugin("DynamicDifficulty").getDescription().getVersion()) || !getConfig().contains("version",true))
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] Your configuration file is not up to date. Please remove it or update it yourself, because I don't know how to do it with Java without deleting existing configs. Sorry :'(");
+
         loadConfig();
 
         try {
@@ -47,6 +50,9 @@ public class DataManager {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
             DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
         }
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () ->
+            Bukkit.getOnlinePlayers().forEach(player -> updatePlayer(player.getUniqueId())), 20*60*5, 20*60*5);
     }
 
     public void loadConfig() {

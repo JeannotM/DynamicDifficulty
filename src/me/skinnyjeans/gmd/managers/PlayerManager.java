@@ -60,7 +60,7 @@ public class PlayerManager {
 
     public int addAffinity(UUID uuid, int value) {
         if(value != 0) {
-            value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, value);
+            value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, PLAYER_LIST.get(uuid).getAffinity() + value);
             PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + value);
         }
         return PLAYER_LIST.get(uuid).getAffinity();
@@ -83,8 +83,6 @@ public class PlayerManager {
         PLAYER_LIST.get(uuid).setMinAffinity(value);
         return value;
     }
-
-    public void savePlayer(UUID uuid) { }
 
     public void addMinAffinity(UUID uuid, int value) {
         if(value != 0) PLAYER_LIST.get(uuid).setMinAffinity(PLAYER_LIST.get(uuid).getMinAffinity() + value);

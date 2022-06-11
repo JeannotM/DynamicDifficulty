@@ -79,7 +79,7 @@ public class EntityHitListener extends BaseListener {
                 e.setDamage(damage);
 
                 Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
-                    int removePoints = (damage == 0 ? 0 : affinityPerHeart * (int) Math.ceil(damage / 2)) + onPlayerHit;
+                    int removePoints = -(damage == 0 ? 0 : affinityPerHeart * (int) Math.ceil(damage / 2)) + onPlayerHit;
                     MAIN_MANAGER.getPlayerManager().addAffinity(uuid, removePoints);
                 });
             }

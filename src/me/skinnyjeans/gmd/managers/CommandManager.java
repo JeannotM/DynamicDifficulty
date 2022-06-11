@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -24,7 +23,7 @@ public class CommandManager implements CommandExecutor {
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
-    private final String authorMessage = "/tellraw %user% {\"text\":\"DynamicDifficulty: SkinnyJeans\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/dynamic-difficulty.92025/\"}}";
+    private final String authorMessage = "DynamicDifficulty: SkinnyJeans\nhttps://www.spigotmc.org/resources/dynamic-difficulty.92025/\n\n";
     private final String PREFIX_NUMBER = "%number%";
     private final String PREFIX_USER = "%user%";
     private final String PREFIX_DIFFICULTY = "%difficulty%";
@@ -69,7 +68,7 @@ public class CommandManager implements CommandExecutor {
 
         if(NO_ARG.contains(argument)) {
             if(hasPermission(sender, argument)) {
-                if(argument.equals("author")) return author(sender);
+                if(argument.equals("author")) return sendMessage(sender, author(), true);
                 if(argument.equals("reload")) return sendMessage(sender, reloadPlugin(), true);
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
@@ -158,23 +157,18 @@ public class CommandManager implements CommandExecutor {
         return minAffinityRemoved.replace(PREFIX_USER, player.getName());
     }
 
-    private boolean author(CommandSender sender) {
-        String author = authorMessage.replace(PREFIX_USER, sender.getName());
-        String translator = translatorMessage.replace(PREFIX_USER, sender.getName());
-
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), author);
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), translator);
-
-        return true;
+    private String author() {
+        return authorMessage + translatorMessage;
     }
 
     private String info() {
         StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getLang().getCurrentPath()).append("\n");
 
-        ArrayList<String> difficulties = MAIN_MANAGER.getDifficultyManager().getDifficultyNames();
-        message.append("Difficulties: (").append(difficulties.size()).append(") ");
-        for(String name : difficulties) message.append(name).append(", ");
+        message.append("Difficulties: (").append(MAIN_MANAGER.getDifficultyManager().getDifficultyNames().size()).append(") ");
+        MAIN_MANAGER.getDifficultyManager().getDifficulties().forEach(d -> message.append(d.getDifficultyName()).append(" : ").append(d.getDamageByMobs()).append(", "));
         message.append("\n");
+
+        MAIN_MANAGER.getEntityManager().getMobs().forEach((key, value) -> message.append(key).append(" : ").append(value).append(", "));
 
         return message.toString();
     }
@@ -303,9 +297,7 @@ public class CommandManager implements CommandExecutor {
         allUserMinAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.min-affinity-all", true);
         allUserMaxAffinityRemoved = MAIN_MANAGER.getDataManager().getLanguageString("command.remove.max-affinity-all", true);
 
-        translatorMessage = "/tellraw %user% {\"text\":\"%message%\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"%url%\"}}";
-        translatorMessage = translatorMessage.replace("%message%", MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true))
-                .replace("%url%", MAIN_MANAGER.getDataManager().getLanguageString("translator-url", true));
+        translatorMessage = MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true) + "\n" + MAIN_MANAGER.getDataManager().getLanguageString("translator-url", true);
 
         ConfigurationSection language = MAIN_MANAGER.getDataManager().getLang();
         String label = language.getString("command.help.label", "&f/dd");

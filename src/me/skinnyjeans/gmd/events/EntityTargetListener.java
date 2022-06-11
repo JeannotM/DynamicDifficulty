@@ -20,10 +20,9 @@ public class EntityTargetListener extends BaseListener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(shouldDisable) return;
-
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getTarget()))
             if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).getIgnoredMobs().contains(e.getEntity().getType().toString()))
-                if(MAIN_MANAGER.getEntityManager().isEntityIgnored(e.getEntity()))
+                if(!MAIN_MANAGER.getEntityManager().wasEntityAttacked(e.getEntity()))
                     e.setCancelled(true);
     }
 

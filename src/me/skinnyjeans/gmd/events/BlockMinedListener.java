@@ -36,7 +36,6 @@ public class BlockMinedListener extends BaseListener {
     @Override
     public void reloadConfig() {
         BLOCKS.clear();
-
         silkTouchAllowed = MAIN_MANAGER.getDataManager().getConfig().getBoolean("silk-touch-allowed", false);
         ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 

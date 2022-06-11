@@ -121,7 +121,7 @@ public class MobSpawnListener extends BaseListener {
                 }
             }));
         } else if(changeSpawnedMobs && UNNATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
-            MAIN_MANAGER.getEntityManager().entityIgnored(e.getEntity());
+            MAIN_MANAGER.getEntityManager().ignoreEntity(e.getEntity());
         }
     }
 

@@ -204,7 +204,7 @@ public class DifficultyManager {
             String thisKey = tmpMap.get(key).replace(" ", "_");
             DIFFICULTY_LIST_SORTED.add(thisKey);
             if(tmpMap.size() == DIFFICULTY_LIST_SORTED.size())
-                DIFFICULTY_LIST.get(thisKey).setUntil(MAIN_MANAGER.getAffinityManager().withinServerLimits(Integer.MAX_VALUE));
+                DIFFICULTY_LIST.get(thisKey).setUntil(Integer.MAX_VALUE);
             if(lastKey != null)
                 DIFFICULTY_LIST.get(lastKey).setUntil(key - 1);
             lastKey = thisKey;
