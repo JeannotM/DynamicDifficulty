@@ -59,22 +59,20 @@ public class PlayerManager {
     public Minecrafter getPlayerAffinity(UUID uuid) { return PLAYER_LIST.get(uuid); }
 
     public int addAffinity(UUID uuid, int value) {
-        if(value != 0) {
-            value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, PLAYER_LIST.get(uuid).getAffinity() + value);
-            PLAYER_LIST.get(uuid).setAffinity(PLAYER_LIST.get(uuid).getAffinity() + value);
-        }
-        return PLAYER_LIST.get(uuid).getAffinity();
+        return value == 0 ? PLAYER_LIST.get(uuid).getAffinity() : setAffinity(uuid, PLAYER_LIST.get(uuid).getAffinity() + value);
+    }
+
+    public int addMinAffinity(UUID uuid, int value) {
+        return value == 0 ? PLAYER_LIST.get(uuid).getMinAffinity() : setMinAffinity(uuid, PLAYER_LIST.get(uuid).getMinAffinity() + value);
+    }
+
+    public int addMaxAffinity(UUID uuid, int value) {
+        return value == 0 ? PLAYER_LIST.get(uuid).getMaxAffinity() : setMaxAffinity(uuid, PLAYER_LIST.get(uuid).getMaxAffinity() + value);
     }
 
     public int setAffinity(UUID uuid, int value) {
         value = MAIN_MANAGER.getAffinityManager().withinPlayerLimits(uuid, value);
         PLAYER_LIST.get(uuid).setAffinity(value);
-        return value;
-    }
-
-    public int setMaxAffinity(UUID uuid, int value) {
-        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
-        PLAYER_LIST.get(uuid).setMaxAffinity(value);
         return value;
     }
 
@@ -84,10 +82,9 @@ public class PlayerManager {
         return value;
     }
 
-    public void addMinAffinity(UUID uuid, int value) {
-        if(value != 0) PLAYER_LIST.get(uuid).setMinAffinity(PLAYER_LIST.get(uuid).getMinAffinity() + value);
-    }
-    public void addMaxAffinity(UUID uuid, int value) {
-        if(value != 0) PLAYER_LIST.get(uuid).setMaxAffinity(PLAYER_LIST.get(uuid).getMaxAffinity() + value);
+    public int setMaxAffinity(UUID uuid, int value) {
+        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+        PLAYER_LIST.get(uuid).setMaxAffinity(value);
+        return value;
     }
 }

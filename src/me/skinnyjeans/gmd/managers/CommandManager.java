@@ -183,7 +183,7 @@ public class CommandManager implements CommandExecutor {
     private String getAffinity(Player player) {
         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(player.getUniqueId());
         StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, data.getAffinity() + ""))
-                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getPrefix(data.getAffinity()))
+                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(data.getUUID()).getPrefix())
                         .replace(PREFIX_NUMBER, data.getAffinity() + ""));
 
         if(data.getMaxAffinity() != -1) message.append("\n").append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.getMaxAffinity() + ""));
@@ -194,8 +194,9 @@ public class CommandManager implements CommandExecutor {
 
     private String setAffinity(Player player, int value) {
         int setAffinity = MAIN_MANAGER.getPlayerManager().setAffinity(player.getUniqueId(), value);
-        return affinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER,setAffinity + "")
-                .replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getPrefix(setAffinity));
+        MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
+        return affinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, String.valueOf(setAffinity))
+                .replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(player.getUniqueId()).getPrefix());
     }
 
     private String addAffinity(Player player, int value) {

@@ -45,7 +45,6 @@ public class MobSpawnListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMobSpawn(CreatureSpawnEvent e) {
-        if(!customArmorSpawnChance && !changeSpawnedMobs) return;
         if(!AFFECTED_MOBS.contains(e.getEntity().getType())) return;
 
         if(customArmorSpawnChance && NATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
@@ -177,8 +176,8 @@ public class MobSpawnListener extends BaseListener {
 
         overrideConflictingEnchants = customMobs.getBoolean("override-enchant-conflicts", false);
         overrideEnchantLimit = customMobs.getBoolean("override-default-limits", false);
-        customArmorSpawnChance = config.getBoolean("advanced-features.custom-mob-items-spawn-chance", false);
-        changeSpawnedMobs = config.getBoolean("plugin-support.no-changes-to-spawned-mobs", false);
+        customArmorSpawnChance = config.getBoolean("toggle-settings.advanced.custom-enchants-on-mobs", false);
+        changeSpawnedMobs = config.getBoolean("toggle-settings.loot-changes-to-spawned-mobs", false);
 
         if(customArmorSpawnChance) {
             for(String armor_type : customMobs.getConfigurationSection("armor-set-weight").getKeys(false))

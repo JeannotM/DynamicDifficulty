@@ -44,10 +44,10 @@ public class EntityHitListener extends BaseListener {
             hunter = (((Wolf) e.getDamager()).getOwner() == null) ? e.getDamager() : (Entity) ((Wolf) e.getDamager()).getOwner();
         } else hunter = e.getDamager();
 
-        if(prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
+        if (prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
             if (((Player) prey).isBlocking()) return;
 
-            if(hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
+            if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
                 HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", ((Player) prey).getDisplayName()); }};
                 if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getAllowPVP()) {
                     if(notAttackOthers.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackOthers, entry));

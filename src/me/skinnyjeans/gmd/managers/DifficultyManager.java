@@ -16,7 +16,6 @@ public class DifficultyManager {
     private final ArrayList<String> DIFFICULTY_LIST_SORTED = new ArrayList<>();
 
     private DifficultyTypes DifficultyType;
-    private boolean customPrefixAllowed;
 
     public DifficultyManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -29,9 +28,7 @@ public class DifficultyManager {
 
     public Difficulty getDifficulty(String name) { return DIFFICULTY_LIST.get(name); }
 
-    public Difficulty getDifficulty(UUID uuid) {
-        return PLAYER_LIST.get(uuid);
-    }
+    public Difficulty getDifficulty(UUID uuid) { return PLAYER_LIST.getOrDefault(uuid, DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(0))); }
 
     public DifficultyTypes getType() { return DifficultyType; }
 
@@ -47,33 +44,17 @@ public class DifficultyManager {
             MAIN_MANAGER.getPlayerManager().getPlayerList().forEach((key, value) -> calculateDifficulty(key));
     }
 
-    public String getPrefix(int value) {
-        Difficulty difficulty = calcDifficulty(value);
-        return (customPrefixAllowed) ? difficulty.getPrefix() : difficulty.getDifficultyName();
-    }
-
-    public String getPrefix(UUID uuid) {
-        Difficulty difficulty = getDifficulty(uuid);
-        return (customPrefixAllowed) ? difficulty.getPrefix() : difficulty.getDifficultyName();
-    }
-
     public String getProgress(UUID uuid) {
-        Difficulty first = getDifficulty(uuid);
-        int index = DIFFICULTY_LIST_SORTED.indexOf(first.getDifficultyName());
-        if (index != DIFFICULTY_LIST_SORTED.size() - 1) index++;
-        Difficulty second = DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(index));
+        int a = getDifficulty(getDifficulty(uuid).getDifficultyName()).getAffinity();
+        int b = getNextDifficulty(uuid).getAffinity();
 
-        int a = first.getAffinity();
-        int b = second.getAffinity();
-        double c = Math.abs(1.0 - (100.0 / (a - b) * (MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity() - b)));
-
-        return (calculatePercentage(first.getAffinity(), second.getAffinity(), c) * 100) + "%";
+        if(a == b) return "100.0%";
+        return Math.round(1000.0 * Math.abs(1.0 - (100.0 / (a - b) * (MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity() - b)) / 100.0)) / 10.0 + "%";
     }
 
     public Difficulty getNextDifficulty(UUID uuid) {
-        Difficulty first = getDifficulty(uuid);
-        int index = DIFFICULTY_LIST_SORTED.indexOf(first.getDifficultyName());
-        if (index != DIFFICULTY_LIST_SORTED.size() - 1) index++;
+        int index = DIFFICULTY_LIST_SORTED.indexOf(getDifficulty(uuid).getDifficultyName());
+        if (index != DIFFICULTY_LIST_SORTED.size() - 1 || index == -1) index++;
 
         return DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(index));
     }
@@ -85,11 +66,9 @@ public class DifficultyManager {
 
     public Difficulty calculateDifficulty(Minecrafter affinity) {
         Difficulty first = calcDifficulty(affinity.getAffinity());
-        int index = DIFFICULTY_LIST_SORTED.indexOf(first.getDifficultyName());
-        if (index != DIFFICULTY_LIST_SORTED.size() - 1) index++;
-        Difficulty second = DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(index));
+        Difficulty second = DIFFICULTY_LIST.get(getNextDifficulty(affinity.getUUID()).getDifficultyName());
 
-        Difficulty difficulty = new Difficulty("");
+        Difficulty difficulty = new Difficulty(first.getDifficultyName());
 
         int a = first.getAffinity();
         int b = second.getAffinity();
@@ -98,22 +77,17 @@ public class DifficultyManager {
 
         difficulty.setDoubleLoot(calculatePercentage(first.getDoubleLoot(), second.getDoubleLoot(), c));
         difficulty.setHungerDrain(calculatePercentage(first.getHungerDrain(), second.getHungerDrain(), c));
-        difficulty.setMaxEnchants(calculatePercentage(first.getMaxEnchants(), second.getMaxEnchants(), c));
         difficulty.setDamageByMobs(calculatePercentage(first.getDamageByMobs(), second.getDamageByMobs(), c));
         difficulty.setDamageOnMobs(calculatePercentage(first.getDamageOnMobs(), second.getDamageOnMobs(), c));
+        difficulty.setDamageOnTamed(calculatePercentage(first.getDamageOnTamed(), second.getDamageOnTamed(), c));
         difficulty.setArmorDropChance(calculatePercentage(first.getArmorDropChance(), second.getArmorDropChance(), c));
-        difficulty.setMaxEnchantLevel(calculatePercentage(first.getMaxEnchantLevel(), second.getMaxEnchantLevel(), c));
-        difficulty.setChanceToEnchant(calculatePercentage(first.getChanceToEnchant(), second.getChanceToEnchant(), c));
-        difficulty.setWeaponDropChance(calculatePercentage(first.getWeaponDropChance(), second.getWeaponDropChance(), c));
         difficulty.setChanceToHaveArmor(calculatePercentage(first.getChanceToHaveArmor(), second.getChanceToHaveArmor(), c));
         difficulty.setDamageByRangedMobs(calculatePercentage(first.getDamageByRangedMobs(), second.getDamageByRangedMobs(), c));
         difficulty.setExperienceMultiplier(calculatePercentage(first.getExperienceMultiplier(), second.getExperienceMultiplier(), c));
         difficulty.setDoubleDurabilityDamageChance(calculatePercentage(first.getDoubleDurabilityDamageChance(), second.getDoubleDurabilityDamageChance(), c));
         difficulty.setMaxEnchants(calculatePercentage(first.getMaxEnchants(), second.getMaxEnchants(), c));
         difficulty.setMaxEnchantLevel(calculatePercentage(first.getMaxEnchantLevel(), second.getMaxEnchantLevel(), c));
-        difficulty.setChanceToHaveArmor(calculatePercentage(first.getChanceToHaveArmor(), second.getChanceToHaveArmor(), c));
         difficulty.setChanceToEnchant(calculatePercentage(first.getChanceToEnchant(), second.getChanceToEnchant(), c));
-        difficulty.setArmorDropChance(calculatePercentage(first.getArmorDropChance(), second.getArmorDropChance(), c));
         difficulty.setWeaponDropChance(calculatePercentage(first.getWeaponDropChance(), second.getWeaponDropChance(), c));
         HashMap<EquipmentItems, Double> equipmentValues = new HashMap<>();
         for(EquipmentItems item : EquipmentItems.values())
@@ -121,12 +95,13 @@ public class DifficultyManager {
         difficulty.setEnchantChances(equipmentValues);
 
         difficulty.setArmorDamageMultiplier(first.getArmorDamageMultiplier());
+        difficulty.setAllowHealthRegen(first.getAllowHealthRegen());
+        difficulty.setPrefix(first.getPrefix());
         difficulty.setAllowPVP(first.getAllowPVP());
         difficulty.setKeepInventory(first.getKeepInventory());
         difficulty.setEffectsOnAttack(first.getEffectsOnAttack());
         difficulty.setDisabledCommands(first.getDisabledCommands());
         difficulty.setIgnoredMobs(first.getIgnoredMobs());
-        difficulty.setEnchantChances(first.getEnchantChance());
 
         Bukkit.getConsoleSender().sendMessage("diff "+ first.getDifficultyName() + " : " + second.getDifficultyName());
         Bukkit.getConsoleSender().sendMessage("c "+ c);
@@ -149,7 +124,6 @@ public class DifficultyManager {
     }
 
     public void reloadConfig() {
-        customPrefixAllowed = MAIN_MANAGER.getDataManager().getConfig().getBoolean("plugin-support.use-prefix", true);
         String type = MAIN_MANAGER.getDataManager().getConfig().getString("difficulty-modifiers.type", "player");
         DifficultyType = DifficultyTypes.valueOf(type.substring(0, 1).toUpperCase() + type.substring(1));
 
@@ -159,7 +133,7 @@ public class DifficultyManager {
             Difficulty difficulty = new Difficulty(key.replace(" ", "_"));
 
             difficulty.setAffinity(data.getInt("affinity-required", 0));
-            tmpMap.put(difficulty.getAffinity(), key.replace(" ", "_"));
+            tmpMap.put(difficulty.getAffinity(), difficulty.getDifficultyName());
             difficulty.setDamageByMobs(data.getInt("damage-done-by-mobs", 100));
             difficulty.setDamageOnMobs(data.getInt("damage-done-on-mobs", 100));
             difficulty.setDamageOnTamed(data.getInt("damage-done-on-tamed", 100));
@@ -183,7 +157,7 @@ public class DifficultyManager {
                 difficulty.setArmorDamageMultiplier(armorTypes);
             }
             if(data.isSet("mobs-ignore-player")) difficulty.setIgnoredMobs(data.getStringList("mobs-ignore-player"));
-            DIFFICULTY_LIST.put(key, difficulty);
+            DIFFICULTY_LIST.put(difficulty.getDifficultyName(), difficulty);
 
             ConfigurationSection enchantData = data.getConfigurationSection("enchanting");
             difficulty.setMaxEnchants(enchantData.getInt("max-enchants", 2));

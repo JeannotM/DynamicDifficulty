@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class InventoryManager {
 
     private Inventory baseInventory;
     private Inventory basePlayerInventory;
-    private ItemStack playerHead;
+    private String affinity, minAffinity, maxAffinity;
 
     private final HashMap<Material, String> MATERIAL_NAMES = new HashMap<Material, String>(){{
         put(Material.GOLD_INGOT, "Next Page >");
@@ -30,9 +31,9 @@ public class InventoryManager {
         put(Material.PINK_WOOL, "-100");
         put(Material.MAGENTA_WOOL, "-10");
         put(Material.PURPLE_WOOL, "-1");
-        put(Material.BLUE_WOOL, "1");
-        put(Material.CYAN_WOOL, "10");
-        put(Material.LIGHT_BLUE_WOOL, "100");
+        put(Material.BLUE_WOOL, "+1");
+        put(Material.CYAN_WOOL, "+10");
+        put(Material.LIGHT_BLUE_WOOL, "+100");
     }};
 
     private final HashMap<Integer, Material> INVENTORY_SLOTS = new HashMap<Integer, Material>(){{
@@ -80,13 +81,16 @@ public class InventoryManager {
             int iterator = (page - 1) * 45;
             if(players.length - iterator <= 0) return;
 
-            inventory.getItem(4).getItemMeta().getDisplayName().replace("%number%", String.valueOf(page));
-            int iteratorLimit = (players.length % 45) + 1;
+            ItemMeta meta = inventory.getItem(4).getItemMeta();
+            meta.getDisplayName().replace("%number%", String.valueOf(page));
+            inventory.getItem(4).setItemMeta(meta);
+            int iteratorLimit = (players.length % 45);
 
             for(int i = 0; i < iteratorLimit; i++)
                 inventory.setItem(i + 9, createPlayerHead(players[iterator + i].getUniqueId()));
 
-            player.openInventory(basePlayerInventory);
+            Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () ->
+                    player.openInventory(inventory));
         });
     }
 
@@ -106,15 +110,15 @@ public class InventoryManager {
         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 
-        ItemStack item = playerHead.clone();
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
         meta.setDisplayName(player.getName());
         meta.setOwningPlayer(player);
         meta.setLore(Arrays.asList(
             uuid.toString(),
-            item.getItemMeta().getLore().get(0).replace("%number%", data.getAffinity() + ""),
-            item.getItemMeta().getLore().get(1).replace("%number%", data.getMinAffinity() + ""),
-            item.getItemMeta().getLore().get(2).replace("%number%", data.getMaxAffinity() + "")
+            affinity.replace("%number%", data.getAffinity() + ""),
+            minAffinity.replace("%number%", data.getMinAffinity() + ""),
+            maxAffinity.replace("%number%", data.getMaxAffinity() + "")
         ));
         item.setItemMeta(meta);
         return item;
@@ -122,7 +126,11 @@ public class InventoryManager {
 
     public ItemStack createItem(Material type) {
         ItemStack item = new ItemStack(type);
-        if(MATERIAL_NAMES.containsKey(type)) item.getItemMeta().setDisplayName(MATERIAL_NAMES.get(type));
+        if(MATERIAL_NAMES.containsKey(type)) {
+            ItemMeta meta = item.getItemMeta();
+            meta.setDisplayName(MATERIAL_NAMES.get(type));
+            item.setItemMeta(meta);
+        }
         return item;
     }
 
@@ -132,13 +140,9 @@ public class InventoryManager {
         MATERIAL_NAMES.put(Material.IRON_INGOT, MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.previous-page"));
         MATERIAL_NAMES.put(Material.IRON_CHESTPLATE, MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.current-page"));
 
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        head.getItemMeta().setLore(Arrays.asList(
-            MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.affinity"),
-            MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.min-affinity"),
-            MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.max-affinity")
-        ));
-        playerHead = head;
+        affinity = MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.affinity");
+        minAffinity = MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.min-affinity");
+        maxAffinity = MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.max-affinity");
 
         createBaseInventory();
         createBasePlayerInventory();

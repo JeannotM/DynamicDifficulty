@@ -37,9 +37,8 @@ public class MainManager {
 
         reloadConfig();
 
-        if(DATA_MANAGER.getConfig().getBoolean("plugin-support.allow-papi", false))
-            if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
-                new PlaceholderAPIExpansion(PLUGIN, this).register();
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+            new PlaceholderAPIExpansion(this).register();
     }
 
     public void reloadConfig() {

@@ -49,6 +49,7 @@ mobs-count-as-pve:
 - SPIDER
 - VILLAGER: 20
 - VINDICATOR: 5
+- WARDEN: 200
 - WITCH
 - WITHER: 100
 - WITHER_SKELETON: 5
@@ -65,17 +66,16 @@ blocks:
 toggle-settings:
   silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
-  no-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
+  loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   allow-tamed-wolves-in-calculations: true # Whether to allow tamed wolves in the damage calculations
   advanced:
     # advanced features may decrease performance or are a little harder to configure
-    custom-mob-items-spawn-chance: false
+    custom-enchants-on-mobs: false
     exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
 
 # Whether to Hook Into certain Plugins or not
 plugin-support:
-  allow-papi: false # Check the GitHub or Spigot page for the commands
   use-prefix: true
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
 
@@ -96,6 +96,7 @@ disabled-mobs:
 - ENDER_DRAGON
 - ENDER_CRYSTAL
 - ELDER_GUARDIAN
+- WARDEN
 - WITHER
 
 difficulty-modifiers:
