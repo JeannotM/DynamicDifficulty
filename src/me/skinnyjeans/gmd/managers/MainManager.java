@@ -59,7 +59,7 @@ public class MainManager {
     public void checkMetrics() {
         Metrics m = new Metrics(PLUGIN, 11417);
         m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
-            DATA_MANAGER.getConfig().getString("difficulty-modifiers.type").toLowerCase()
+            DATA_MANAGER.getConfig().getString("toggle-settings.difficulty-type").toLowerCase()
         ));
         m.addCustomChart(new Metrics.SimplePie("save_type", () ->
             DATA_MANAGER.getConfig().getString("saving-data.type").toLowerCase()
@@ -68,7 +68,7 @@ public class MainManager {
             String.valueOf(DATA_MANAGER.getConfig().getConfigurationSection("difficulty").getKeys(false).size())
         ));
         m.addCustomChart(new Metrics.SimplePie("custom_armor_and_item_spawn_chance", () ->
-            DATA_MANAGER.getConfig().getString("advanced-features.custom-mob-items-spawn-chance", "false").toLowerCase()
+            DATA_MANAGER.getConfig().getString("toggle-settings.advanced.custom-enchants-on-mobs", "false").toLowerCase()
         ));
     }
 

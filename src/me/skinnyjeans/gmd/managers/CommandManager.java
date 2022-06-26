@@ -164,8 +164,8 @@ public class CommandManager implements CommandExecutor {
     private String info() {
         StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getLang().getCurrentPath()).append("\n");
 
-        message.append("Difficulties: (").append(MAIN_MANAGER.getDifficultyManager().getDifficultyNames().size()).append(") ");
-        MAIN_MANAGER.getDifficultyManager().getDifficulties().forEach(d -> message.append(d.getDifficultyName()).append(" : ").append(d.getDamageByMobs()).append(", "));
+        message.append("Difficulties: (").append(MAIN_MANAGER.getDifficultyManager().getDifficulties().size()).append(") ");
+        MAIN_MANAGER.getDifficultyManager().getDifficulties().forEach(d -> message.append(d.getDifficultyName()).append(" : ").append(d.getAffinity()).append(", "));
         message.append("\n");
 
         MAIN_MANAGER.getEntityManager().getMobs().forEach((key, value) -> message.append(key).append(" : ").append(value).append(", "));

@@ -44,7 +44,4 @@ public class EntityDeathListener extends BaseListener {
                     Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
         }
     }
-
-    @Override
-    public void reloadConfig() { }
 }

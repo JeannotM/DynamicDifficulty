@@ -48,7 +48,7 @@ public class Difficulty {
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
-    public int getArmorDamageMultiplier(String type) { return armorDamageMultipliers.getOrDefault(type, -505); }
+    public int getArmorDamageMultiplier(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, -505); }
     public HashMap<ArmorTypes, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }

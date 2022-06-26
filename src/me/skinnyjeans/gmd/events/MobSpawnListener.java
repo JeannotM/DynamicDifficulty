@@ -180,8 +180,8 @@ public class MobSpawnListener extends BaseListener {
         changeSpawnedMobs = config.getBoolean("toggle-settings.loot-changes-to-spawned-mobs", false);
 
         if(customArmorSpawnChance) {
-            for(String armor_type : customMobs.getConfigurationSection("armor-set-weight").getKeys(false))
-                ARMOR_TYPES.put(armor_type.toUpperCase(), customMobs.getInt("armor-set-weight." + armor_type));
+            for(String armorType : customMobs.getConfigurationSection("armor-set-weight").getKeys(false))
+                ARMOR_TYPES.put(armorType.toUpperCase(), customMobs.getInt("armor-set-weight." + armorType));
 
             for(String entity : customMobs.getStringList("includes-mobs"))
                 if(EntityType.valueOf(entity) != null) AFFECTED_MOBS.add(EntityType.valueOf(entity));

@@ -33,7 +33,7 @@ public class DataManager {
 
         loadConfig();
 
-        if (!getConfig().getString("version").equals(Bukkit.getPluginManager().getPlugin("DynamicDifficulty").getDescription().getVersion()) || !getConfig().contains("version",true))
+        if (!getConfig().getString("version").equals(MAIN_MANAGER.getPlugin().getDescription().getVersion()) || !getConfig().contains("version",true))
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] Your configuration file is not up to date. Please remove it or update it yourself, because I don't know how to do it with Java without deleting existing configs. Sorry :'(");
 
         try {
@@ -62,12 +62,18 @@ public class DataManager {
         config = YamlConfiguration.loadConfiguration(configFile);
         language = YamlConfiguration.loadConfiguration(langFile);
 
+        if (! configFile.exists())
+            MAIN_MANAGER.getPlugin().saveResource("config.yml", false);
+
         InputStream configStream = MAIN_MANAGER.getPlugin().getResource("config.yml");
 
         if(configStream != null) {
             YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(configStream));
             config.setDefaults(defaultConfig);
         }
+
+        if (! langFile.exists())
+            MAIN_MANAGER.getPlugin().saveResource("lang.yml", false);
 
         InputStream languageStream = MAIN_MANAGER.getPlugin().getResource("lang.yml");
 
@@ -84,13 +90,6 @@ public class DataManager {
     public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
     public void getAffinityValues(UUID uuid, final ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
     public void playerExists(UUID uuid, final ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
-
-    public String getString(String item, HashMap<String, String> replaceables) {
-        String entry = language.getString(culture + item);
-        if(entry == null) return null;
-        for(String key : replaceables.keySet()) entry = entry.replace(key, replaceables.get(key));
-        return ChatColor.translateAlternateColorCodes('&', entry);
-    }
 
     public String replaceString(String item, HashMap<String, String> replaceables) {
         for(String key : replaceables.keySet()) item = item.replace(key, replaceables.get(key));
@@ -109,12 +108,9 @@ public class DataManager {
         return ChatColor.translateAlternateColorCodes('&', (isRight ? language.getString("command-right-prefix") : language.getString("command-wrong-prefix")) + entry);
     }
 
-    public boolean langExists(String location) {
-        return language.isSet(location) && language.getString(location).length() != 0;
-    }
-
     public void saveData() {
-
+        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () ->
+                Bukkit.getOnlinePlayers().forEach(player -> updatePlayer(player.getUniqueId())));
     }
 
     public void reloadConfig() {

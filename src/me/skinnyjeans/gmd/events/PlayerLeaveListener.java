@@ -29,6 +29,6 @@ public class PlayerLeaveListener extends BaseListener {
 
     @Override
     public void reloadConfig() {
-        unloadLeavingPlayers = MAIN_MANAGER.getDataManager().getConfig().getBoolean("plugin-support.unload-leaving-player", false);
+        unloadLeavingPlayers = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.unload-leaving-player", false);
     }
 }

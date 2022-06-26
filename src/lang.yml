@@ -259,7 +259,6 @@ lang:
         command-wrong-prefix: "&c"
         reload-config: "Configuración recargada exitosamente!"
         force-save: "Datos del jugador han sido guardados!"
-
       player-gui:
           next-page: "Siguiente Página >"
           previous-page: "< Página Anterior"
@@ -298,7 +297,6 @@ lang:
     other:
         database-chosen: "Conexión satisfactoria con %database%"
         update-config: "Estas jugando con una configuración desactualizada, Asegúrese de actualizarlo!"
-
     error:
         no-permission: "No tienes permisos para hacer eso!"
         add-force: "Debes agregar 'force' al final para que @a pueda trabajar aquí"

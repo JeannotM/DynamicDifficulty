@@ -72,8 +72,7 @@ public class DifficultyManager {
 
         int a = first.getAffinity();
         int b = second.getAffinity();
-//                            1.0 - (100.0 / (400 - 600) * (550 - 600) / 100.0) = 0.75
-        double c = Math.abs(1.0 - (100.0 / (a - b) * (affinity.getAffinity() - b)) / 100.0);
+        double c = (a == b) ? 1.0 : Math.abs(1.0 - (100.0 / (a - b) * (affinity.getAffinity() - b)) / 100.0);
 
         difficulty.setDoubleLoot(calculatePercentage(first.getDoubleLoot(), second.getDoubleLoot(), c));
         difficulty.setHungerDrain(calculatePercentage(first.getHungerDrain(), second.getHungerDrain(), c));
@@ -94,7 +93,11 @@ public class DifficultyManager {
             equipmentValues.put(item, calculatePercentage(first.getEnchantChance(item), second.getEnchantChance(item), c));
         difficulty.setEnchantChances(equipmentValues);
 
-        difficulty.setArmorDamageMultiplier(first.getArmorDamageMultiplier());
+        HashMap<ArmorTypes, Integer> armorValues = new HashMap<>();
+        for(ArmorTypes item : ArmorTypes.values())
+            armorValues.put(item, calculatePercentage(first.getArmorDamageMultiplier(item), second.getArmorDamageMultiplier(item), c));
+        difficulty.setArmorDamageMultiplier(armorValues);
+
         difficulty.setAllowHealthRegen(first.getAllowHealthRegen());
         difficulty.setPrefix(first.getPrefix());
         difficulty.setAllowPVP(first.getAllowPVP());
@@ -102,13 +105,6 @@ public class DifficultyManager {
         difficulty.setEffectsOnAttack(first.getEffectsOnAttack());
         difficulty.setDisabledCommands(first.getDisabledCommands());
         difficulty.setIgnoredMobs(first.getIgnoredMobs());
-
-        Bukkit.getConsoleSender().sendMessage("diff "+ first.getDifficultyName() + " : " + second.getDifficultyName());
-        Bukkit.getConsoleSender().sendMessage("c "+ c);
-        Bukkit.getConsoleSender().sendMessage("damby"+ difficulty.getDamageByMobs());
-        Bukkit.getConsoleSender().sendMessage("exp"+ difficulty.getExperienceMultiplier());
-        Bukkit.getConsoleSender().sendMessage("dbl"+ difficulty.getDoubleLoot());
-        Bukkit.getConsoleSender().sendMessage("damon"+ difficulty.getDamageOnMobs());
 
         return difficulty;
     }
@@ -124,42 +120,47 @@ public class DifficultyManager {
     }
 
     public void reloadConfig() {
-        String type = MAIN_MANAGER.getDataManager().getConfig().getString("difficulty-modifiers.type", "player");
+        DIFFICULTY_LIST.clear();
+        DIFFICULTY_LIST_SORTED.clear();
+
+        String type = MAIN_MANAGER.getDataManager().getConfig().getString("toggle-settings.difficulty-type", "player");
         DifficultyType = DifficultyTypes.valueOf(type.substring(0, 1).toUpperCase() + type.substring(1));
 
         HashMap<Integer, String> tmpMap = new HashMap<>();
         for(String key : MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty").getKeys(false)) {
-            ConfigurationSection data = MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty." + key);
+            ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty." + key);
+
+            if(! config.getBoolean("enabled", true)) continue;
+
             Difficulty difficulty = new Difficulty(key.replace(" ", "_"));
 
-            difficulty.setAffinity(data.getInt("affinity-required", 0));
-            tmpMap.put(difficulty.getAffinity(), difficulty.getDifficultyName());
-            difficulty.setDamageByMobs(data.getInt("damage-done-by-mobs", 100));
-            difficulty.setDamageOnMobs(data.getInt("damage-done-on-mobs", 100));
-            difficulty.setDamageOnTamed(data.getInt("damage-done-on-tamed", 100));
-            difficulty.setHungerDrain(data.getInt("hunger-drain-chance", 100));
-            difficulty.setDamageByRangedMobs(data.getInt("damage-done-by-ranged-mobs", 100));
-            difficulty.setDoubleDurabilityDamageChance(data.getInt("double-durability-damage-chance", 0));
-            difficulty.setExperienceMultiplier(data.getInt("experience-multiplier", 100));
-            difficulty.setDoubleLoot(data.getInt("double-loot-chance", 1));
-            difficulty.setKeepInventory(data.getBoolean("keep-inventory", false));
-            difficulty.setAllowPVP(data.getBoolean("allow-pvp", true));
-            difficulty.setAllowHealthRegen(data.getBoolean("allow-natural-regen", true));
-            difficulty.setEffectsOnAttack(data.getBoolean("effects-when-attacked", true));
-            difficulty.setPrefix(ChatColor.translateAlternateColorCodes('&', data.getString("prefix", key)));
-            if(data.isSet("commands-not-allowed-on-difficulty")) difficulty.setDisabledCommands(data.getStringList("commands-not-allowed-on-difficulty"));
-            if(data.isSet("extra-damage-for-certain-armor-types")) {
+            difficulty.setAffinity(config.getInt("affinity-required", 0));
+            difficulty.setDamageByMobs(config.getInt("damage-done-by-mobs", 100));
+            difficulty.setDamageOnMobs(config.getInt("damage-done-on-mobs", 100));
+            difficulty.setDamageOnTamed(config.getInt("damage-done-on-tamed", 100));
+            difficulty.setHungerDrain(config.getInt("hunger-drain-chance", 100));
+            difficulty.setDamageByRangedMobs(config.getInt("damage-done-by-ranged-mobs", 100));
+            difficulty.setDoubleDurabilityDamageChance(config.getInt("double-durability-damage-chance", 0));
+            difficulty.setExperienceMultiplier(config.getInt("experience-multiplier", 100));
+            difficulty.setDoubleLoot(config.getInt("double-loot-chance", 1));
+            difficulty.setKeepInventory(config.getBoolean("keep-inventory", false));
+            difficulty.setAllowPVP(config.getBoolean("allow-pvp", true));
+            difficulty.setAllowHealthRegen(config.getBoolean("allow-natural-regen", true));
+            difficulty.setEffectsOnAttack(config.getBoolean("effects-when-attacked", true));
+            difficulty.setPrefix(ChatColor.translateAlternateColorCodes('&', config.getString("prefix", key)));
+            if(config.isSet("commands-not-allowed-on-difficulty")) difficulty.setDisabledCommands(config.getStringList("commands-not-allowed-on-difficulty"));
+            if(config.isSet("extra-damage-for-certain-armor-types")) {
                 HashMap<ArmorTypes, Integer> armorTypes = new HashMap<>();
-                for(String armorType : data.getConfigurationSection("extra-damage-for-certain-armor-types").getKeys(false))
+                for(String armorType : config.getConfigurationSection("extra-damage-for-certain-armor-types").getKeys(false))
                     try {
-                        armorTypes.put(ArmorTypes.valueOf(armorType), data.getInt("extra-damage-for-certain-armor-types." + armorType, 1));
+                        armorTypes.put(ArmorTypes.valueOf(armorType), config.getInt("extra-damage-for-certain-armor-types." + armorType, 1));
                     } catch (Exception ignored) { }
                 difficulty.setArmorDamageMultiplier(armorTypes);
             }
-            if(data.isSet("mobs-ignore-player")) difficulty.setIgnoredMobs(data.getStringList("mobs-ignore-player"));
+            if(config.isSet("mobs-ignore-player")) difficulty.setIgnoredMobs(config.getStringList("mobs-ignore-player"));
             DIFFICULTY_LIST.put(difficulty.getDifficultyName(), difficulty);
 
-            ConfigurationSection enchantData = data.getConfigurationSection("enchanting");
+            ConfigurationSection enchantData = config.getConfigurationSection("enchanting");
             difficulty.setMaxEnchants(enchantData.getInt("max-enchants", 2));
             difficulty.setMaxEnchantLevel(enchantData.getInt("max-level", 1));
             difficulty.setChanceToHaveArmor(enchantData.getDouble("chance-to-have-armor", 15.0));
@@ -170,6 +171,8 @@ public class DifficultyManager {
             for(EquipmentItems item : EquipmentItems.values())
                 equipmentValues.put(item, enchantData.getDouble(item.name().toLowerCase() + "-chance", 1.0));
             difficulty.setEnchantChances(equipmentValues);
+
+            tmpMap.put(difficulty.getAffinity(), difficulty.getDifficultyName());
         }
 
         TreeMap<Integer, String> tm = new TreeMap<>(tmpMap);

@@ -45,7 +45,7 @@ public class PlayerDeathListener extends BaseListener {
 
     @Override
     public void reloadConfig() {
-        preventAffinityLossOnSuicide = MAIN_MANAGER.getDataManager().getConfig().getBoolean("prevent-affinity-loss-on-suicide", true);
+        preventAffinityLossOnSuicide = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.prevent-affinity-loss-on-suicide", true);
         onDeath = MAIN_MANAGER.getDataManager().getConfig().getInt("death", -100);
     }
 }

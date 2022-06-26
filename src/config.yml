@@ -64,20 +64,17 @@ blocks:
 - EMERALD_ORE
 
 toggle-settings:
+  difficulty-type: player # Supported: player
   silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   allow-tamed-wolves-in-calculations: true # Whether to allow tamed wolves in the damage calculations
+  unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
   advanced:
     # advanced features may decrease performance or are a little harder to configure
     custom-enchants-on-mobs: false
     exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
-
-# Whether to Hook Into certain Plugins or not
-plugin-support:
-  use-prefix: true
-  unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
 
 saving-data:
   type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql
@@ -99,17 +96,10 @@ disabled-mobs:
 - WARDEN
 - WITHER
 
-difficulty-modifiers:
-  type: player # Supported: player
-  # Multiplies all the difficulty values by x amount (100 * 2.5 = 250)
-  damage-done-by-mobs-multiplier: 1.0
-  damage-done-on-mobs-multiplier: 1.0
-  double-loot-chance-multiplier: 1.0
-  experience-multiplier: 1.0
-
 # This has been calculated from the hard difficulty. So it is recommended to change these if you're not playing on hard world difficulty
 # More information if you want to make your own difficulty (I'd recommend copying one of the other difficulties and changing values):
 # <custom_name>:
+#   enabled: <bool, Whether this difficulty is enabled>
 #   affinity-required: <number, At What affinity this difficulty starts working>
 #   damage-done-by-mobs: <percentage, How much damage mobs do to you>
 #   damage-done-on-mobs: <percentage, How much damage you do on mobs>
@@ -140,6 +130,7 @@ difficulty-modifiers:
 #     boots-chance: <percentage, Chance for a mob to have a boots if armor is allowed>
 difficulty:
   Easy:
+    enabled: true
     affinity-required: 0
     damage-done-by-mobs: 50
     damage-done-on-mobs: 100
@@ -172,6 +163,7 @@ difficulty:
       leggings-chance: 56.25
       boots-chance: 42.19
   Normal:
+    enabled: true
     affinity-required: 400
     damage-done-by-mobs: 75
     damage-done-on-mobs: 100
@@ -199,6 +191,7 @@ difficulty:
       leggings-chance: 56.25
       boots-chance: 42.19
   Hard:
+    enabled: true
     affinity-required: 1100
     damage-done-by-mobs: 100
     damage-done-on-mobs: 100

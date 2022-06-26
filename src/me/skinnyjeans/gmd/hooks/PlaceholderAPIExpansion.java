@@ -48,7 +48,6 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         if(player != null) {
             UUID uuid = player.getUniqueId();
             if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getPrefix();
-            if(identifier.equals("test")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getPrefix();
             if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(uuid);
             if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getNextDifficulty(uuid).getPrefix();
             if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity());
