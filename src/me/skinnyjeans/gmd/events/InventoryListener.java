@@ -52,11 +52,14 @@ public class InventoryListener extends BaseListener {
                 int value = ITEMS_WITH_VALUES.get(e.getCurrentItem().getType());
                 UUID uuid = UUID.fromString(getSlot(e, 4).getItemMeta().getLore().get(0));
                 if (affinityType < 2) {
-                    MAIN_MANAGER.getPlayerManager().addAffinity(uuid, value);
+                    if(MAIN_MANAGER.getCommandManager().hasAnyPermission(e.getWhoClicked(), "set", "other"))
+                        MAIN_MANAGER.getPlayerManager().addAffinity(uuid, value);
                 } else if (affinityType < 3) {
-                    MAIN_MANAGER.getPlayerManager().addMinAffinity(uuid, value);
+                    if(MAIN_MANAGER.getCommandManager().hasAnyPermission(e.getWhoClicked(), "setmin", "other"))
+                        MAIN_MANAGER.getPlayerManager().addMinAffinity(uuid, value);
                 } else if (affinityType < 4) {
-                    MAIN_MANAGER.getPlayerManager().addMaxAffinity(uuid, value);
+                    if(MAIN_MANAGER.getCommandManager().hasAnyPermission(e.getWhoClicked(), "setmax", "other"))
+                        MAIN_MANAGER.getPlayerManager().addMaxAffinity(uuid, value);
                 }
                 MAIN_MANAGER.getInventoryManager().updatePlayerInventory((Player) e.getWhoClicked(), uuid);
             } else if (e.getCurrentItem().getType() == Material.IRON_INGOT) {
@@ -64,11 +67,11 @@ public class InventoryListener extends BaseListener {
                 MAIN_MANAGER.getInventoryManager().openInventory(whoClicked, 1);
             } else if (e.getCurrentItem().getType() == Material.RED_WOOL) {
                 UUID uuid = UUID.fromString(getSlot(e, 4).getItemMeta().getLore().get(0));
-                MAIN_MANAGER.getAffinityManager().resetAffinity(uuid);
+                if(MAIN_MANAGER.getCommandManager().hasAnyPermission(e.getWhoClicked(), "set", "other"))
+                    MAIN_MANAGER.getAffinityManager().resetAffinity(uuid);
                 MAIN_MANAGER.getInventoryManager().updatePlayerInventory((Player) e.getWhoClicked(), uuid);
             }
         }
-
         e.setCancelled(true);
     }
 

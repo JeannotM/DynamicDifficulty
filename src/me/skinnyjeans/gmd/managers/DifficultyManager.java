@@ -109,12 +109,12 @@ public class DifficultyManager {
         return difficulty;
     }
 
-    private int calculatePercentage(int value1, int value2, double percentage) {
+    private static int calculatePercentage(int value1, int value2, double percentage) {
         if(value1 == value2) return value1;
         return (int) Math.round(value1 - ((value1 - value2) * percentage));
     }
 
-    private double calculatePercentage(double value1, double value2, double percentage) {
+    private static double calculatePercentage(double value1, double value2, double percentage) {
         if(value1 == value2) return value1;
         return Math.round(value1 - ((value1 - value2) * percentage));
     }
@@ -131,7 +131,6 @@ public class DifficultyManager {
             ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty." + key);
 
             if(! config.getBoolean("enabled", true)) continue;
-
             Difficulty difficulty = new Difficulty(key.replace(" ", "_"));
 
             difficulty.setAffinity(config.getInt("affinity-required", 0));

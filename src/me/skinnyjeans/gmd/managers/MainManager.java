@@ -59,10 +59,10 @@ public class MainManager {
     public void checkMetrics() {
         Metrics m = new Metrics(PLUGIN, 11417);
         m.addCustomChart(new Metrics.SimplePie("difficulty_type", () ->
-            DATA_MANAGER.getConfig().getString("toggle-settings.difficulty-type").toLowerCase()
+            DATA_MANAGER.getConfig().getString("toggle-settings.difficulty-type", "player").toLowerCase()
         ));
         m.addCustomChart(new Metrics.SimplePie("save_type", () ->
-            DATA_MANAGER.getConfig().getString("saving-data.type").toLowerCase()
+            DATA_MANAGER.getConfig().getString("saving-data.type", "file").toLowerCase()
         ));
         m.addCustomChart(new Metrics.SimplePie("amount_of_difficulties", () ->
             String.valueOf(DATA_MANAGER.getConfig().getConfigurationSection("difficulty").getKeys(false).size())

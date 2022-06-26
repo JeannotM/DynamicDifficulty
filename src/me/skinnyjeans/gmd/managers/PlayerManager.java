@@ -32,7 +32,6 @@ public class PlayerManager {
                 MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
             }
         });
-
     }
 
     public boolean playerExist(Entity player) { return PLAYER_LIST.containsKey(player.getUniqueId()); }
@@ -46,9 +45,7 @@ public class PlayerManager {
         return true;
     }
 
-    public void reloadConfig() {
-
-    }
+    public void reloadConfig() { }
 
     public void unloadPlayer(UUID uuid) {
         PLAYER_LIST.remove(uuid);
@@ -77,13 +74,21 @@ public class PlayerManager {
     }
 
     public int setMinAffinity(UUID uuid, int value) {
-        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+        if(value != -1) {
+            value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+            if(PLAYER_LIST.get(uuid).getMaxAffinity() != -1)
+                value = Math.min(PLAYER_LIST.get(uuid).getMaxAffinity(), value);
+        }
         PLAYER_LIST.get(uuid).setMinAffinity(value);
         return value;
     }
 
     public int setMaxAffinity(UUID uuid, int value) {
-        if(value != -1) value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+        if(value != -1) {
+            value = MAIN_MANAGER.getAffinityManager().withinServerLimits(value);
+            if(PLAYER_LIST.get(uuid).getMinAffinity() != -1)
+                value = Math.max(PLAYER_LIST.get(uuid).getMinAffinity(), value);
+        }
         PLAYER_LIST.get(uuid).setMaxAffinity(value);
         return value;
     }

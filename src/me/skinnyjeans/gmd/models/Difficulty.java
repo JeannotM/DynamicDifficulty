@@ -57,7 +57,6 @@ public class Difficulty {
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
     public List<String> getDisabledCommands() { return disabledCommands; }
     public double getEnchantChance(EquipmentItems type) { return armorChance.get(type); }
-    public HashMap<EquipmentItems, Double> getEnchantChance() { return armorChance; }
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
     public double getChanceToHaveArmor() { return chanceToHaveArmor; }

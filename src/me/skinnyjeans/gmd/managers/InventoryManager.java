@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -40,7 +39,6 @@ public class InventoryManager {
         put(1, Material.PINK_WOOL);
         put(2, Material.MAGENTA_WOOL);
         put(3, Material.PURPLE_WOOL);
-        put(4, Material.LIME_WOOL);
         put(5, Material.BLUE_WOOL);
         put(6, Material.CYAN_WOOL);
         put(7, Material.LIGHT_BLUE_WOOL);
@@ -81,9 +79,9 @@ public class InventoryManager {
             int iterator = (page - 1) * 45;
             if(players.length - iterator <= 0) return;
 
-            ItemMeta meta = inventory.getItem(4).getItemMeta();
-            meta.getDisplayName().replace("%number%", String.valueOf(page));
-            inventory.getItem(4).setItemMeta(meta);
+            ItemMeta itemMeta = inventory.getItem(4).getItemMeta();
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace("%number%", String.valueOf(page)));
+            inventory.getItem(4).setItemMeta(itemMeta);
             int iteratorLimit = (players.length % 45);
 
             for(int i = 0; i < iteratorLimit; i++)
@@ -97,13 +95,11 @@ public class InventoryManager {
     public void openPlayerInventory(Player player, UUID uuid) {
         Inventory inventory = basePlayerInventory;
         inventory.setItem(4, createPlayerHead(uuid));
-        player.openInventory(basePlayerInventory);
+        player.openInventory(inventory);
     }
 
     public void updatePlayerInventory(Player player, UUID uuid) {
-        InventoryView inventory = player.getOpenInventory();
-        inventory.setItem(4, createPlayerHead(uuid));
-        player.openInventory(basePlayerInventory);
+        player.getOpenInventory().setItem(4, createPlayerHead(uuid));
     }
 
     public ItemStack createPlayerHead(UUID uuid) {
@@ -116,9 +112,9 @@ public class InventoryManager {
         meta.setOwningPlayer(player);
         meta.setLore(Arrays.asList(
             uuid.toString(),
-            affinity.replace("%number%", data.getAffinity() + ""),
-            minAffinity.replace("%number%", data.getMinAffinity() + ""),
-            maxAffinity.replace("%number%", data.getMaxAffinity() + "")
+            affinity.replace("%number%", String.valueOf(data.getAffinity())),
+            minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
+            maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
         ));
         item.setItemMeta(meta);
         return item;

@@ -231,7 +231,7 @@ lang:
       console:
         console-selected: "你不可以选择终端或命令方块!"
         cannot-open-playergui: "玩家GUI不能在终端打开!"
-  es_MX:
+  es-MX:
     translated-by: "ItsRea1Pers0n y Ale2512"
     translator-url: "https://github.com/ItsRealPerson and https://github.com/ralx25"
     command:

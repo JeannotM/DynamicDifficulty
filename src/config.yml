@@ -68,7 +68,6 @@ toggle-settings:
   silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
-  randomize: false # randomizes all difficulty settings for everyone (uses the settings at the end of the page)
   allow-tamed-wolves-in-calculations: true # Whether to allow tamed wolves in the damage calculations
   unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
   advanced:

@@ -83,6 +83,8 @@ public class DataManager {
         }
 
         culture = "lang." + language.getString("culture", "en-US") + ".";
+
+        if(! language.isSet("lang." + culture)) culture = "lang.en-US.";
     }
 
     public FileConfiguration getConfig() { return config; }
