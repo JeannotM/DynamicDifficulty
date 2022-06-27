@@ -19,7 +19,12 @@ public class File implements ISaveManager {
     public File(Main m, DataManager d) {
         plugin = m;
         dataFile = new java.io.File(plugin.getDataFolder(), "data.yml");
-        if(!dataFile.exists()) plugin.saveResource("data.yml",false);
+
+        if (! dataFile.exists())
+            try {
+                dataFile.createNewFile();
+            } catch(Exception ignored) { }
+
         data = YamlConfiguration.loadConfiguration(dataFile);
 
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "File"));
