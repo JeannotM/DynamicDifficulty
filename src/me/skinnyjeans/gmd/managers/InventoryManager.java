@@ -75,7 +75,7 @@ public class InventoryManager {
     public void openInventory(Player player, int page) {
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             Inventory inventory = baseInventory;
-            Player[] players = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+            Minecrafter[] players = MAIN_MANAGER.getPlayerManager().getPlayerList().values().toArray(new Minecrafter[0]);
             int iterator = (page - 1) * 45;
             if(players.length - iterator <= 0) return;
 
@@ -85,7 +85,7 @@ public class InventoryManager {
             int iteratorLimit = (players.length % 45);
 
             for(int i = 0; i < iteratorLimit; i++)
-                inventory.setItem(i + 9, createPlayerHead(players[iterator + i].getUniqueId()));
+                inventory.setItem(i + 9, createPlayerHead(players[iterator + i]));
 
             Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () ->
                     player.openInventory(inventory));
@@ -102,19 +102,18 @@ public class InventoryManager {
         player.getOpenInventory().setItem(4, createPlayerHead(uuid));
     }
 
-    public ItemStack createPlayerHead(UUID uuid) {
-        Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
-        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-
+    public ItemStack createPlayerHead(UUID uuid) { return createPlayerHead(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid)); }
+    public ItemStack createPlayerHead(Minecrafter data) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
-        meta.setDisplayName(player.getName());
-        meta.setOwningPlayer(player);
+        meta.setDisplayName(data.getName());
+        try { meta.setOwningPlayer(Bukkit.getOfflinePlayer(data.getUUID()));
+        } catch (Exception ignored) { }
         meta.setLore(Arrays.asList(
-            uuid.toString(),
-            affinity.replace("%number%", String.valueOf(data.getAffinity())),
-            minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
-            maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
+                data.getUUID().toString(),
+                affinity.replace("%number%", String.valueOf(data.getAffinity())),
+                minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
+                maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
         ));
         item.setItemMeta(meta);
         return item;

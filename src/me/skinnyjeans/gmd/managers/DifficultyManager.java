@@ -19,6 +19,13 @@ public class DifficultyManager {
 
     public DifficultyManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
+
+        if(MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.force-hard-difficulty", true))
+            Bukkit.getWorlds().forEach(world -> {
+                if(!MAIN_MANAGER.getDataManager().isWorldDisabled(world.getName()))
+                    world.setDifficulty(org.bukkit.Difficulty.HARD);
+            });
+
         Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 30, 20 * 120);
     }
 

@@ -13,14 +13,12 @@ import java.util.EnumSet;
 public class PlayerDeathListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
-    private final EnumSet<EntityDamageEvent.DamageCause> COUNTS_AS_SUICIDE;
+    private final EnumSet<EntityDamageEvent.DamageCause> COUNTS_AS_SUICIDE = EnumSet.of(EntityDamageEvent.DamageCause.FALL, EntityDamageEvent.DamageCause.SUFFOCATION, EntityDamageEvent.DamageCause.SUICIDE);
     private boolean preventAffinityLossOnSuicide;
     private int onDeath;
 
     public PlayerDeathListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-        COUNTS_AS_SUICIDE = EnumSet.of(EntityDamageEvent.DamageCause.FALL, EntityDamageEvent.DamageCause.SUFFOCATION, EntityDamageEvent.DamageCause.SUICIDE);
-
         reloadConfig();
     }
 
@@ -37,7 +35,7 @@ public class PlayerDeathListener extends BaseListener {
 
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             if(preventAffinityLossOnSuicide)
-                if(COUNTS_AS_SUICIDE.contains(e.getEntity().getLastDamageCause()))
+                if(COUNTS_AS_SUICIDE.contains(e.getEntity().getLastDamageCause().getCause()))
                     return;
             MAIN_MANAGER.getPlayerManager().addAffinity(e.getEntity().getUniqueId(), onDeath);
         });

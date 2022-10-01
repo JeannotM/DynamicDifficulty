@@ -23,10 +23,10 @@ public class BlockMinedListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
-        if(BLOCKS.size() == 0) return;
-        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
-
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
+            if(BLOCKS.size() == 0) return;
+            if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
+
             if(BLOCKS.containsKey(e.getBlock().getType()))
                 if(!e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH) || silkTouchAllowed)
                     MAIN_MANAGER.getPlayerManager().addAffinity(e.getPlayer().getUniqueId(), BLOCKS.get(e.getBlock().getType()));

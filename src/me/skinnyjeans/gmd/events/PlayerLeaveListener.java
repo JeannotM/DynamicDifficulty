@@ -11,8 +11,6 @@ public class PlayerLeaveListener extends BaseListener {
 
     private final MainManager MAIN_MANAGER;
 
-    private boolean unloadLeavingPlayers;
-
     public PlayerLeaveListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }
@@ -23,12 +21,6 @@ public class PlayerLeaveListener extends BaseListener {
 
         UUID uuid = e.getPlayer().getUniqueId();
         MAIN_MANAGER.getDataManager().updatePlayer(uuid);
-        if(unloadLeavingPlayers)
-            MAIN_MANAGER.getPlayerManager().unloadPlayer(uuid);
-    }
-
-    @Override
-    public void reloadConfig() {
-        unloadLeavingPlayers = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.unload-leaving-player", false);
+        MAIN_MANAGER.getPlayerManager().unloadPlayer(uuid);
     }
 }

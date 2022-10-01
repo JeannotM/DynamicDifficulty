@@ -118,7 +118,7 @@ public class SQL implements ISaveManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("SELECT id FROM "+tbName+" WHERE UUID=?");
+                    PreparedStatement ps = getConnection().prepareStatement("SELECT Name FROM "+tbName+" WHERE UUID=?");
                     ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()){

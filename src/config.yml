@@ -69,10 +69,10 @@ toggle-settings:
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
   allow-tamed-wolves-in-calculations: true # Whether to allow tamed wolves in the damage calculations
-  unload-leaving-player: false # Removes a few issues with not being able to find certain players. Enabling it will improve ram a few kb's, but may cause some problems that were stated earlier.
+  force-hard-difficulty: true # Forces hard Difficulty on all worlds that are not in "disabled-worlds"
   advanced:
     # advanced features may decrease performance or are a little harder to configure
-    custom-enchants-on-mobs: false
+    custom-enchants-on-mobs: true
     exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
 
 saving-data:
@@ -115,7 +115,7 @@ disabled-mobs:
 #   commands-not-allowed-on-difficulty: <list, What commands aren't allowed to be run by players on certain difficulties, spaces not recommended>
 #   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 x 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
 #   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
-#   enchanting: <Will only work if 'custom-mob-items-spawn-chance' in the toggle-settings is enabled>
+#   enchanting: <Will only work if 'custom-enchants-on-mobs' in the toggle-settings is enabled>
 #     max-enchants: <number, Maximum amount of enchants on armor or weapons>
 #     max-level: <number, Maximum level of the enchants>
 #     chance-to-have-armor: <percentage, Chance for a mob to spawn with armor>
