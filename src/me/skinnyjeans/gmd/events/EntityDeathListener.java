@@ -24,14 +24,15 @@ public class EntityDeathListener extends BaseListener {
     public void onKill(EntityDeathEvent e) {
         if(e.getEntity().getKiller() == null) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity().getKiller())) return;
+        if(MAIN_MANAGER.getEntityManager().isEntityIgnored(e.getEntity())) {
+            MAIN_MANAGER.getEntityManager().ignoredEntityKilled(e.getEntity());
+            return;
+        }
 
         UUID uuid = e.getEntity().getKiller().getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             if (MAIN_MANAGER.getEntityManager().hasEntityPoints(e.getEntityType()))
                 MAIN_MANAGER.getPlayerManager().addAffinity(uuid, MAIN_MANAGER.getEntityManager().getEntityPoints(e.getEntityType()));
-
-            if(MAIN_MANAGER.getEntityManager().isEntityIgnored(e.getEntity()))
-                MAIN_MANAGER.getEntityManager().ignoredEntityKilled(e.getEntity());
         });
 
         boolean isPlayer = e.getEntity() instanceof Player;

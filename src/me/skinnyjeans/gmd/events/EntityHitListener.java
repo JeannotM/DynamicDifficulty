@@ -39,11 +39,13 @@ public class EntityHitListener extends BaseListener {
             prey = (((Wolf) e.getEntity()).getOwner() == null) ? e.getEntity() : (Entity) ((Wolf) e.getEntity()).getOwner();
         } else prey = e.getEntity();
 
-        if (e.getDamager() instanceof Arrow) {
+        if (e.getDamager() instanceof Projectile && ((Projectile) e.getDamager()).getShooter() instanceof Entity) {
             hunter = (Entity) ((Projectile) e.getDamager()).getShooter();
         } else if (allowTamedWolves && e.getDamager() instanceof Wolf) {
             hunter = (((Wolf) e.getDamager()).getOwner() == null) ? e.getDamager() : (Entity) ((Wolf) e.getDamager()).getOwner();
         } else hunter = e.getDamager();
+
+        if (MAIN_MANAGER.getEntityManager().isEntityIgnored(prey) || MAIN_MANAGER.getEntityManager().isEntityIgnored(hunter)) return;
 
         if (prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
             if (((Player) prey).isBlocking()) return;
@@ -60,7 +62,6 @@ public class EntityHitListener extends BaseListener {
             } else {
                 UUID uuid = prey.getUniqueId();
                 Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
-
                 double damage;
                 if (allowTamedWolves && e.getEntity() instanceof Wolf) {
                     damage = (e.getFinalDamage() * difficulty.getDamageOnTamed()) / 100;

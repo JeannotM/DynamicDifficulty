@@ -1,6 +1,12 @@
 package me.skinnyjeans.gmd.managers;
 
+import me.skinnyjeans.gmd.Main;
+import me.skinnyjeans.gmd.models.ArmorTypes;
+import me.skinnyjeans.gmd.models.Difficulty;
+import me.skinnyjeans.gmd.models.EquipmentItems;
 import me.skinnyjeans.gmd.models.Minecrafter;
+import me.skinnyjeans.gmd.utils.Formatter;
+import me.skinnyjeans.gmd.utils.StaticInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -10,14 +16,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class InventoryManager {
 
     private final MainManager MAIN_MANAGER;
 
+    private Inventory difficultyInventory;
+    private HashMap<String, Inventory> difficultyInventories = new HashMap<String, Inventory>();
     private Inventory baseInventory;
     private Inventory basePlayerInventory;
     private String affinity, minAffinity, maxAffinity;
@@ -47,7 +53,7 @@ public class InventoryManager {
     public InventoryManager(MainManager mainManager) { MAIN_MANAGER = mainManager; }
 
     public void createBaseInventory() {
-        Inventory inventory = Bukkit.createInventory(null, 54, "DynamicDifficulty - Players");
+        Inventory inventory = Bukkit.createInventory(null, 54, StaticInfo.PLAYERS_INVENTORY);
         ItemStack prevPage = createItem(Material.IRON_INGOT);
         ItemStack currentPage = createItem(Material.IRON_CHESTPLATE);
         ItemStack nextPage = createItem(Material.GOLD_INGOT);
@@ -60,7 +66,7 @@ public class InventoryManager {
     }
 
     public void createBasePlayerInventory() {
-        Inventory inventory = Bukkit.createInventory(null, 36, "DynamicDifficulty - Individual Player");
+        Inventory inventory = Bukkit.createInventory(null, 36, StaticInfo.INDIVIDUAL_PLAYER_INVENTORY);
 
         for(int i = 9; i < 36; i++)
             if(INVENTORY_SLOTS.containsKey(i % 9))
@@ -72,6 +78,61 @@ public class InventoryManager {
         basePlayerInventory = inventory;
     }
 
+    public void createDifficultiesInventory() {
+        difficultyInventory = Bukkit.createInventory(null, 54, StaticInfo.DIFFICULTIES_INVENTORY);
+        int i = 0;
+
+        List<Difficulty> difficulties = MAIN_MANAGER.getDifficultyManager().getDifficulties();
+        for(Difficulty difficulty : difficulties) {
+            if (i >= 53) break;
+            difficultyInventory.setItem(i++, createDifficultyPlayerHead("&r" + difficulty.getDifficultyName(), difficulty.getAffinity()));
+            Inventory inventory = Bukkit.createInventory(null, 36, StaticInfo.DIFFICULTY_INVENTORY);
+            inventory.setItem(0,  createDifficultyPlayerHead(MAIN_MANAGER.getDataManager().getLanguageString("command.player-gui.previous-page")));
+            inventory.setItem(4,  createDifficultyPlayerHead("Name", difficulty.getDifficultyName()));
+            inventory.setItem(9,  createDifficultyPlayerHead("Prefix", difficulty.getPrefix()));
+            inventory.setItem(10, createDifficultyPlayerHead("Affinity Required", difficulty.getAffinity()));
+            inventory.setItem(11, createDifficultyPlayerHead("Damage Done By Mobs", difficulty.getDamageByMobs()));
+            inventory.setItem(12, createDifficultyPlayerHead("Damage Done On Mobs", difficulty.getDamageOnMobs()));
+            inventory.setItem(13, createDifficultyPlayerHead("Damage Done On Tamed", difficulty.getDamageOnTamed()));
+            inventory.setItem(14, createDifficultyPlayerHead("Experience Multiplier", difficulty.getExperienceMultiplier()));
+            inventory.setItem(15, createDifficultyPlayerHead("Hunger Drain", difficulty.getHungerDrain()));
+            inventory.setItem(16, createDifficultyPlayerHead("Double Loot Chance", difficulty.getDoubleLoot()));
+            inventory.setItem(17, createDifficultyPlayerHead("Max Enchants", difficulty.getMaxEnchants()));
+            inventory.setItem(18, createDifficultyPlayerHead("Max Enchant Level", difficulty.getMaxEnchantLevel()));
+            inventory.setItem(19, createDifficultyPlayerHead("Damage Done On Ranged", difficulty.getDamageByRangedMobs()));
+            inventory.setItem(20, createDifficultyPlayerHead("Double Durability Damage Chance", difficulty.getDoubleDurabilityDamageChance()));
+            inventory.setItem(21, createDifficultyPlayerHead("Armor Damage Multiplier", difficulty.getArmorDamageMultiplier().values()));
+            inventory.setItem(22, createDifficultyPlayerHead("PVP Allowed", difficulty.getAllowPVP()));
+            inventory.setItem(23, createDifficultyPlayerHead("Keep Inventory", difficulty.getKeepInventory()));
+            inventory.setItem(24, createDifficultyPlayerHead("Health Regen", difficulty.getAllowHealthRegen()));
+            inventory.setItem(25, createDifficultyPlayerHead("Effects When Attacked", difficulty.getEffectsOnAttack()));
+            inventory.setItem(26, createDifficultyPlayerHead("Armor Drop Chance", difficulty.getArmorDropChance()));
+            inventory.setItem(27, createDifficultyPlayerHead("Armor Enchant Chance", difficulty.getChanceToEnchant()));
+            inventory.setItem(28, createDifficultyPlayerHead("Armor Chance For Mobs", difficulty.getChanceToHaveArmor()));
+            inventory.setItem(30, createDifficultyPlayerHead("Weapon Drop Chance", difficulty.getWeaponDropChance()));
+            inventory.setItem(31, createDifficultyPlayerHead("Ignored Mobs", difficulty.getIgnoredMobs()));
+            inventory.setItem(32, createDifficultyPlayerHead("Disabled Commands", difficulty.getDisabledCommands()));
+            inventory.setItem(33, createDifficultyPlayerHead("Enchant Chances", difficulty.getEnchantChances()));
+            difficultyInventories.put(difficulty.getDifficultyName(), inventory);
+        }
+    }
+
+    public ItemStack createDifficultyPlayerHead(String name, Object ...values) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta meta = item.getItemMeta();
+
+        if(meta == null) return item;
+        meta.setDisplayName(Formatter.format("&f&l" + name));
+        meta.setLore(Formatter.list(values));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public void openDifficultyInventory(Player player, String difficulty) {
+        if (difficultyInventories.containsKey(difficulty))
+            player.openInventory(difficultyInventories.get(difficulty));
+    }
+    public void openBaseDifficultyInventory(Player player) { player.openInventory(difficultyInventory); }
     public void openInventory(Player player, int page) {
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             Inventory inventory = baseInventory;
@@ -110,10 +171,10 @@ public class InventoryManager {
         try { meta.setOwningPlayer(Bukkit.getOfflinePlayer(data.getUUID()));
         } catch (Exception ignored) { }
         meta.setLore(Arrays.asList(
-                data.getUUID().toString(),
-                affinity.replace("%number%", String.valueOf(data.getAffinity())),
-                minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
-                maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
+            data.getUUID().toString(),
+            affinity.replace("%number%", String.valueOf(data.getAffinity())),
+            minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
+            maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
         ));
         item.setItemMeta(meta);
         return item;
@@ -141,5 +202,6 @@ public class InventoryManager {
 
         createBaseInventory();
         createBasePlayerInventory();
+        createDifficultiesInventory();
     }
 }

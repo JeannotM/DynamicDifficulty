@@ -21,9 +21,11 @@ public class DataManager {
 
     private final HashSet<String> DISABLED_WORLDS = new HashSet<>();
 
-    private String culture;
+    private String cultureCode;
     private FileConfiguration config;
     private FileConfiguration language;
+    private FileConfiguration culture;
+    private File cultureFile;
     private File configFile;
     private File langFile;
     private ISaveManager DATABASE;
@@ -56,39 +58,44 @@ public class DataManager {
     }
 
     public void loadConfig() {
-        if (configFile == null) configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
-        if (langFile == null) langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
+        configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
+        langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
+        language = new YamlConfiguration();
+        culture = new YamlConfiguration();
+        config = new YamlConfiguration();
 
-        config = YamlConfiguration.loadConfiguration(configFile);
-        language = YamlConfiguration.loadConfiguration(langFile);
+        if (!configFile.exists()) MAIN_MANAGER.getPlugin().saveResource("config.yml", false);
+        if (!langFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang.yml", false);
 
-        if (! configFile.exists())
-            MAIN_MANAGER.getPlugin().saveResource("config.yml", false);
+        try {
+            config.load(configFile);
+            language.load(langFile);
+        } catch (Exception e) { e.printStackTrace(); }
 
-        InputStream configStream = MAIN_MANAGER.getPlugin().getResource("config.yml");
+        File langDir = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang");
+        if (! langDir.exists()) langDir.mkdir();
 
-        if(configStream != null) {
-            YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(configStream));
-            config.setDefaults(defaultConfig);
+        cultureCode = language.getString("culture", "en-US");
+        cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/" + cultureCode + ".yml");
+
+        try {
+            if(!cultureFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang/" + cultureCode + ".yml", false);
+        } catch (IllegalArgumentException ignored) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + cultureCode + ".yml can not be found, switching to en-US");
+            cultureCode = "en-US";
+            cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/en-US.yml");
         }
 
-        if (! langFile.exists())
-            MAIN_MANAGER.getPlugin().saveResource("lang.yml", false);
+        if(!cultureFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang/" + cultureCode + ".yml", false);
 
-        InputStream languageStream = MAIN_MANAGER.getPlugin().getResource("lang.yml");
-
-        if(languageStream != null) {
-            YamlConfiguration defaultLang = YamlConfiguration.loadConfiguration(new InputStreamReader(languageStream));
-            language.setDefaults(defaultLang);
-        }
-
-        culture = "lang." + language.getString("culture", "en-US") + ".";
-
-        if(! language.isSet("lang." + culture)) culture = "lang.en-US.";
+        try {
+            culture.load(cultureFile);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     public FileConfiguration getConfig() { return config; }
-    public ConfigurationSection getLang() { return language.getConfigurationSection(culture); }
+    public ConfigurationSection getLang() { return language; }
+    public ConfigurationSection getCultureLang() { return culture; }
     public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
     public void getAffinityValues(UUID uuid, final ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
     public void playerExists(UUID uuid, final ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
@@ -99,13 +106,13 @@ public class DataManager {
     }
 
     public String getLanguageString(String item) {
-        String entry = language.getString(culture + item);
+        String entry = culture.getString(item);
         if(entry == null) return "";
         return ChatColor.translateAlternateColorCodes('&', entry);
     }
 
     public String getLanguageString(String item, boolean isRight) {
-        String entry = language.getString(culture + item);
+        String entry = language.getString(item);
         if(entry == null) return "";
         return ChatColor.translateAlternateColorCodes('&', (isRight ? language.getString("command-right-prefix") : language.getString("command-wrong-prefix")) + entry);
     }
@@ -121,4 +128,5 @@ public class DataManager {
     }
 
     public boolean isWorldDisabled(String worldName) { return DISABLED_WORLDS.contains(worldName); }
+
 }

@@ -2,6 +2,7 @@ package me.skinnyjeans.gmd.events;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
+import me.skinnyjeans.gmd.utils.StaticInfo;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -71,6 +72,11 @@ public class InventoryListener extends BaseListener {
                     MAIN_MANAGER.getAffinityManager().resetAffinity(uuid);
                 MAIN_MANAGER.getInventoryManager().updatePlayerInventory((Player) e.getWhoClicked(), uuid);
             }
+        } else if (e.getView().getTitle().equals(StaticInfo.DIFFICULTIES_INVENTORY)) {
+            MAIN_MANAGER.getInventoryManager().openDifficultyInventory((Player) e.getWhoClicked(),
+                    e.getCurrentItem().getItemMeta().getDisplayName());
+        } else if (e.getView().getTitle().equals(StaticInfo.DIFFICULTY_INVENTORY) && e.getSlot() == 0) {
+            MAIN_MANAGER.getInventoryManager().openBaseDifficultyInventory((Player) e.getWhoClicked());
         }
         e.setCancelled(true);
     }

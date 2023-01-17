@@ -88,6 +88,7 @@ public class DifficultyManager {
         difficulty.setDamageOnTamed(calculatePercentage(first.getDamageOnTamed(), second.getDamageOnTamed(), c));
         difficulty.setArmorDropChance(calculatePercentage(first.getArmorDropChance(), second.getArmorDropChance(), c));
         difficulty.setChanceToHaveArmor(calculatePercentage(first.getChanceToHaveArmor(), second.getChanceToHaveArmor(), c));
+        difficulty.setChanceToHaveWeapon(calculatePercentage(first.getChanceToHaveWeapon(), second.getChanceToHaveWeapon(), c));
         difficulty.setDamageByRangedMobs(calculatePercentage(first.getDamageByRangedMobs(), second.getDamageByRangedMobs(), c));
         difficulty.setExperienceMultiplier(calculatePercentage(first.getExperienceMultiplier(), second.getExperienceMultiplier(), c));
         difficulty.setDoubleDurabilityDamageChance(calculatePercentage(first.getDoubleDurabilityDamageChance(), second.getDoubleDurabilityDamageChance(), c));
@@ -173,6 +174,7 @@ public class DifficultyManager {
             difficulty.setChanceToEnchant(enchantData.getDouble("chance-to-enchant-a-piece", 30.0));
             difficulty.setArmorDropChance(enchantData.getDouble("armor-drop-chance", 15.0));
             difficulty.setWeaponDropChance(enchantData.getDouble("weapon-drop-chance", 10.0));
+            difficulty.setChanceToHaveWeapon(enchantData.getDouble("weapon-chance", 5.0));
             HashMap<EquipmentItems, Double> equipmentValues = new HashMap<>();
             for(EquipmentItems item : EquipmentItems.values())
                 equipmentValues.put(item, enchantData.getDouble(item.name().toLowerCase() + "-chance", 1.0));

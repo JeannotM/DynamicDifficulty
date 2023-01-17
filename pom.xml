@@ -58,7 +58,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                         <option>-ignorewarnings</option>
                     </options>
                     <libs>
-                        <lib>C:\Program Files\Java\jre1.8.0_321\lib\rt.jar</lib>
+                        <lib>C:\Program Files\Java\jre1.8.0_341\lib\rt.jar</lib>
                     </libs>
                 </configuration>
                 <dependencies>
@@ -84,19 +84,29 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>2.13.3</version>
+            <version>3.12.11</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.0</version>
+            <version>42.5.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

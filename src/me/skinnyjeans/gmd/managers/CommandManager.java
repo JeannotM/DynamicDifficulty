@@ -1,6 +1,5 @@
 package me.skinnyjeans.gmd.managers;
 
-import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,7 +18,7 @@ public class CommandManager implements CommandExecutor {
 
     private final MainManager MAIN_MANAGER;
 
-    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("info", "help", "reload", "author", "forcesave", "playergui"));
+    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("info", "difficulties", "help", "reload", "author", "forcesave", "playergui"));
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
@@ -72,6 +71,7 @@ public class CommandManager implements CommandExecutor {
                 if(argument.equals("reload")) return sendMessage(sender, reloadPlugin(), true);
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
+                if(argument.equals("difficulties")) return openDifficultyGUI(sender);
                 if(argument.equals("info")) return sendMessage(sender, info(), true);
             }
         } else if(ONE_ARG.contains(argument)) {
@@ -162,7 +162,7 @@ public class CommandManager implements CommandExecutor {
     }
 
     private String info() {
-        StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getLang().getCurrentPath()).append("\n");
+        StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getCultureLang().getCurrentPath()).append("\n");
 
         message.append("Difficulties: (").append(MAIN_MANAGER.getDifficultyManager().getDifficulties().size()).append(") ");
         MAIN_MANAGER.getDifficultyManager().getDifficulties().forEach(d -> message.append(d.getDifficultyName()).append(" : ").append(d.getAffinity()).append(", "));
@@ -171,6 +171,13 @@ public class CommandManager implements CommandExecutor {
         MAIN_MANAGER.getEntityManager().getMobs().forEach((key, value) -> message.append(key).append(" : ").append(value).append(", "));
 
         return message.toString();
+    }
+
+    private boolean openDifficultyGUI(CommandSender sender) {
+        if(sender instanceof Player) {
+            MAIN_MANAGER.getInventoryManager().openBaseDifficultyInventory((Player) sender);
+        } else sendMessage(sender, consoleOpenPlayerGUI, false);
+        return true;
     }
 
     private boolean openPlayerGUI(CommandSender sender) {
@@ -300,7 +307,7 @@ public class CommandManager implements CommandExecutor {
 
         translatorMessage = MAIN_MANAGER.getDataManager().getLanguageString("translated-by", true) + "\n" + MAIN_MANAGER.getDataManager().getLanguageString("translator-url", true);
 
-        ConfigurationSection language = MAIN_MANAGER.getDataManager().getLang();
+        ConfigurationSection language = MAIN_MANAGER.getDataManager().getCultureLang();
         String label = language.getString("command.help.label", "&f/dd");
         String nameNum = language.getString("command.help.name-num", "<?Name> <Number>");
         String name = language.getString("command.help.name", "<?Name>");

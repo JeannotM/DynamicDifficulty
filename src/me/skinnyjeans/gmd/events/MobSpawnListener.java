@@ -63,7 +63,7 @@ public class MobSpawnListener extends BaseListener {
                 double chanceToEnchant = difficulty.getChanceToEnchant() / 100.0;
                 EntityEquipment eq = e.getEntity().getEquipment();
                 int rnd = random.nextInt(CUSTOM_SPAWN_WEAPONS.values().stream().mapToInt(i -> i).sum() + 1);
-                if(random.nextDouble() < difficulty.getWeaponDropChance() / 100.0)
+                if(random.nextDouble() < difficulty.getChanceToHaveWeapon() / 100.0)
                     if (RANGED.contains(eq.getItemInMainHand().getType())) {
                         ItemStack item = new ItemStack(eq.getItemInMainHand().getType());
                         eq.setItemInMainHand(calcEnchant(item, difficulty, EquipmentItems.BOW, chanceToEnchant));

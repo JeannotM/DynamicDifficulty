@@ -1,0 +1,77 @@
+# 如果你不喜欢这里的任何文字，你可以随意修改.但会让我很伤心:'(  //译者：原文如此
+# 这些变量不一定对每个指令均有效
+# %number% 是命令执行者输入的数字 (如:1,49,71)
+# %difficulty%是玩家当前所处的难度(常与%number%一同使用，作用于单个玩家)
+# %user% 用于显示玩家名
+# 使用 &颜色 添加颜色(见https://minecraft.fandom.com/wiki/Formatting_codes)
+
+translated-by: "翻译者: kuzuanpa"
+translator-url: "https://github.com/kuzuanpa"
+command:
+  set:
+    affinity: "%user% 的难度已被改为 %difficulty% , 吸引力为 %number%"
+    max-affinity: "将玩家 %user% 的吸引力上限设为 %number%"
+    min-affinity: "将玩家 %user% 的吸引力下限设为 %number%"
+    all: "将所有在线玩家的吸引力设为 %number%"
+    max-affinity-all: "将所有在线玩家的吸引力上限设为 %number%"
+    min-affinity-all: "将所有在线玩家的吸引力下限设为 %number%"
+  remove:
+    max-affinity: "移除了玩家 %user% 的吸引力上限"
+    min-affinity: "移除了玩家 %user% 的吸引力下限"
+    max-affinity-all: "移除了所有在线玩家的吸引力上限"
+    min-affinity-all: "移除了所有在线玩家的吸引力下限"
+  get:
+    cannot-use-get-for-all: "/get中不可使用 @a 选择器"
+    has-affinity: "%user% 有 %number% 点吸引力"
+    currently-on: "当前处于 %difficulty% 难度"
+    max-affinity: "吸引力上限: %number%"
+    min-affinity: "吸引力下限: %number%"
+  player-gui:
+    next-page: "下一页 >"
+    previous-page: "< 上一页"
+    reset-values: "重设吸引力"
+    affinity: "吸引力: %number%"
+    current-page: "当前页码: %number%"
+    max-affinity: "吸引力上限: %number%"
+    min-affinity: "吸引力上限: %number%"
+  other:
+    reload-config: "配置已重载! 汉化 by 苦钻怕"
+    force-save: "玩家数据已保存!"
+  help:
+    label: "&f/dd"
+    name-num: "<?名称> <数字>"
+    name: "<?名称>"
+    command:
+      0: "&c======== &6[&eDynamic Difficulty&6] &c========&f"
+      1: "也可使用难度名代替吸引力数字"
+      2: "不指定玩家将选中命令执行者"
+      3: "指令不对大小写敏感, 如/dD sEtMaX 等也可使用"
+      4: "%label% setMax %name-num% &7>&6 设置玩家的吸引力上限"
+      5: "%label% setMin %name-num% &7>&6 设置玩家的吸引力下限"
+      6: "%label% remove %name-num% &7>&6 减少玩家N点吸引力"
+      7: "%label% add %name-num% &7>&6 增加玩家N点吸引力"
+      8: "%label% set %name-num% &7>&6 设置玩家吸引力"
+      9: "%label% delMax %name% &7>&6 移除玩家的吸引力上限"
+      10: "%label% delMin %name% &7>&6 移除玩家的吸引力下限"
+      11: "%label% get %name% &7>&6 获取玩家的当前吸引力值 和 吸引力上下限"
+      12: "%label% author &7>&6 查看作者与译者名"
+      13: "%label% reload &7>&6 重载本插件"
+      14: "%label% forceSave &7>&6 保存玩家吸引力值"
+      15: "%label% playerGUI &7>&6 使用箱子GUI展示全部玩家"
+      16: "%label% help &7>&6 显示本菜单"
+      17: "%label% info &7>&6 显示debug信息"
+in-game:
+  attacker-no-pvp: "你还是个萌新，你不可以攻击 %user%!"
+  attackee-no-pvp: "你不可以攻击 %user% ，他还是个萌新!"
+  command-not-allowed: "你怎敢使用该指令?"
+other:
+  database-chosen: "成功连接至 %database%"
+  update-config: "你正在使用旧版配置,请及时更新!"
+error:
+  no-permission: "你没有执行权限!"
+  include-number: "你需要填入一个数字或难度!"
+  not-a-number: "%number% 不是一个可用的数字或难度"
+  cannot-be-found: "该玩家不存在或不在线"
+  console:
+    console-selected: "你不可以选择终端或命令方块!"
+    cannot-open-playergui: "玩家GUI不能在终端打开!"

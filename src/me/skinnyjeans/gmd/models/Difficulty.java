@@ -22,6 +22,7 @@ public class Difficulty {
     private double armorDropChance;
     private double chanceToEnchant = Double.NaN;
     private double chanceToHaveArmor;
+    private double chanceToHaveWeapon;
     private double weaponDropChance;
     private boolean allowPVP;
     private boolean keepInventory;
@@ -50,6 +51,7 @@ public class Difficulty {
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
     public int getArmorDamageMultiplier(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, -505); }
     public HashMap<ArmorTypes, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
+    public HashMap<EquipmentItems, Double> getEnchantChances() { return armorChance; }
     public boolean getAllowPVP() { return allowPVP; }
     public boolean getKeepInventory() { return keepInventory; }
     public boolean getAllowHealthRegen() { return allowHealthRegen; }
@@ -60,6 +62,7 @@ public class Difficulty {
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
     public double getChanceToHaveArmor() { return chanceToHaveArmor; }
+    public double getChanceToHaveWeapon() { return chanceToHaveWeapon; }
     public double getWeaponDropChance() { return weaponDropChance; }
 
     public void setPrefix(String value) { userPrefix = value; }
@@ -88,4 +91,5 @@ public class Difficulty {
     public void setWeaponDropChance(Double value) { weaponDropChance = value; }
     public void setChanceToEnchant(Double value) { chanceToEnchant = value; }
     public void setChanceToHaveArmor(Double value) { chanceToHaveArmor = value; }
+    public void setChanceToHaveWeapon(Double value) { chanceToHaveWeapon = value; }
 }
