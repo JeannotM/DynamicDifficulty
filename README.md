@@ -69,6 +69,10 @@ Sets a minimum Affinity limit for an user.
 perm: affinity.author
 Mentions DynamicDifficulty, my name and the person who translated the language you selected
 
+/Affinity difficulties
+perm: affinity.difficulties
+Shows the difficulties that are currently loaded.
+
 /Affinity reload
 perm: affinity.reload
 Reloads the config.

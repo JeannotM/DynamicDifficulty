@@ -19,6 +19,9 @@ public class Difficulty {
     private int difficultyUntil;
     private int damageByRangedMobs;
     private int doubleDurabilityDamageChance;
+    private int minimumStarvationHealth;
+    private int maximumHealth;
+    private double chanceCancelDeath;
     private double armorDropChance;
     private double chanceToEnchant = Double.NaN;
     private double chanceToHaveArmor;
@@ -49,6 +52,8 @@ public class Difficulty {
     public int getMaxEnchantLevel() { return maxEnchantLevel; }
     public int getDamageByRangedMobs() { return damageByRangedMobs; }
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
+    public int getMinimumStarvationHealth() { return minimumStarvationHealth; }
+    public int getMaximumHealth() { return maximumHealth; }
     public int getArmorDamageMultiplier(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, -505); }
     public HashMap<ArmorTypes, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public HashMap<EquipmentItems, Double> getEnchantChances() { return armorChance; }
@@ -64,6 +69,7 @@ public class Difficulty {
     public double getChanceToHaveArmor() { return chanceToHaveArmor; }
     public double getChanceToHaveWeapon() { return chanceToHaveWeapon; }
     public double getWeaponDropChance() { return weaponDropChance; }
+    public double getChanceToCancelDeath() { return chanceCancelDeath; }
 
     public void setPrefix(String value) { userPrefix = value; }
     public void setAffinity(int value) { affinityRequirement = value; }
@@ -78,6 +84,8 @@ public class Difficulty {
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
     public void setDamageByRangedMobs(int value) { damageByRangedMobs = value; }
     public void setDoubleDurabilityDamageChance(int value) { doubleDurabilityDamageChance = value; }
+    public void setMinimumStarvationHealth(int value) { minimumStarvationHealth = value; }
+    public void setMaximumHealth(int value) { maximumHealth = value; }
     public void setArmorDamageMultiplier(HashMap<ArmorTypes, Integer> value) { armorDamageMultipliers = value; }
     public void setAllowPVP(boolean value) { allowPVP = value; }
     public void setKeepInventory(boolean value) { keepInventory = value; }
@@ -92,4 +100,5 @@ public class Difficulty {
     public void setChanceToEnchant(Double value) { chanceToEnchant = value; }
     public void setChanceToHaveArmor(Double value) { chanceToHaveArmor = value; }
     public void setChanceToHaveWeapon(Double value) { chanceToHaveWeapon = value; }
+    public void setChanceToCancelDeath(Double value) { chanceCancelDeath = value; }
 }

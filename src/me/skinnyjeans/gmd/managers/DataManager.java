@@ -81,7 +81,7 @@ public class DataManager {
         try {
             if(!cultureFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang/" + cultureCode + ".yml", false);
         } catch (IllegalArgumentException ignored) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + cultureCode + ".yml can not be found, switching to en-US");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] " + cultureCode + ".yml can not be found, switching to en-US");
             cultureCode = "en-US";
             cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/en-US.yml");
         }
@@ -112,7 +112,7 @@ public class DataManager {
     }
 
     public String getLanguageString(String item, boolean isRight) {
-        String entry = language.getString(item);
+        String entry = culture.getString(item);
         if(entry == null) return "";
         return ChatColor.translateAlternateColorCodes('&', (isRight ? language.getString("command-right-prefix") : language.getString("command-wrong-prefix")) + entry);
     }

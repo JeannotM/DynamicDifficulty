@@ -18,7 +18,7 @@ public class CommandManager implements CommandExecutor {
 
     private final MainManager MAIN_MANAGER;
 
-    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("info", "difficulties", "help", "reload", "author", "forcesave", "playergui"));
+    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("difficulties", "help", "reload", "author", "forcesave", "playergui"));
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
@@ -72,7 +72,6 @@ public class CommandManager implements CommandExecutor {
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
                 if(argument.equals("difficulties")) return openDifficultyGUI(sender);
-                if(argument.equals("info")) return sendMessage(sender, info(), true);
             }
         } else if(ONE_ARG.contains(argument)) {
             if(args.length > 1 && args[1].equals("@a")) {
@@ -159,18 +158,6 @@ public class CommandManager implements CommandExecutor {
 
     private String author() {
         return authorMessage + translatorMessage;
-    }
-
-    private String info() {
-        StringBuilder message = new StringBuilder("Language: ").append(MAIN_MANAGER.getDataManager().getCultureLang().getCurrentPath()).append("\n");
-
-        message.append("Difficulties: (").append(MAIN_MANAGER.getDifficultyManager().getDifficulties().size()).append(") ");
-        MAIN_MANAGER.getDifficultyManager().getDifficulties().forEach(d -> message.append(d.getDifficultyName()).append(" : ").append(d.getAffinity()).append(", "));
-        message.append("\n");
-
-        MAIN_MANAGER.getEntityManager().getMobs().forEach((key, value) -> message.append(key).append(" : ").append(value).append(", "));
-
-        return message.toString();
     }
 
     private boolean openDifficultyGUI(CommandSender sender) {

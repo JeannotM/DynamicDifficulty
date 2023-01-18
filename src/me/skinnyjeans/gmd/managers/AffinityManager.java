@@ -20,8 +20,7 @@ public class AffinityManager {
             Bukkit.getOnlinePlayers().forEach(player -> {
                 if (mainManager.getPlayerManager().isPlayerValid(player))
                     MAIN_MANAGER.getPlayerManager().addAffinity(player.getUniqueId(), intervalAffinity);
-            })
-        , 20 * 60, 20 * 60);
+            }), 20 * 60, 20 * 60);
     }
 
     public int withinServerLimits(int value) {

@@ -5,15 +5,18 @@ import me.skinnyjeans.gmd.models.ArmorTypes;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 public class EntityHitListener extends BaseListener {
@@ -48,10 +51,11 @@ public class EntityHitListener extends BaseListener {
         if (MAIN_MANAGER.getEntityManager().isEntityIgnored(prey) || MAIN_MANAGER.getEntityManager().isEntityIgnored(hunter)) return;
 
         if (prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
-            if (((Player) prey).isBlocking()) return;
+            Player playerPrey = (Player) prey;
+            if (playerPrey.isBlocking()) return;
 
             if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
-                HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", ((Player) prey).getDisplayName()); }};
+                HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", playerPrey.getDisplayName()); }};
                 if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getAllowPVP()) {
                     if(notAttackOthers.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackOthers, entry));
                     e.setCancelled(true);
@@ -78,12 +82,28 @@ public class EntityHitListener extends BaseListener {
                     damage = (e.getFinalDamage() * (isProjectile ? difficulty.getDamageByRangedMobs() : difficulty.getDamageByMobs()) + damageByArmor) / 100;
                 }
 
-                e.setDamage(damage);
-
                 Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
                     int removePoints = damage == 0 ? 0 : (affinityPerHeart) * (int) Math.ceil(damage / 2) + (onPlayerHit);
                     MAIN_MANAGER.getPlayerManager().addAffinity(uuid, removePoints);
                 });
+
+                if (playerPrey.getHealth() - damage <= 0)
+                    if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
+                            .getDifficulty(playerPrey.getUniqueId()).getChanceToCancelDeath() / 100.0) {
+                        ItemStack mainHand = playerPrey.getInventory().getItemInMainHand();
+                        ItemStack offHand = playerPrey.getInventory().getItemInOffHand();
+
+                        if (mainHand == null || mainHand.getType().equals(Material.AIR)) {
+                            playerPrey.getInventory().setItemInMainHand(new ItemStack(Material.TOTEM_OF_UNDYING));
+                        } else {
+                            playerPrey.getInventory().setItemInOffHand(new ItemStack(Material.TOTEM_OF_UNDYING));
+                            if (offHand != null && !offHand.getType().equals(Material.AIR))
+                                Bukkit.getScheduler().runTaskLater(MAIN_MANAGER.getPlugin(), () ->
+                                    playerPrey.getInventory().setItemInOffHand(offHand), 5);
+                        }
+                    }
+
+                e.setDamage(damage);
             }
         } else if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
             double damage = e.getFinalDamage() * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getDamageOnMobs() / 100.0;
@@ -104,7 +124,7 @@ public class EntityHitListener extends BaseListener {
         notAttackOthers = MAIN_MANAGER.getDataManager().getLanguageString("in-game.attacker-no-pvp", false);
         notAttackPerson = MAIN_MANAGER.getDataManager().getLanguageString("in-game.attackee-no-pvp", false);
 
-        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
+        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
             if (difficulty.getArmorDamageMultiplier().size() != 0) {
                 calculateExtraArmorDamage = true;
                 break;

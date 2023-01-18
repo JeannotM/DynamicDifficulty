@@ -3,6 +3,7 @@ package me.skinnyjeans.gmd.managers;
 import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
@@ -96,6 +97,9 @@ public class DifficultyManager {
         difficulty.setMaxEnchantLevel(calculatePercentage(first.getMaxEnchantLevel(), second.getMaxEnchantLevel(), c));
         difficulty.setChanceToEnchant(calculatePercentage(first.getChanceToEnchant(), second.getChanceToEnchant(), c));
         difficulty.setWeaponDropChance(calculatePercentage(first.getWeaponDropChance(), second.getWeaponDropChance(), c));
+        difficulty.setMinimumStarvationHealth(calculatePercentage(first.getMinimumStarvationHealth(), second.getMinimumStarvationHealth(), c));
+        difficulty.setMaximumHealth(calculatePercentage(first.getMaximumHealth(), second.getMaximumHealth(), c));
+        difficulty.setChanceToCancelDeath(calculatePercentage(first.getChanceToCancelDeath(), second.getChanceToCancelDeath(), c));
         HashMap<EquipmentItems, Double> equipmentValues = new HashMap<>();
         for(EquipmentItems item : EquipmentItems.values())
             equipmentValues.put(item, calculatePercentage(first.getEnchantChance(item), second.getEnchantChance(item), c));
@@ -113,6 +117,12 @@ public class DifficultyManager {
         difficulty.setEffectsOnAttack(first.getEffectsOnAttack());
         difficulty.setDisabledCommands(first.getDisabledCommands());
         difficulty.setIgnoredMobs(first.getIgnoredMobs());
+
+        try {
+            if (Bukkit.getOfflinePlayer(affinity.getUUID()).isOnline())
+                Bukkit.getPlayer(affinity.getUUID()).getAttribute(Attribute.GENERIC_MAX_HEALTH)
+                        .setBaseValue(difficulty.getMaximumHealth());
+        } catch (Exception ignored) { }
 
         return difficulty;
     }
@@ -149,6 +159,9 @@ public class DifficultyManager {
             difficulty.setDamageByRangedMobs(config.getInt("damage-done-by-ranged-mobs", 100));
             difficulty.setDoubleDurabilityDamageChance(config.getInt("double-durability-damage-chance", 0));
             difficulty.setExperienceMultiplier(config.getInt("experience-multiplier", 100));
+            difficulty.setChanceToCancelDeath(config.getDouble("chance-cancel-death", 0.0));
+            difficulty.setMaximumHealth(config.getInt("maximum-health", 20));
+            difficulty.setMinimumStarvationHealth(config.getInt("minimum-health-starvation", 0));
             difficulty.setDoubleLoot(config.getInt("double-loot-chance", 1));
             difficulty.setKeepInventory(config.getBoolean("keep-inventory", false));
             difficulty.setAllowPVP(config.getBoolean("allow-pvp", true));

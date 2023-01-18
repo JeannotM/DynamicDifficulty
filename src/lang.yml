@@ -3,6 +3,7 @@
 # https://github.com/JeannotM/DynamicDifficulty
 
 # Culture .NET
+# Supported en-US, nl-NL, es-MX, zh-CN
 culture: "en-US"
 command-right-prefix: "&f"
 command-wrong-prefix: "&c"

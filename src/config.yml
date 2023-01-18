@@ -105,8 +105,11 @@ disabled-mobs:
 #   hunger-drain-chance: <percentage, Chance that the hunger of a player will drain>
 #   damage-done-by-ranged-mobs: <percentage, How much damage projectiles do>
 #   double-durability-damage-chance: <percentage, Chance to take double damage on item durability>
+#   chance-cancel-death: <number, Chance to cancel death when attack by a entity>
+#   minimum-health-starvation: <number, Minimum hearts left from starvation damage>
+#   maximum-health: <number, Maximum health when a player is in this difficulty>
 #   experience-multiplier: <percentage, Experience Multiplier>
-#   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed>
+#   double-loot-chance: <percentage, Chance to double the loot dropped when a mob is killed or an ore that is mined>
 #   keep-inventory: <bool, Whether the player keeps everything on death or not>
 #   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
 #   allow-natural-regen <bool, Whether health regen from 'natural occurrences' (full foodbar) should be allowed.
@@ -137,6 +140,9 @@ difficulty:
     hunger-drain-chance: 60
     damage-done-by-ranged-mobs: 75
     double-durability-damage-chance: 0
+    chance-cancel-death: 0.5
+    minimum-health-starvation: 2
+    maximum-health: 20
     experience-multiplier: 70
     double-loot-chance: 0
     allow-pvp: true
@@ -170,6 +176,9 @@ difficulty:
     hunger-drain-chance: 80
     damage-done-by-ranged-mobs: 100
     double-durability-damage-chance: 1
+    chance-cancel-death: 0.0
+    minimum-health-starvation: 1
+    maximum-health: 20
     experience-multiplier: 90
     double-loot-chance: 0
     allow-pvp: true
@@ -198,6 +207,9 @@ difficulty:
     hunger-drain-chance: 100
     damage-done-by-ranged-mobs: 125
     double-durability-damage-chance: 5
+    chance-cancel-death: 0.0
+    minimum-health-starvation: 0
+    maximum-health: 20
     experience-multiplier: 125
     double-loot-chance: 5
     allow-pvp: true
