@@ -1,9 +1,13 @@
 package me.skinnyjeans.gmd.events;
 
+import io.lumine.mythic.api.mobs.MythicMob;
+import io.lumine.mythic.bukkit.BukkitAdapter;
+import io.lumine.mythic.bukkit.MythicBukkit;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import me.skinnyjeans.gmd.models.EquipmentItems;
+import me.skinnyjeans.gmd.models.MythicMobProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -35,19 +39,22 @@ public class MobSpawnListener extends BaseListener {
     private final Random random = new Random();
 
     private boolean overrideConflictingEnchants;
+    private final boolean enableMythicMobs;
     private boolean customArmorSpawnChance;
     private boolean overrideEnchantLimit;
     private boolean changeSpawnedMobs;
 
     public MobSpawnListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
+        enableMythicMobs = Bukkit.getPluginManager().getPlugin("MythicMobs") != null;
+
+        if (enableMythicMobs)
+            Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] MythicMobs found, enabled the connection!");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMobSpawn(CreatureSpawnEvent e) {
-        if(!AFFECTED_MOBS.contains(e.getEntity().getType())) return;
-
-        if(customArmorSpawnChance && NATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
+        if(NATURAL_SPAWN_REASONS.contains(e.getSpawnReason())) {
             Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () -> {
                 Player closestPlayer = null;
                 double distance = 512.0;
@@ -58,8 +65,30 @@ public class MobSpawnListener extends BaseListener {
                         closestPlayer = pl;
                     }
                 if(closestPlayer == null || !MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)) return;
-
                 Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer.getUniqueId());
+
+                if (enableMythicMobs) {
+                    for (MythicMobProfile mythicMobProfile : difficulty.getMythicMobProfiles()) {
+                        if (!mythicMobProfile.replacedWith.equals(e.getEntity().getType())) continue;
+                        if (random.nextDouble() < mythicMobProfile.chanceToReplace / 100.0) {
+                            MythicMob mythicMob = MythicBukkit.inst().getMobManager().getMythicMob(mythicMobProfile.mythicMobName)
+                                    .orElse(null);
+
+                            if (mythicMob != null) {
+                                mythicMob.spawn(BukkitAdapter.adapt(e.getEntity().getLocation()), 1);
+                                e.setCancelled(true);
+                                return;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                if (!customArmorSpawnChance || !AFFECTED_MOBS.contains(e.getEntity().getType())) {
+                    return;
+                }
+
+
                 double chanceToEnchant = difficulty.getChanceToEnchant() / 100.0;
                 EntityEquipment eq = e.getEntity().getEquipment();
                 int rnd = random.nextInt(CUSTOM_SPAWN_WEAPONS.values().stream().mapToInt(i -> i).sum() + 1);

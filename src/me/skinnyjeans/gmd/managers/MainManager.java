@@ -37,7 +37,7 @@ public class MainManager {
 
         reloadConfig();
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new PlaceholderAPIExpansion(this).register();
     }
 

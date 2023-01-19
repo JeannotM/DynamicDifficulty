@@ -110,6 +110,7 @@ public class DifficultyManager {
             armorValues.put(item, calculatePercentage(first.getArmorDamageMultiplier(item), second.getArmorDamageMultiplier(item), c));
         difficulty.setArmorDamageMultiplier(armorValues);
 
+        difficulty.setMythicMobProfiles(first.getMythicMobProfiles());
         difficulty.setAllowHealthRegen(first.getAllowHealthRegen());
         difficulty.setPrefix(first.getPrefix());
         difficulty.setAllowPVP(first.getAllowPVP());
@@ -192,6 +193,15 @@ public class DifficultyManager {
             for(EquipmentItems item : EquipmentItems.values())
                 equipmentValues.put(item, enchantData.getDouble(item.name().toLowerCase() + "-chance", 1.0));
             difficulty.setEnchantChances(equipmentValues);
+
+            if (config.isSet("mythic-mobs")) {
+                ConfigurationSection mythicMobConfig = config.getConfigurationSection("mythic-mobs");
+                List<MythicMobProfile> profiles = new ArrayList<>();
+                for (String mythicMobKey : mythicMobConfig.getKeys(false))
+                    profiles.add(new MythicMobProfile(mythicMobKey, mythicMobConfig));
+
+                difficulty.setMythicMobProfiles(profiles);
+            }
 
             tmpMap.put(difficulty.getAffinity(), difficulty.getDifficultyName());
         }

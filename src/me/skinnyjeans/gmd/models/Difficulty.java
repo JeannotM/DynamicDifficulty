@@ -33,6 +33,7 @@ public class Difficulty {
     private boolean effectsWhenAttacked;
     private List<String> disabledCommands = new ArrayList<>();
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
+    private List<MythicMobProfile> mythicMobProfiles = new ArrayList<>();
     private HashMap<EquipmentItems, Double> armorChance = new HashMap<>();
     private HashMap<ArmorTypes, Integer> armorDamageMultipliers = new HashMap<>();
 
@@ -63,6 +64,7 @@ public class Difficulty {
     public boolean getEffectsOnAttack() { return effectsWhenAttacked; }
     public List<String> getIgnoredMobs() { return mobsIgnoredPlayers; }
     public List<String> getDisabledCommands() { return disabledCommands; }
+    public List<MythicMobProfile> getMythicMobProfiles() { return mythicMobProfiles; }
     public double getEnchantChance(EquipmentItems type) { return armorChance.get(type); }
     public double getArmorDropChance() { return armorDropChance; }
     public double getChanceToEnchant() { return chanceToEnchant; }
@@ -92,6 +94,7 @@ public class Difficulty {
     public void setEffectsOnAttack(boolean value) { effectsWhenAttacked = value; }
     public void setAllowHealthRegen(boolean value) { allowHealthRegen = value; }
 
+    public void setMythicMobProfiles(List<MythicMobProfile> value) { mythicMobProfiles = value; }
     public void setDisabledCommands(List<String> value) { disabledCommands = value; }
     public void setIgnoredMobs(List<String> value) { mobsIgnoredPlayers = value; }
     public void setEnchantChances(HashMap<EquipmentItems, Double> value) { armorChance = value; }

@@ -1,9 +1,9 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.6
+version: 1.7
 author: SkinnyJeans
 api-version: 1.13
-softdepend: ['PlaceholderAPI']
+softdepend: ["PlaceholderAPI", "MythicMobs"]
 
 permissions:
   affinity.*:
@@ -23,6 +23,7 @@ permissions:
       affinity.reload: true
       affinity.forcesave: true
       affinity.playergui: true
+      affinity.difficulties: true
 
   affinity.info:
     default: false
@@ -66,6 +67,9 @@ permissions:
   affinity.playergui:
     default: op
     description: allows you to change the settings of players in chest form
+  affinity.difficulties:
+    default: op
+    description: allows you to see all the difficulties
 
 commands:
   affinity:
