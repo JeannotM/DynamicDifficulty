@@ -33,17 +33,18 @@ public class BlockMinedListener extends BaseListener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMined(BlockBreakEvent e) {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
-
-        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
+        ItemStack tool = e.getPlayer().getItemInUse();
+        if (tool == null) return;
+        Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () -> {
             if(BLOCKS.size() == 0) return;
 
             if(BLOCKS.containsKey(e.getBlock().getType()))
-                if(silkTouchAllowed || ! e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH))
+                if(silkTouchAllowed || ! tool.containsEnchantment(Enchantment.SILK_TOUCH))
                     MAIN_MANAGER.getPlayerManager().addAffinity(e.getPlayer().getUniqueId(), BLOCKS.get(e.getBlock().getType()));
         });
 
         if (ORE_BLOCKS.containsKey(e.getBlock().getType())) {
-            if (! e.getPlayer().getItemOnCursor().containsEnchantment(Enchantment.SILK_TOUCH))
+            if (! tool.containsEnchantment(Enchantment.SILK_TOUCH))
                 e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                         new ItemStack(ORE_BLOCKS.get(e.getBlock().getType())));
         }
