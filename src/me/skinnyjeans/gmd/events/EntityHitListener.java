@@ -6,14 +6,19 @@ import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -90,17 +95,16 @@ public class EntityHitListener extends BaseListener {
                 if (playerPrey.getHealth() - damage <= 0)
                     if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
                             .getDifficulty(playerPrey.getUniqueId()).getChanceToCancelDeath() / 100.0) {
-                        ItemStack mainHand = playerPrey.getInventory().getItemInMainHand();
-                        ItemStack offHand = playerPrey.getInventory().getItemInOffHand();
+                        playerPrey.spawnParticle(Particle.TOTEM, playerPrey.getLocation(), 100);
+                        playerPrey.playSound(playerPrey.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
 
-                        if (mainHand == null || mainHand.getType().equals(Material.AIR)) {
-                            playerPrey.getInventory().setItemInMainHand(new ItemStack(Material.TOTEM_OF_UNDYING));
-                        } else {
-                            playerPrey.getInventory().setItemInOffHand(new ItemStack(Material.TOTEM_OF_UNDYING));
-                            if (offHand != null && !offHand.getType().equals(Material.AIR))
-                                Bukkit.getScheduler().runTaskLater(MAIN_MANAGER.getPlugin(), () ->
-                                    playerPrey.getInventory().setItemInOffHand(offHand), 5);
-                        }
+                        AttributeInstance health = playerPrey.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+                        playerPrey.setHealth(Math.min(4, health == null ? 4 : health.getValue()));
+                        playerPrey.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 5 * 20, 1));
+                        playerPrey.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 45 * 20, 1));
+                        playerPrey.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40 * 20, 0));
+
+                        e.setCancelled(true);
                     }
 
                 e.setDamage(damage);

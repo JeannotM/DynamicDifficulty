@@ -64,6 +64,7 @@ public class SQL implements ISaveManager {
                             "MinAffinity INT DEFAULT -1, " +
                             "PRIMARY KEY(UUID))");
                     ps.execute();
+                    ps.close();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
         });
@@ -86,6 +87,7 @@ public class SQL implements ISaveManager {
                     ps.setInt(3, playerData.getMinAffinity());
                     ps.setString(4, playerData.getUUID().toString());
                     ps.executeUpdate();
+                    ps.close();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
         });
@@ -107,6 +109,7 @@ public class SQL implements ISaveManager {
                         data.setMaxAffinity(result.getInt("MaxAffinity"));
                         data.setMinAffinity(result.getInt("MinAffinity"));
                     }
+                    ps.close();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
             callback.onQueryDone(data);
@@ -125,6 +128,7 @@ public class SQL implements ISaveManager {
                         callback.onQueryDone(true);
                         return;
                     }
+                    ps.close();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
             callback.onQueryDone(false);
