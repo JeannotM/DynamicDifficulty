@@ -48,8 +48,7 @@ public class DifficultyManager {
     }
 
     public void calculateAllPlayers() {
-        if(MAIN_MANAGER.getPlayerManager().getPlayerList().size() != 0)
-            MAIN_MANAGER.getPlayerManager().getPlayerList().forEach((key, value) -> calculateDifficulty(key));
+        MAIN_MANAGER.getPlayerManager().getPlayerList().forEach((key, value) -> calculateDifficulty(key));
     }
 
     public String getProgress(UUID uuid) {
@@ -68,8 +67,42 @@ public class DifficultyManager {
     }
 
     public void calculateDifficulty(UUID uuid) {
+        Difficulty oldDifficulty = getDifficulty(uuid);
         Difficulty difficulty = calculateDifficulty(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid));
         PLAYER_LIST.put(uuid, difficulty);
+
+        handleDifficultyChange(uuid, oldDifficulty, difficulty);
+    }
+
+    private void handleDifficultyChange(UUID uuid, Difficulty oldDifficulty, Difficulty newDifficulty) {
+        if (oldDifficulty.getDifficultyName().equals(newDifficulty.getDifficultyName())) return;
+
+        int oldDifficultyIndex = DIFFICULTY_LIST_SORTED.indexOf(oldDifficulty.getDifficultyName());
+        int newDifficultyIndex = DIFFICULTY_LIST_SORTED.indexOf(newDifficulty.getDifficultyName());
+
+        boolean directionIsUp = oldDifficultyIndex < newDifficultyIndex;
+        ArrayList<String> difficultiesInBetween = new ArrayList<>();
+
+        if (directionIsUp) {
+            for (int i = oldDifficultyIndex + 1; i <= newDifficultyIndex; i++)
+                difficultiesInBetween.add(DIFFICULTY_LIST_SORTED.get(i));
+        } else {
+            for (int i = oldDifficultyIndex - 1; i >= newDifficultyIndex; i--)
+                difficultiesInBetween.add(DIFFICULTY_LIST_SORTED.get(i));
+        }
+
+        ArrayList<String> allCommands = new ArrayList<>();
+
+        for (String difficultyName : difficultiesInBetween) {
+            Difficulty difficulty = DIFFICULTY_LIST.get(difficultyName);
+            List<String> commands = directionIsUp
+                    ? difficulty.getCommandsOnSwitchFromPrev()
+                    : difficulty.getCommandsOnSwitchFromNext();
+
+            allCommands.addAll(commands);
+        }
+
+        MAIN_MANAGER.getCommandManager().dispatchCommandsIfOnline(uuid, allCommands);
     }
 
     public Difficulty calculateDifficulty(Minecrafter affinity) {
@@ -118,6 +151,10 @@ public class DifficultyManager {
         difficulty.setEffectsOnAttack(first.getEffectsOnAttack());
         difficulty.setDisabledCommands(first.getDisabledCommands());
         difficulty.setIgnoredMobs(first.getIgnoredMobs());
+        difficulty.setCommandsOnSwitchFromNext(first.getCommandsOnSwitchFromNext());
+        difficulty.setCommandsOnSwitchFromPrevious(first.getCommandsOnSwitchFromPrev());
+        difficulty.setCommandsOnJoin(first.getCommandsOnJoin());
+
 
         try {
             if (Bukkit.getOfflinePlayer(affinity.getUUID()).isOnline())
@@ -201,6 +238,13 @@ public class DifficultyManager {
                     profiles.add(new MythicMobProfile(mythicMobKey, mythicMobConfig));
 
                 difficulty.setMythicMobProfiles(profiles);
+            }
+
+            if (config.isSet("execute")) {
+                ConfigurationSection commands = config.getConfigurationSection("execute");
+                difficulty.setCommandsOnJoin(commands.getStringList("on-join"));
+                difficulty.setCommandsOnSwitchFromPrevious(commands.getStringList("on-switch-from-previous"));
+                difficulty.setCommandsOnSwitchFromNext(commands.getStringList("on-switch-from-next"));
             }
 
             tmpMap.put(difficulty.getAffinity(), difficulty.getDifficultyName());
