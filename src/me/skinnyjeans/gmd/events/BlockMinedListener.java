@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Random;
 
 public class BlockMinedListener extends BaseListener {
 
@@ -44,9 +45,9 @@ public class BlockMinedListener extends BaseListener {
                     MAIN_MANAGER.getPlayerManager().addAffinity(e.getPlayer().getUniqueId(), BLOCKS.get(type));
         });
 
-
         if (ORE_BLOCKS.containsKey(type) && e.getBlock().isPreferredTool(tool)) {
-            if (! hasSilkTouch)
+            double DoubleLoot = MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).getDoubleLoot();
+            if (! hasSilkTouch && DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0)
                 e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                         new ItemStack(ORE_BLOCKS.get(type)));
         }
