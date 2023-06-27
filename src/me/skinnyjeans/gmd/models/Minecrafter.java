@@ -6,6 +6,7 @@ public class Minecrafter {
     private UUID uuid;
     private String name;
     private int affinity;
+    private int gainedThisMinute;
     private int minAffinity = -1;
     private int maxAffinity = -1;
 
@@ -19,10 +20,12 @@ public class Minecrafter {
     public int getAffinity() { return affinity; }
     public int getMinAffinity() { return minAffinity; }
     public int getMaxAffinity() { return maxAffinity; }
+    public int getGainedThisMinute() { return gainedThisMinute; }
 
     public void setUUID(UUID value) { uuid = value; }
     public void setName(String value) { name = value; }
     public void setAffinity(int value) { affinity = value; }
     public void setMinAffinity(int value) { minAffinity = value; }
     public void setMaxAffinity(int value) { maxAffinity = value; }
+    public void setGainedThisMinute(int value) { gainedThisMinute = value; }
 }

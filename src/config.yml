@@ -16,6 +16,15 @@ affinity-per-heart-loss: -1 # So 1.5 hearts of damage (counts as 2 hearts) amoun
 pve-kill: 2
 death: -100
 
+# How much affinity player can gain or lose every minute at most.
+# This is to prevent players from gaining too much affinity in a short amount of time,
+# for example, when using mob farms or killing themselves in a loop.
+# NOTE: If the momentary gain is higher than the max (or lower than the min),
+# the affinity gain WILL NOT BE CAPPED, so big gains, like from killing the boss or dying,
+# are still be possible. That's why if it is set to 0, the limitation does not apply.
+max-affinity-gain-per-minute: 0
+max-affinity-loss-per-minute: 0 # this value is expected to be negative
+
 # How Much Affinity a Player Starts With When Joining For The First Time.
 starting-affinity: 600
 

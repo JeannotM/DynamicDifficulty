@@ -1,6 +1,7 @@
 package me.skinnyjeans.gmd.managers;
 
 import me.skinnyjeans.gmd.models.Minecrafter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -11,6 +12,9 @@ public class PlayerManager {
 
     private final MainManager MAIN_MANAGER;
     private final HashMap<UUID, Minecrafter> PLAYER_LIST = new HashMap<>();
+
+    private int maxAffinityGainPerMinute;
+    private int maxAffinityLossPerMinute;
 
     public PlayerManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -45,7 +49,11 @@ public class PlayerManager {
         return true;
     }
 
-    public void reloadConfig() { }
+    public void reloadConfig() {
+        FileConfiguration config = MAIN_MANAGER.getDataManager().getConfig();
+        maxAffinityGainPerMinute = config.getInt("max-affinity-gain-per-minute");
+        maxAffinityLossPerMinute = config.getInt("max-affinity-loss-per-minute");
+    }
 
     public void unloadPlayer(UUID uuid) {
         PLAYER_LIST.remove(uuid);
@@ -56,7 +64,31 @@ public class PlayerManager {
     public Minecrafter getPlayerAffinity(UUID uuid) { return PLAYER_LIST.get(uuid); }
 
     public int addAffinity(UUID uuid, int value) {
-        return value == 0 ? PLAYER_LIST.get(uuid).getAffinity() : setAffinity(uuid, PLAYER_LIST.get(uuid).getAffinity() + value);
+        Minecrafter player = PLAYER_LIST.get(uuid);
+
+        boolean ignoreTheCap = value > maxAffinityGainPerMinute || value < maxAffinityLossPerMinute;
+
+        if (value == 0) {
+            return player.getAffinity();
+        } else if (value > 0) {
+            if (!ignoreTheCap && player.getGainedThisMinute() + value > maxAffinityGainPerMinute) {
+                value = maxAffinityGainPerMinute - player.getGainedThisMinute();
+            }
+        } else {
+            if (!ignoreTheCap && player.getGainedThisMinute() + value < maxAffinityLossPerMinute) {
+                value = maxAffinityLossPerMinute - player.getGainedThisMinute();
+            }
+        }
+
+        if (!ignoreTheCap)
+            player.setGainedThisMinute(player.getGainedThisMinute() + value);
+        return setAffinity(uuid, PLAYER_LIST.get(uuid).getAffinity() + value);
+    }
+
+    public void resetAllGainsThisMinute() {
+        for(Minecrafter player : PLAYER_LIST.values()) {
+            player.setGainedThisMinute(0);
+        }
     }
 
     public int addMinAffinity(UUID uuid, int value) {
