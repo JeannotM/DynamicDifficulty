@@ -58,7 +58,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
                         <option>-ignorewarnings</option>
                     </options>
                     <libs>
-                        <lib>C:\Program Files\Java\jre1.8.0_341\lib\rt.jar</lib>
+                        <lib>${java.home}/lib/rt.jar</lib>
                     </libs>
                 </configuration>
                 <dependencies>

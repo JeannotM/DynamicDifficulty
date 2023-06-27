@@ -309,4 +309,30 @@ public class CommandManager implements CommandExecutor {
         DIFFICULTIES.clear();
         DIFFICULTIES.addAll(MAIN_MANAGER.getDifficultyManager().getDifficultyNames());
     }
+
+    private void dispatchCommandsInCurrentThread(UUID uuid, List<String> commands) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) return;
+
+        try {
+            for (String command : commands) {
+                command = command.replace("%player%", player.getName());
+                if (command.startsWith("/")) command = command.substring(1);
+                boolean foundCommand = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                if (!foundCommand) {
+                    MAIN_MANAGER.getPlugin().getLogger().warning("Command not found: " + command);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            MAIN_MANAGER.getPlugin().getLogger().warning("Error dispatching commands for " + player.getName());
+            e.printStackTrace();
+        }
+    }
+
+    public void dispatchCommandsIfOnline(UUID uuid, List<String> commands) {
+        Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () ->
+            dispatchCommandsInCurrentThread(uuid, commands)
+        );
+    }
 }

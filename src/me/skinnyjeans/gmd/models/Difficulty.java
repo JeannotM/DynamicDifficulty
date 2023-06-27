@@ -33,6 +33,9 @@ public class Difficulty {
     private boolean effectsWhenAttacked;
     private List<String> disabledCommands = new ArrayList<>();
     private List<String> mobsIgnoredPlayers = new ArrayList<>();
+    private List<String> commandsOnJoin = new ArrayList<>();
+    private List<String> commandsOnSwitchFromPrev = new ArrayList<>();
+    private List<String> commandsOnSwitchFromNext = new ArrayList<>();
     private List<MythicMobProfile> mythicMobProfiles = new ArrayList<>();
     private HashMap<EquipmentItems, Double> armorChance = new HashMap<>();
     private HashMap<ArmorTypes, Integer> armorDamageMultipliers = new HashMap<>();
@@ -72,6 +75,9 @@ public class Difficulty {
     public double getChanceToHaveWeapon() { return chanceToHaveWeapon; }
     public double getWeaponDropChance() { return weaponDropChance; }
     public double getChanceToCancelDeath() { return chanceCancelDeath; }
+    public List<String> getCommandsOnJoin() { return commandsOnJoin; }
+    public List<String> getCommandsOnSwitchFromPrev() { return commandsOnSwitchFromPrev; }
+    public List<String> getCommandsOnSwitchFromNext() { return commandsOnSwitchFromNext; }
 
     public void setPrefix(String value) { userPrefix = value; }
     public void setAffinity(int value) { affinityRequirement = value; }
@@ -104,4 +110,7 @@ public class Difficulty {
     public void setChanceToHaveArmor(Double value) { chanceToHaveArmor = value; }
     public void setChanceToHaveWeapon(Double value) { chanceToHaveWeapon = value; }
     public void setChanceToCancelDeath(Double value) { chanceCancelDeath = value; }
+    public void setCommandsOnJoin(List<String> value) { commandsOnJoin = value; }
+    public void setCommandsOnSwitchFromPrevious(List<String> value) { commandsOnSwitchFromPrev = value; }
+    public void setCommandsOnSwitchFromNext(List<String> value) { commandsOnSwitchFromNext = value; }
 }

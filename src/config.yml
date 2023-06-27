@@ -134,6 +134,10 @@ disabled-mobs:
 #     <MythicMob>:
 #       replace-with: <Entity, replaces mob>
 #       chance-to-replace: <percentage, chance to replace a mob>
+#   execute: <Use %player% placeholder to customize>
+#     on-join: <list, commands to execute when a player with this difficulty joins the server>
+#     on-switch-from-next: <list, commands to execute when a player switches to this difficulty from the next one>
+#     on-switch-from-previous: <list, commands to execute when a player switches to this difficulty from the previous one>
 difficulty:
   Easy:
     enabled: true
@@ -171,6 +175,15 @@ difficulty:
       chest-chance: 75.0
       leggings-chance: 56.25
       boots-chance: 42.19
+    execute:
+      on-join:
+        # - '/minecraft:tellraw %player% "You are playing on EASY difficulty"'
+      on-switch-from-next:
+        # - '/minecraft:tellraw %player% "You are now playing on EASY difficulty"'
+        # - '/minecraft:tellraw %player% "Have a cookie for your troubles!"'
+        # - '/minecraft:give %player% minecraft:cookie 1'
+      # this line will be ignored if you don't have a previous difficulty
+      # on-switch-from-previous: []
   Normal:
     enabled: true
     affinity-required: 400
@@ -206,6 +219,13 @@ difficulty:
       SkeletalKnight:
         replace-with: SKELETON
         chance-to-replace: 1.0
+    execute:
+      on-join:
+        # - '/minecraft:tellraw %player% "You are playing on NORMAL difficulty"'
+      on-switch-from-next:
+        # - '/minecraft:tellraw %player% "You are now playing on NORMAL difficulty"'
+      on-switch-from-previous:
+        # - '/minecraft:tellraw %player% "You are now playing on NORMAL difficulty"'
   Hard:
     enabled: true
     affinity-required: 1100
@@ -246,6 +266,13 @@ difficulty:
       chest-chance: 90.0
       leggings-chance: 81.0
       boots-chance: 72.9
+    execute:
+      on-join:
+        # - '/minecraft:tellraw %player% "You are playing on HARD difficulty"'
+      on-switch-from-previous:
+        # - '/minecraft:tellraw @a "%player% has switched to HARD difficulty!"'
+      # This line will be ignored if you don't have a difficulty after this one
+      # on-switch-from-next: []
 
 custom-mob-items-spawn-chance:
   override-default-limits: false # will allow higher levels than Minecraft's defaults. (E.g. Unbreaking 7 can happen if max-level is higher or equals 7)
