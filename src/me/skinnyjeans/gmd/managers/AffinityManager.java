@@ -18,8 +18,10 @@ public class AffinityManager {
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () ->
             Bukkit.getOnlinePlayers().forEach(player -> {
-                if (mainManager.getPlayerManager().isPlayerValid(player))
+                if (mainManager.getPlayerManager().isPlayerValid(player)) {
                     MAIN_MANAGER.getPlayerManager().addAffinity(player.getUniqueId(), intervalAffinity);
+                    MAIN_MANAGER.getPlayerManager().resetAllGainsThisMinute();
+                }
             }), 20 * 60, 20 * 60);
     }
 
