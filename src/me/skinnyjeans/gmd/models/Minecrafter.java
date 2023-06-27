@@ -28,4 +28,15 @@ public class Minecrafter {
     public void setMinAffinity(int value) { minAffinity = value; }
     public void setMaxAffinity(int value) { maxAffinity = value; }
     public void setGainedThisMinute(int value) { gainedThisMinute = value; }
+
+    public Minecrafter clone() {
+        Minecrafter clone = new Minecrafter();
+        clone.setUUID(uuid);
+        clone.setName(name);
+        clone.setAffinity(affinity);
+        clone.setMinAffinity(minAffinity);
+        clone.setMaxAffinity(maxAffinity);
+        clone.setGainedThisMinute(gainedThisMinute);
+        return clone;
+    }
 }
