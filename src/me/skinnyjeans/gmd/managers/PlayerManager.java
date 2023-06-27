@@ -28,7 +28,7 @@ public class PlayerManager {
                     MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
                 });
             } else {
-                Minecrafter playerData = MAIN_MANAGER.getAffinityManager().getDefault();
+                Minecrafter playerData = MAIN_MANAGER.getAffinityManager().getDefault().clone();
                 playerData.setName(player.getName());
                 playerData.setUUID(player.getUniqueId());
                 PLAYER_LIST.put(player.getUniqueId(), playerData);
