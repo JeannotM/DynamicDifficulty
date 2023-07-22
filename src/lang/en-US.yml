@@ -63,7 +63,7 @@ command:
 in-game:
   attacker-no-pvp: "You cannot attack %user% because you're still having a hard time!"
   attackee-no-pvp: "You cannot attack %user% because he's already having a hard time!"
-  command-not-allowed: "You're too good of a player too use this command!"
+  command-not-allowed: "You're too good of a player to use this command!"
 other:
   database-chosen: "Successfully connected to %database%"
   update-config: "You're currently playing on an old version of the config, make sure you update it!"
