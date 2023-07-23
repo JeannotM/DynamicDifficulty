@@ -21,6 +21,7 @@ public class Difficulty {
     private int doubleDurabilityDamageChance;
     private int minimumStarvationHealth;
     private int maximumHealth;
+    private int damagePerArmorPoint;
     private double chanceCancelDeath;
     private double armorDropChance;
     private double chanceToEnchant = Double.NaN;
@@ -50,6 +51,7 @@ public class Difficulty {
     public int getDamageOnMobs() { return damageDoneOnMobs; }
     public int getDamageOnTamed() { return damageDoneOnTamed; }
     public int getExperienceMultiplier() { return experienceMultiplier; }
+    public int getDamagePerArmorPoint() { return damagePerArmorPoint; }
     public int getHungerDrain() { return hungerDrainChance; }
     public int getDoubleLoot() { return doubleLootChance; }
     public int getMaxEnchants() { return maxEnchants; }
@@ -58,7 +60,7 @@ public class Difficulty {
     public int getDoubleDurabilityDamageChance() { return doubleDurabilityDamageChance; }
     public int getMinimumStarvationHealth() { return minimumStarvationHealth; }
     public int getMaximumHealth() { return maximumHealth; }
-    public int getArmorDamageMultiplier(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, -505); }
+    public int getArmorDamageMultiplier(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, 0); }
     public HashMap<ArmorTypes, Integer> getArmorDamageMultiplier() { return armorDamageMultipliers; }
     public HashMap<EquipmentItems, Double> getEnchantChances() { return armorChance; }
     public boolean getAllowPVP() { return allowPVP; }
@@ -91,6 +93,7 @@ public class Difficulty {
     public void setMaxEnchants(int value) { maxEnchants = value; }
     public void setMaxEnchantLevel(int value) { maxEnchantLevel = value; }
     public void setDamageByRangedMobs(int value) { damageByRangedMobs = value; }
+    public void setDamagePerArmorPoint(int value) { damagePerArmorPoint = value; }
     public void setDoubleDurabilityDamageChance(int value) { doubleDurabilityDamageChance = value; }
     public void setMinimumStarvationHealth(int value) { minimumStarvationHealth = value; }
     public void setMaximumHealth(int value) { maximumHealth = value; }

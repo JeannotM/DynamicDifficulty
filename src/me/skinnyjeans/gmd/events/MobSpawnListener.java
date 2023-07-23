@@ -154,7 +154,11 @@ public class MobSpawnListener extends BaseListener {
     }
 
     public ItemStack calcEnchant(ItemStack item, Difficulty difficulty, EquipmentItems piece, Double chanceToEnchant) {
-        for(int j = 0; j < random.nextInt(difficulty.getMaxEnchants()); j++) {
+        int maxEnchants = difficulty.getMaxEnchants();
+        if(maxEnchants <= 0) return item;
+
+        int count = random.nextInt(maxEnchants);
+        for(int j = 0; j < count; j++) {
             Enchantment chosenEnchant = null;
             int currentAmount = 0;
             int chosenAmount = random.nextInt(ENCHANTMENT_WEIGHT.values().stream().mapToInt(i -> i).sum()) + 1;

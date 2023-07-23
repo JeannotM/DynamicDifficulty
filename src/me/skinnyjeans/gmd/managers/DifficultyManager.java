@@ -124,6 +124,7 @@ public class DifficultyManager {
         difficulty.setChanceToHaveArmor(calculatePercentage(first.getChanceToHaveArmor(), second.getChanceToHaveArmor(), c));
         difficulty.setChanceToHaveWeapon(calculatePercentage(first.getChanceToHaveWeapon(), second.getChanceToHaveWeapon(), c));
         difficulty.setDamageByRangedMobs(calculatePercentage(first.getDamageByRangedMobs(), second.getDamageByRangedMobs(), c));
+        difficulty.setDamagePerArmorPoint(calculatePercentage(first.getDamagePerArmorPoint(), second.getDamagePerArmorPoint(), c));
         difficulty.setExperienceMultiplier(calculatePercentage(first.getExperienceMultiplier(), second.getExperienceMultiplier(), c));
         difficulty.setDoubleDurabilityDamageChance(calculatePercentage(first.getDoubleDurabilityDamageChance(), second.getDoubleDurabilityDamageChance(), c));
         difficulty.setMaxEnchants(calculatePercentage(first.getMaxEnchants(), second.getMaxEnchants(), c));
@@ -154,7 +155,6 @@ public class DifficultyManager {
         difficulty.setCommandsOnSwitchFromNext(first.getCommandsOnSwitchFromNext());
         difficulty.setCommandsOnSwitchFromPrevious(first.getCommandsOnSwitchFromPrev());
         difficulty.setCommandsOnJoin(first.getCommandsOnJoin());
-
 
         try {
             if (Bukkit.getOfflinePlayer(affinity.getUUID()).isOnline())
@@ -195,6 +195,7 @@ public class DifficultyManager {
             difficulty.setDamageOnTamed(config.getInt("damage-done-on-tamed", 100));
             difficulty.setHungerDrain(config.getInt("hunger-drain-chance", 100));
             difficulty.setDamageByRangedMobs(config.getInt("damage-done-by-ranged-mobs", 100));
+            difficulty.setDamagePerArmorPoint(config.getInt("extra-damage-per-armor-point", 0));
             difficulty.setDoubleDurabilityDamageChance(config.getInt("double-durability-damage-chance", 0));
             difficulty.setExperienceMultiplier(config.getInt("experience-multiplier", 100));
             difficulty.setChanceToCancelDeath(config.getDouble("chance-cancel-death", 0.0));

@@ -125,6 +125,7 @@ disabled-mobs:
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
 #   commands-not-allowed-on-difficulty: <list, What commands aren't allowed to be run by players on certain difficulties, spaces not recommended>
+#   extra-damage-per-armor-point: <number, how much damage reduction/increased needs to be added per armor point a player has (E.g. Diamond Chestplate has 8 armor points, 8 * 1 = 8)>
 #   extra-damage-for-certain-armor-types: <list, how much damage reduction/increased per armor set worn (full diamond on Hard = 100 + (4 x 4)). Settings include: [nothing, leather, golden, chainmail, iron, turtle, elytra, diamond and netherite]>
 #   mobs-ignore-player: <list, these mobs will ignore the players unless they're provoked>
 #   enchanting: <Will only work if 'custom-enchants-on-mobs' in the toggle-settings is enabled>
@@ -167,6 +168,7 @@ difficulty:
     allow-natural-regen: true
     effects-when-attacked: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
+    extra-damage-per-armor-point: 0
     extra-damage-for-certain-armor-types:
       nothing: -3
       leather: -1
@@ -257,6 +259,7 @@ difficulty:
     commands-not-allowed-on-difficulty:
       - gotohome
       - help 34
+    extra-damage-per-armor-point: 0
     extra-damage-for-certain-armor-types:
       golden: 1
       chainmail: 1

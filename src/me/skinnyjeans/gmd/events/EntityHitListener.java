@@ -5,7 +5,6 @@ import me.skinnyjeans.gmd.models.ArmorTypes;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -73,18 +72,23 @@ public class EntityHitListener extends BaseListener {
                 Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
                 double damage;
                 if (allowTamedWolves && e.getEntity() instanceof Wolf) {
-                    damage = (e.getFinalDamage() * difficulty.getDamageOnTamed()) / 100;
+                    damage = (e.getFinalDamage()
+                            * difficulty.getDamageOnTamed())
+                            / 100.0;
                 } else {
                     int damageByArmor = 0;
                     if(calculateExtraArmorDamage && e.getEntity() instanceof Player)
                         for(ItemStack x : ((Player) prey).getInventory().getArmorContents()) {
                             ArmorTypes suit = ArmorTypes.valueOf(x == null ? "NOTHING" : x.getType().toString().split("_")[0].toLowerCase());
-                            int dmg = difficulty.getArmorDamageMultiplier(suit);
-                            damageByArmor += dmg == -505 ? 0 : dmg;
+                            damageByArmor += difficulty.getArmorDamageMultiplier(suit);
                         }
 
                     boolean isProjectile = e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE);
-                    damage = (e.getFinalDamage() * (isProjectile ? difficulty.getDamageByRangedMobs() : difficulty.getDamageByMobs()) + damageByArmor) / 100;
+                    damage = e.getFinalDamage()
+                            * ((isProjectile ? difficulty.getDamageByRangedMobs() : difficulty.getDamageByMobs()
+                            + damageByArmor
+                            + difficulty.getDamagePerArmorPoint())
+                            / 100.0);
                 }
 
                 Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
@@ -110,7 +114,9 @@ public class EntityHitListener extends BaseListener {
                 e.setDamage(damage);
             }
         } else if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
-            double damage = e.getFinalDamage() * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getDamageOnMobs() / 100.0;
+            double damage = e.getFinalDamage()
+                    * (MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getDamageOnMobs()
+                    / 100.0);
             MAIN_MANAGER.getEntityManager().entityHit(prey);
             e.setDamage(damage);
         }
