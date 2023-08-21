@@ -21,7 +21,7 @@ public class HealthRegenListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onHealthRegen(EntityRegainHealthEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
@@ -33,7 +33,7 @@ public class HealthRegenListener extends BaseListener {
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
-            if (!difficulty.getAllowHealthRegen()) {
+            if (!difficulty.allowHealthRegen) {
                 shouldDisable = false;
                 break;
             }

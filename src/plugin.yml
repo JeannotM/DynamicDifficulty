@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.7
+version: 1.8
 author: SkinnyJeans
 api-version: 1.13
 softdepend: ["PlaceholderAPI", "MythicMobs"]
@@ -9,6 +9,7 @@ permissions:
   affinity.*:
     default: op
     children:
+      affinity.me: true
       affinity.info: true
       affinity.help: true
       affinity.get: true
@@ -25,6 +26,9 @@ permissions:
       affinity.playergui: true
       affinity.difficulties: true
 
+  affinity.me:
+    default: false
+    description: Opens the difficulty settings for a player
   affinity.info:
     default: false
     description: Returns some info from items in the plugin

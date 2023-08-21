@@ -31,7 +31,7 @@ public class BlockMinedListener extends BaseListener {
 
     public BlockMinedListener(MainManager mainManager) { MAIN_MANAGER = mainManager; }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onMined(BlockBreakEvent e) {
         if(BLOCKS.size() == 0) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
@@ -46,8 +46,8 @@ public class BlockMinedListener extends BaseListener {
         });
 
         if (ORE_BLOCKS.containsKey(type) && e.getBlock().isPreferredTool(tool)) {
-            double DoubleLoot = MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).getDoubleLoot();
-            if (! hasSilkTouch && DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0)
+            if (! hasSilkTouch && new Random().nextDouble() < MAIN_MANAGER
+                    .getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).doubleLootChance)
                 e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                         new ItemStack(ORE_BLOCKS.get(type)));
         }

@@ -37,7 +37,8 @@ public class SQL implements ISaveManager {
 
     public void connect(DataManager d) throws SQLException, ClassNotFoundException {
         String database = "";
-        if(!isConnected())
+        if(!isConnected()) {
+            Class.forName("com.mysql.jdbc.Driver");
             if(saveType.equals("mysql")) {
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
                 database = "MySQL";
@@ -49,6 +50,7 @@ public class SQL implements ISaveManager {
                 connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
                 database = "PostGreSQL";
             }
+        }
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", database));
     }
 

@@ -5,7 +5,6 @@ import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
@@ -21,16 +20,16 @@ public class CommandListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void beforeCommand(PlayerCommandPreprocessEvent e) {
         if(shouldDisable) return;
         Player p = e.getPlayer();
         if(p.isOp()) return;
         MAIN_MANAGER.getPlayerManager().isPlayerValid(p);
 
-        List<String> list = MAIN_MANAGER.getDifficultyManager().getDifficulty(p.getUniqueId()).getDisabledCommands();
+        List<String> list = MAIN_MANAGER.getDifficultyManager().getDifficulty(p.getUniqueId()).disabledCommands;
         StringBuilder cmd = new StringBuilder();
-        String[] args = e.getMessage().replace("/","").split(" ");
+        String[] args = e.getMessage().replace("/","").toLowerCase().split(" ");
         if(list.size() != 0)
             for(String arg : args) {
                 if(cmd.length() != 0)
@@ -47,8 +46,8 @@ public class CommandListener extends BaseListener {
     @Override
     public void reloadConfig() {
         shouldDisable = true;
-        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
-            if (difficulty.getDisabledCommands().size() != 0) {
+        for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
+            if (difficulty.disabledCommands.size() != 0) {
                 shouldDisable = false;
                 break;
             }

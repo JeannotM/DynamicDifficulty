@@ -19,11 +19,11 @@ public class ItemDamageListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onItemDamage(PlayerItemDamageEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer()))
-            if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).getDoubleDurabilityDamageChance() / 100.0)
+            if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).doubleDurabilityDamageChance)
                 e.setDamage(e.getDamage() * 2);
     }
 
@@ -31,7 +31,7 @@ public class ItemDamageListener extends BaseListener {
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
-            if (difficulty.getDoubleDurabilityDamageChance() != 0) {
+            if (difficulty.doubleDurabilityDamageChance != 0.0) {
                 shouldDisable = false;
                 break;
             }

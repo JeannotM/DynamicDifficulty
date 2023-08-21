@@ -5,7 +5,6 @@ import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 public class EntityDamageListener extends BaseListener {
@@ -18,14 +17,14 @@ public class EntityDamageListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onEntityDamage(EntityDamageEvent e) {
         if (shouldDisable) return;
         if (MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) {
             Player player = (Player) e.getEntity();
             if (e.getCause() == EntityDamageEvent.DamageCause.STARVATION)
                 if(player.getHealth() - e.getFinalDamage() < MAIN_MANAGER.getDifficultyManager()
-                        .getDifficulty(player.getUniqueId()).getMinimumStarvationHealth())
+                        .getDifficulty(player.getUniqueId()).minimumStarvationHealth)
                     e.setCancelled(true);
         }
     }
@@ -35,7 +34,7 @@ public class EntityDamageListener extends BaseListener {
         shouldDisable = true;
 
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
-            if (difficulty.getMinimumStarvationHealth() != 0) {
+            if (difficulty.minimumStarvationHealth != 0) {
                 shouldDisable = false;
                 break;
             }

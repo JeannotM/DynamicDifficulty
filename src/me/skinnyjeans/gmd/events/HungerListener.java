@@ -20,12 +20,12 @@ public class HungerListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onHungerDrain(FoodLevelChangeEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
             if(((Player) e.getEntity()).getFoodLevel() > e.getFoodLevel())
-                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getHungerDrain() / 100.0)
+                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).hungerDrainChance)
                     e.setCancelled(true);
     }
 
@@ -33,7 +33,7 @@ public class HungerListener extends BaseListener {
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
-            if (difficulty.getHungerDrain() < 100) {
+            if (difficulty.hungerDrainChance < 1.0) {
                 shouldDisable = false;
                 break;
             }

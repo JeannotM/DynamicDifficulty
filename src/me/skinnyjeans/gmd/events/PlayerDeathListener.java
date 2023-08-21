@@ -22,11 +22,11 @@ public class PlayerDeathListener extends BaseListener {
         reloadConfig();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onDeath(PlayerDeathEvent e) {
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) return;
 
-        if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getKeepInventory()) {
+        if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).keepInventory) {
             e.setKeepInventory(true);
             e.setKeepLevel(true);
             e.setDroppedExp(0);

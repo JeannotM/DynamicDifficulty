@@ -1,6 +1,8 @@
 package me.skinnyjeans.gmd.managers;
 
+import me.skinnyjeans.gmd.models.Difficulty;
 import me.skinnyjeans.gmd.models.Minecrafter;
+import me.skinnyjeans.gmd.utils.StaticInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -9,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -18,7 +21,7 @@ public class CommandManager implements CommandExecutor {
 
     private final MainManager MAIN_MANAGER;
 
-    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("difficulties", "help", "reload", "author", "forcesave", "playergui"));
+    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("difficulties", "me", "help", "reload", "author", "forcesave", "playergui"));
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
@@ -72,6 +75,7 @@ public class CommandManager implements CommandExecutor {
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
                 if(argument.equals("difficulties")) return openDifficultyGUI(sender);
+                if(argument.equals("me")) return openMyInventoryGUI(sender);
             }
         } else if(ONE_ARG.contains(argument)) {
             if(args.length > 1 && args[1].equals("@a")) {
@@ -174,10 +178,21 @@ public class CommandManager implements CommandExecutor {
         return true;
     }
 
+    private boolean openMyInventoryGUI(CommandSender sender) {
+        if(sender instanceof Player) {
+            Player player = (Player) sender;
+            Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(player.getUniqueId());
+            Inventory inventory = Bukkit.createInventory(null, 36, StaticInfo.DIFFICULTY_INVENTORY);
+            MAIN_MANAGER.getInventoryManager().createInventory(difficulty, inventory);
+            player.openInventory(inventory);
+        } else sendMessage(sender, consoleOpenPlayerGUI, false);
+        return true;
+    }
+
     private String getAffinity(Player player) {
         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(player.getUniqueId());
         StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, data.getAffinity() + ""))
-                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(data.getUUID()).getPrefix())
+                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(data.getUUID()).prefix)
                         .replace(PREFIX_NUMBER, data.getAffinity() + ""));
 
         if(data.getMaxAffinity() != -1) message.append("\n").append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.getMaxAffinity() + ""));
@@ -190,7 +205,7 @@ public class CommandManager implements CommandExecutor {
         int setAffinity = MAIN_MANAGER.getPlayerManager().setAffinity(player.getUniqueId(), value);
         MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
         return affinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, String.valueOf(setAffinity))
-                .replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(player.getUniqueId()).getPrefix());
+                .replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(player.getUniqueId()).prefix);
     }
 
     private String addAffinity(Player player, int value) {

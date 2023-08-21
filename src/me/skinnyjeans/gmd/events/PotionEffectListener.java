@@ -33,12 +33,12 @@ public class PotionEffectListener extends BaseListener {
         EFFECT_CAUSES = EnumSet.of(EntityPotionEffectEvent.Cause.ATTACK, EntityPotionEffectEvent.Cause.ARROW, EntityPotionEffectEvent.Cause.POTION_SPLASH);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onPotionEffect(EntityPotionEffectEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
             if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
-                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).getEffectsOnAttack())
+                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).effectsWhenAttacked)
                     e.setCancelled(true);
     }
 
@@ -46,7 +46,7 @@ public class PotionEffectListener extends BaseListener {
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties() )
-            if (!difficulty.getEffectsOnAttack()) {
+            if (!difficulty.effectsWhenAttacked) {
                 shouldDisable = false;
                 break;
             }

@@ -38,7 +38,7 @@ public class EntityHitListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onHit(EntityDamageByEntityEvent e) {
         Entity hunter, prey;
 
@@ -60,10 +60,10 @@ public class EntityHitListener extends BaseListener {
 
             if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
                 HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", playerPrey.getDisplayName()); }};
-                if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getAllowPVP()) {
+                if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).allowPVP) {
                     if(notAttackOthers.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackOthers, entry));
                     e.setCancelled(true);
-                } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(prey.getUniqueId()).getAllowPVP()) {
+                } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(prey.getUniqueId()).allowPVP) {
                     if(notAttackPerson.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackPerson, entry));
                     e.setCancelled(true);
                 }
@@ -72,23 +72,21 @@ public class EntityHitListener extends BaseListener {
                 Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
                 double damage;
                 if (allowTamedWolves && e.getEntity() instanceof Wolf) {
-                    damage = (e.getFinalDamage()
-                            * difficulty.getDamageOnTamed())
-                            / 100.0;
+                    damage = e.getFinalDamage()
+                            * difficulty.damageDoneOnTamed;
                 } else {
-                    int damageByArmor = 0;
+                    double damageByArmor = 0;
                     if(calculateExtraArmorDamage && e.getEntity() instanceof Player)
                         for(ItemStack x : ((Player) prey).getInventory().getArmorContents()) {
                             ArmorTypes suit = ArmorTypes.valueOf(x == null ? "NOTHING" : x.getType().toString().split("_")[0].toLowerCase());
-                            damageByArmor += difficulty.getArmorDamageMultiplier(suit);
+                            damageByArmor += difficulty.getArmorDamageMultipliers(suit);
                         }
 
                     boolean isProjectile = e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE);
-                    damage = e.getFinalDamage()
-                            * ((isProjectile ? difficulty.getDamageByRangedMobs() : difficulty.getDamageByMobs()
+                    damage = e.getDamage()
+                            * (isProjectile ? difficulty.damageByRangedMobs : difficulty.damageDoneByMobs
                             + damageByArmor
-                            + difficulty.getDamagePerArmorPoint())
-                            / 100.0);
+                            + difficulty.damagePerArmorPoint);
                 }
 
                 Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
@@ -98,7 +96,7 @@ public class EntityHitListener extends BaseListener {
 
                 if (playerPrey.getHealth() - damage <= 0)
                     if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
-                            .getDifficulty(playerPrey.getUniqueId()).getChanceToCancelDeath() / 100.0) {
+                            .getDifficulty(playerPrey.getUniqueId()).chanceCancelDeath) {
                         playerPrey.spawnParticle(Particle.TOTEM, playerPrey.getLocation(), 100);
                         playerPrey.playSound(playerPrey.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
 
@@ -115,8 +113,7 @@ public class EntityHitListener extends BaseListener {
             }
         } else if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
             double damage = e.getFinalDamage()
-                    * (MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).getDamageOnMobs()
-                    / 100.0);
+                    * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).damageDoneOnMobs;
             MAIN_MANAGER.getEntityManager().entityHit(prey);
             e.setDamage(damage);
         }
@@ -135,7 +132,7 @@ public class EntityHitListener extends BaseListener {
         notAttackPerson = MAIN_MANAGER.getDataManager().getLanguageString("in-game.attackee-no-pvp", false);
 
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
-            if (difficulty.getArmorDamageMultiplier().size() != 0) {
+            if (difficulty.armorDamageMultipliers.size() != 0) {
                 calculateExtraArmorDamage = true;
                 break;
             }

@@ -24,7 +24,7 @@ public class PlayerJoinListener extends BaseListener {
             Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
             Runnable afterJoinTask = () ->
                     MAIN_MANAGER.getCommandManager()
-                            .dispatchCommandsIfOnline(uuid, difficulty.getCommandsOnJoin());
+                            .dispatchCommandsIfOnline(uuid, difficulty.commandsOnJoin);
 
             Bukkit.getScheduler().runTaskLater(MAIN_MANAGER.getPlugin(), afterJoinTask, 1L);
         }

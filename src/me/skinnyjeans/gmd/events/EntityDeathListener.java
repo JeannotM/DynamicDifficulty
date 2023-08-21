@@ -20,7 +20,7 @@ public class EntityDeathListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onKill(EntityDeathEvent e) {
         if(e.getEntity().getKiller() == null) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity().getKiller())) return;
@@ -38,9 +38,8 @@ public class EntityDeathListener extends BaseListener {
         boolean isPlayer = e.getEntity() instanceof Player;
         if (!isPlayer && !MAIN_MANAGER.getEntityManager().isEntityDisabled(e.getEntity())) {
             if(e.getEntity().getCanPickupItems()) return;
-            e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getExperienceMultiplier() / 100.0));
-            double DoubleLoot = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).getDoubleLoot();
-            if (DoubleLoot != 0.0 && new Random().nextDouble() < DoubleLoot / 100.0)
+            e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).experienceMultiplier));
+            if (new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).doubleLootChance)
                 for (int i = 0; i < e.getDrops().size(); i++)
                     Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
         }

@@ -17,11 +17,11 @@ public class EntityTargetListener extends BaseListener {
         MAIN_MANAGER = mainManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getTarget()))
-            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).getIgnoredMobs().contains(e.getEntity().getType().toString()))
+            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).mobsIgnoredPlayers.contains(e.getEntity().getType().toString()))
                 if(!MAIN_MANAGER.getEntityManager().wasEntityAttacked(e.getEntity()))
                     e.setCancelled(true);
     }
@@ -30,7 +30,7 @@ public class EntityTargetListener extends BaseListener {
     public void reloadConfig() {
         shouldDisable = true;
         for(Difficulty difficulty : MAIN_MANAGER.getDifficultyManager().getDifficulties())
-            if (difficulty.getIgnoredMobs().size() != 0) {
+            if (difficulty.mobsIgnoredPlayers.size() != 0) {
                 shouldDisable = false;
                 break;
             }
