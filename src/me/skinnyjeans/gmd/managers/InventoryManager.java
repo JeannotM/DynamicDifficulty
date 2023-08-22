@@ -110,7 +110,7 @@ public class InventoryManager {
         inventory.setItem(24, createDifficultyPlayerHead("Health Regen", difficulty.allowHealthRegen));
         inventory.setItem(25, createDifficultyPlayerHead("Effects When Attacked", difficulty.effectsWhenAttacked));
         inventory.setItem(26, createDifficultyPlayerHead("Armor Drop Chance", difficulty.armorDropChance));
-        inventory.setItem(27, createDifficultyPlayerHead("Armor Enchant Chance", difficulty.armorEnchantChances));
+        inventory.setItem(27, createDifficultyPlayerHead("Armor Enchant Chance", difficulty.armorChance));
         inventory.setItem(28, createDifficultyPlayerHead("Armor Chance For Mobs", difficulty.chanceToHaveArmor));
         inventory.setItem(29, createDifficultyPlayerHead("Weapon Drop Chance", difficulty.chanceToHaveWeapon));
         inventory.setItem(30, createDifficultyPlayerHead("Ignored Mobs", difficulty.mobsIgnoredPlayers));

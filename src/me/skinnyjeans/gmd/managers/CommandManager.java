@@ -230,6 +230,7 @@ public class CommandManager implements CommandExecutor {
 
     private String reloadPlugin() {
         MAIN_MANAGER.reloadConfig();
+        MAIN_MANAGER.getDifficultyManager().calculateAllPlayers();
         return configReloaded;
     }
 

@@ -42,7 +42,7 @@ public class Difficulty {
     public List<String> commandsOnSwitchFromPrev = new ArrayList<>();
     public List<String> commandsOnSwitchFromNext = new ArrayList<>();
     public List<MythicMobProfile> mythicMobProfiles = new ArrayList<>();
-    public HashMap<EquipmentItems, Double> armorEnchantChances = new HashMap<EquipmentItems, Double>();
+    public HashMap<EquipmentItems, Double> armorChance = new HashMap<EquipmentItems, Double>();
     public HashMap<ArmorTypes, Double> armorDamageMultipliers = new HashMap<ArmorTypes, Double>();
 
     public Difficulty(String name) { difficultyName = name; }
@@ -51,5 +51,5 @@ public class Difficulty {
     public int getAffinity() { return affinityRequirement; }
 
     public double getArmorDamageMultipliers(ArmorTypes type) { return armorDamageMultipliers.getOrDefault(type, 0.0); }
-    public double getEnchantChance(EquipmentItems type) { return armorEnchantChances.getOrDefault(type, 0.0); }
+    public double getArmorChance(EquipmentItems type) { return armorChance.getOrDefault(type, 0.0); }
 }

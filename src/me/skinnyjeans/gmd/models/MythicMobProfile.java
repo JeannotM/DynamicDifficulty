@@ -11,7 +11,7 @@ public class MythicMobProfile {
 
     public MythicMobProfile(String key, ConfigurationSection config) {
         mythicMobName = key;
-        chanceToReplace = config.getDouble(key + ".chance-to-replace", 5.0);
+        chanceToReplace = config.getDouble(key + ".chance-to-replace", 5.0) / 100.0;
         replacedWith = EntityType.valueOf(config.getString(key + ".replace-with", "ZOMBIE"));
     }
 }

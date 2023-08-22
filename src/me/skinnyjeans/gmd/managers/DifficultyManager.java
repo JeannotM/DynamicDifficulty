@@ -138,8 +138,8 @@ public class DifficultyManager {
         difficulty.chanceCancelDeath = calculatePercentage(first.chanceCancelDeath, second.chanceCancelDeath, c);
 
         for(EquipmentItems item : EquipmentItems.values())
-            difficulty.armorEnchantChances.put(item,
-                    calculatePercentage(first.getEnchantChance(item), second.getEnchantChance(item), c));
+            difficulty.armorChance.put(item,
+                    calculatePercentage(first.getArmorChance(item), second.getArmorChance(item), c));
 
         for(ArmorTypes item : ArmorTypes.values())
             difficulty.armorDamageMultipliers.put(item,
@@ -235,7 +235,7 @@ public class DifficultyManager {
             difficulty.maxEnchants = config.getInt("enchanting.max-enchants", 2);
             difficulty.maxEnchantLevel = config.getInt("enchanting.max-level", 1);
             for(EquipmentItems item : EquipmentItems.values())
-                difficulty.armorEnchantChances.put(item, config.getDouble("enchanting." + item.name().toLowerCase() + "-chance", 1.0)
+                difficulty.armorChance.put(item, config.getDouble("enchanting." + item.name().toLowerCase() + "-chance", 1.0)
                         / 100.0);
 
             if (config.isSet("mythic-mobs")) {
