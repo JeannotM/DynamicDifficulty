@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -48,8 +47,7 @@ public class BlockMinedListener extends BaseListener {
         if (ORE_BLOCKS.containsKey(type) && e.getBlock().isPreferredTool(tool)) {
             if (! hasSilkTouch && new Random().nextDouble() < MAIN_MANAGER
                     .getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).doubleLootChance)
-                e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(),
-                        new ItemStack(ORE_BLOCKS.get(type)));
+                e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(ORE_BLOCKS.get(type)));
         }
     }
 
@@ -60,16 +58,15 @@ public class BlockMinedListener extends BaseListener {
         ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 
         int blockMined = config.getInt("block-mined", 2);
-
         try {
             // Add items from newer updates
-            ORE_BLOCKS.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
-            ORE_BLOCKS.put(Material.DEEPSLATE_COAL_ORE, Material.COAL);
-            ORE_BLOCKS.put(Material.DEEPSLATE_LAPIS_ORE, Material.LAPIS_LAZULI);
-            ORE_BLOCKS.put(Material.DEEPSLATE_DIAMOND_ORE, Material.DIAMOND);
-            ORE_BLOCKS.put(Material.DEEPSLATE_EMERALD_ORE, Material.EMERALD);
-            ORE_BLOCKS.put(Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE);
-            ORE_BLOCKS.put(Material.COPPER_ORE, Material.RAW_COPPER);
+//            ORE_BLOCKS.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
+//            ORE_BLOCKS.put(Material.DEEPSLATE_COAL_ORE, Material.COAL);
+//            ORE_BLOCKS.put(Material.DEEPSLATE_LAPIS_ORE, Material.LAPIS_LAZULI);
+//            ORE_BLOCKS.put(Material.DEEPSLATE_DIAMOND_ORE, Material.DIAMOND);
+//            ORE_BLOCKS.put(Material.DEEPSLATE_EMERALD_ORE, Material.EMERALD);
+//            ORE_BLOCKS.put(Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE);
+//            ORE_BLOCKS.put(Material.COPPER_ORE, Material.RAW_COPPER);
         } catch (Exception ignored) { }
 
         for(Object key : config.getList("blocks").toArray())

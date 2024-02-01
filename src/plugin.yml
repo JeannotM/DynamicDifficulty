@@ -3,6 +3,7 @@ name: DynamicDifficulty
 version: 1.8
 author: SkinnyJeans
 api-version: 1.13
+prefix: "[DynamicDifficulty]"
 softdepend: ["PlaceholderAPI", "MythicMobs"]
 
 permissions:
@@ -24,6 +25,7 @@ permissions:
       affinity.reload: true
       affinity.forcesave: true
       affinity.playergui: true
+      affinity.calculate: true
       affinity.difficulties: true
 
   affinity.me:
@@ -71,6 +73,9 @@ permissions:
   affinity.playergui:
     default: op
     description: allows you to change the settings of players in chest form
+  affinity.calculate:
+    default: op
+    description: Force calculates the affinity of all players.
   affinity.difficulties:
     default: op
     description: allows you to see all the difficulties

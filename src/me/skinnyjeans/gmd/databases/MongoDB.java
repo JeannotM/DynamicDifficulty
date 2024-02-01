@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class MongoDB implements ISaveManager {
@@ -50,15 +49,15 @@ public class MongoDB implements ISaveManager {
 
     @Override
     public void updatePlayer(Minecrafter playerData) {
-        playerExists(playerData.getUUID(), r -> {
+        playerExists(playerData.uuid, r -> {
             try {
                 if(isConnected()) {
-                    BasicDBObject obj = new BasicDBObject("_id", playerData.getUUID().toString()).append("Affinity", playerData.getAffinity())
-                            .append("MinAffinity", playerData.getMinAffinity()).append("MaxAffinity", playerData.getMaxAffinity())
-                            .append("Name", playerData.getName());
+                    BasicDBObject obj = new BasicDBObject("_id", playerData.uuid.toString()).append("Affinity", playerData.affinity)
+                            .append("MinAffinity", playerData.minAffinity).append("MaxAffinity", playerData.maxAffinity)
+                            .append("Name", playerData.name);
 
                     if(r) {
-                        getConnection().update(new BasicDBObject("_id", playerData.getUUID().toString()), obj);
+                        getConnection().update(new BasicDBObject("_id", playerData.uuid.toString()), obj);
                     } else {
                         getConnection().insert(obj);
                     }
@@ -78,11 +77,11 @@ public class MongoDB implements ISaveManager {
                     DBCursor find = getConnection().find(new BasicDBObject("_id", uuid));
                     if(find.hasNext()){
                         DBObject object = find.next();
-                        data.setName(object.get("Name").toString());
-                        data.setUUID(uuid);
-                        data.setAffinity(Integer.parseInt(object.get("Affinity").toString()));
-                        data.setMaxAffinity(Integer.parseInt(object.get("MaxAffinity").toString()));
-                        data.setMinAffinity(Integer.parseInt(object.get("MinAffinity").toString()));
+                        data.name = object.get("Name").toString();
+                        data.uuid = uuid;
+                        data.affinity = Integer.parseInt(object.get("Affinity").toString());
+                        data.maxAffinity = Integer.parseInt(object.get("MaxAffinity").toString());
+                        data.minAffinity = Integer.parseInt(object.get("MinAffinity").toString());
                     }
                 }
             } catch(Exception e) { e.printStackTrace(); }

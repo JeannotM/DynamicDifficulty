@@ -3,10 +3,8 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.Random;
@@ -39,9 +37,11 @@ public class EntityDeathListener extends BaseListener {
         if (!isPlayer && !MAIN_MANAGER.getEntityManager().isEntityDisabled(e.getEntity())) {
             if(e.getEntity().getCanPickupItems()) return;
             e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).experienceMultiplier));
-            if (new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).doubleLootChance)
-                for (int i = 0; i < e.getDrops().size(); i++)
+            if (new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).doubleLootChance) {
+                int itemsDropped = e.getDrops().size();
+                for (int i = 0; i < itemsDropped; i++)
                     Bukkit.getWorld(e.getEntity().getWorld().getUID()).dropItemNaturally(e.getEntity().getLocation(), e.getDrops().get(i));
+            }
         }
     }
 }

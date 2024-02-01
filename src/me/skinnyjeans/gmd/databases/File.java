@@ -26,7 +26,7 @@ public class File implements ISaveManager {
             } catch(Exception ignored) { }
 
         data = YamlConfiguration.loadConfiguration(dataFile);
-
+//        Bukkit.getLogger().warning();
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "File"));
     }
 
@@ -35,10 +35,10 @@ public class File implements ISaveManager {
     @Override
     public void updatePlayer(Minecrafter playerData) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            data.set(playerData.getUUID() + ".affinity", playerData.getAffinity());
-            data.set(playerData.getUUID() + ".max-affinity", playerData.getMaxAffinity());
-            data.set(playerData.getUUID() + ".min-affinity", playerData.getMinAffinity());
-            data.set(playerData.getUUID() + ".name", playerData.getName());
+            data.set(playerData.uuid + ".affinity", playerData.affinity);
+            data.set(playerData.uuid + ".max-affinity", playerData.maxAffinity);
+            data.set(playerData.uuid + ".min-affinity", playerData.minAffinity);
+            data.set(playerData.uuid + ".name", playerData.name);
             try {
                 data.save(dataFile);
             } catch (Exception ignored) { }
@@ -50,10 +50,10 @@ public class File implements ISaveManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Minecrafter playerData = new Minecrafter(uuid);
             if(data.isSet(String.valueOf(uuid))) {
-                playerData.setAffinity(data.getInt(uuid + ".affinity"));
-                playerData.setMinAffinity(data.getInt(uuid + ".min-affinity"));
-                playerData.setMaxAffinity(data.getInt(uuid + ".max-affinity"));
-                playerData.setName(data.getString(uuid + ".name"));
+                playerData.affinity = data.getInt(uuid + ".affinity");
+                playerData.minAffinity = data.getInt(uuid + ".min-affinity");
+                playerData.maxAffinity = data.getInt(uuid + ".max-affinity");
+                playerData.name = data.getString(uuid + ".name");
             }
             callback.onQueryDone(playerData);
         });
@@ -65,5 +65,5 @@ public class File implements ISaveManager {
     }
 
     @Override
-    public void disconnect() { return; }
+    public void disconnect() { }
 }

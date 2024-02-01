@@ -127,5 +127,10 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>5.2.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.2.0</version>
+        </dependency>
     </dependencies>
 </project>

@@ -17,12 +17,12 @@ public class AffinityManager {
         MAIN_MANAGER = mainManager;
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () ->
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                if (mainManager.getPlayerManager().isPlayerValid(player)) {
-                    MAIN_MANAGER.getPlayerManager().addAffinity(player.getUniqueId(), intervalAffinity);
-                    MAIN_MANAGER.getPlayerManager().resetAllGainsThisMinute();
-                }
-            }), 20 * 60, 20 * 60);
+                Bukkit.getOnlinePlayers().forEach(player -> {
+                    if (MAIN_MANAGER.getPlayerManager().isPlayerValid(player)) {
+                        MAIN_MANAGER.getPlayerManager().addAffinity(player.getUniqueId(), intervalAffinity);
+                        MAIN_MANAGER.getPlayerManager().resetAllGainsThisMinute();
+                    }
+                }), 20 * 5, 20 * 60);
     }
 
     public int withinServerLimits(int value) {
@@ -33,8 +33,8 @@ public class AffinityManager {
         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
         value = withinServerLimits(value);
 
-        if(data.getMinAffinity() != -1) value = Math.max(data.getMinAffinity(), value);
-        if(data.getMaxAffinity() != -1) value = Math.min(data.getMaxAffinity(), value);
+        if(data.minAffinity != -1) value = Math.max(data.minAffinity, value);
+        if(data.maxAffinity != -1) value = Math.min(data.maxAffinity, value);
 
         return value;
     }
@@ -42,9 +42,9 @@ public class AffinityManager {
     public Minecrafter getDefault() { return defaultData; }
 
     public void resetAffinity(UUID uuid) {
-        MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, defaultData.getMinAffinity());
-        MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, defaultData.getMaxAffinity());
-        MAIN_MANAGER.getPlayerManager().setAffinity(uuid, defaultData.getAffinity());
+        MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, defaultData.minAffinity);
+        MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, defaultData.maxAffinity);
+        MAIN_MANAGER.getPlayerManager().setAffinity(uuid, defaultData.affinity);
     }
 
     public void reloadConfig() {
@@ -53,8 +53,8 @@ public class AffinityManager {
         intervalAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("points-per-minute", 3);
 
         defaultData = new Minecrafter();
-        defaultData.setAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-affinity", 600));
-        defaultData.setMinAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-min-affinity", -1));
-        defaultData.setMaxAffinity(MAIN_MANAGER.getDataManager().getConfig().getInt("starting-max-affinity", -1));
+        defaultData.affinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-affinity", 600);
+        defaultData.minAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-min-affinity", -1);
+        defaultData.maxAffinity = MAIN_MANAGER.getDataManager().getConfig().getInt("starting-max-affinity", -1);
     }
 }

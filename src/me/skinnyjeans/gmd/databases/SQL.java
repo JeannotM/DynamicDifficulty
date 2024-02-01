@@ -40,15 +40,22 @@ public class SQL implements ISaveManager {
         if(!isConnected()) {
             Class.forName("com.mysql.jdbc.Driver");
             if(saveType.equals("mysql")) {
-                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
+                connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useSSL=false&autoReconnect=true" +
+                        "&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true&maxReconnects=5&initialTimeout=2", user, pwd);
                 database = "MySQL";
             } else if (saveType.equals("sqlite")){
                 connection = DriverManager.getConnection("jdbc:sqlite:plugins/DynamicDifficulty/data.db");
                 database = "SQLite";
             } else if (saveType.equals("postgresql")) {
                 Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes&cachePrepStmts=true&useServerPrepStmts=true", user, pwd);
+                connection = DriverManager.getConnection("jdbc:postgresql://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes" +
+                        "&cachePrepStmts=true&useServerPrepStmts=true&maxReconnects=5&initialTimeout=2", user, pwd);
                 database = "PostGreSQL";
+            } else if (saveType.equals("mariadb")) {
+                Class.forName("org.mariadb.jdbc.Driver");
+                connection = DriverManager.getConnection("jdbc:mariadb://"+host+":"+port+"/"+dbName+"?autoReconnect=true&useUnicode=yes" +
+                        "&cachePrepStmts=true&useServerPrepStmts=true&maxReconnects=5&initialTimeout=2", user, pwd);
+                database = "MariaDB";
             }
         }
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", database));
@@ -74,7 +81,7 @@ public class SQL implements ISaveManager {
 
     @Override
     public void updatePlayer(Minecrafter playerData) {
-        playerExists(playerData.getUUID(), r -> {
+        playerExists(playerData.uuid, r -> {
             try {
                 if(isConnected()) {
                     PreparedStatement ps;
@@ -82,12 +89,12 @@ public class SQL implements ISaveManager {
                         ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
                         ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
-                        ps.setString(5, playerData.getName());
+                        ps.setString(5, playerData.name);
                     }
-                    ps.setInt(1, playerData.getAffinity());
-                    ps.setInt(2, playerData.getMaxAffinity());
-                    ps.setInt(3, playerData.getMinAffinity());
-                    ps.setString(4, playerData.getUUID().toString());
+                    ps.setInt(1, playerData.affinity);
+                    ps.setInt(2, playerData.maxAffinity);
+                    ps.setInt(3, playerData.minAffinity);
+                    ps.setString(4, playerData.uuid.toString());
                     ps.executeUpdate();
                     ps.close();
                 }
@@ -105,11 +112,11 @@ public class SQL implements ISaveManager {
                     ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()) {
-                        data.setUUID(uuid);
-                        data.setName(result.getString("Name"));
-                        data.setAffinity(result.getInt("Affinity"));
-                        data.setMaxAffinity(result.getInt("MaxAffinity"));
-                        data.setMinAffinity(result.getInt("MinAffinity"));
+                        data.uuid = uuid;
+                        data.name = result.getString("Name");
+                        data.affinity = result.getInt("Affinity");
+                        data.maxAffinity = result.getInt("MaxAffinity");
+                        data.minAffinity = result.getInt("MinAffinity");
                     }
                     ps.close();
                 }

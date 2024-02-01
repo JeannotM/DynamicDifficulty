@@ -73,7 +73,9 @@ blocks:
 - EMERALD_ORE
 
 toggle-settings:
-  difficulty-type: player # Supported: player
+  update-time-ticks: 1200 # 1200 = 60 seconds
+  # More info on difficulty-type beneath the toggle-settings block
+  difficulty-type: player # Supported: player, region
   silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
@@ -85,8 +87,24 @@ toggle-settings:
     armor-on-mobs: true
     exact-percentage: true # Calculates the percentage between 2 difficulties so the progression will feel more natural
 
+# These are extra settings introduced by the toggle-settings.difficulty-type
+difficulty-type:
+  # Region difficulty type calculates the affinity of a player based on the radius from the given x and z coordinates.
+  # E.g. Assuming you have the default config; a player at x:0, z:200 would have an affinity of 60
+  # Affinity calculations: (MaxAffinity - Radius) * Distance
+  region:
+    type: "circle" # Options: Circle, Square
+    reversed: false
+    x: 0.0
+    z: 0.0
+    radius:
+      # Affinity calculations: (MaxAffinity - Radius) * Distance
+      normal: 5000.0 # (1500 - 5000) * 200 = 60
+      nether: 625.0  # (1500 - 625)  * 200 = 480
+      theend: 1250.0 # (1500 - 1250) * 200 = 240
+
 saving-data:
-  type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql
+  type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql, mariadb
 #  port: 3306
 #  host: localhost
 #  username: root

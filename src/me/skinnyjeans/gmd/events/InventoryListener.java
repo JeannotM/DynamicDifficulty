@@ -29,9 +29,11 @@ public class InventoryListener extends BaseListener {
     public void onInventoryClick(InventoryClickEvent e) {
         if(e.getCurrentItem() == null) return;
         if(e.getCurrentItem().getItemMeta() == null) return;
-        if(!e.getView().getTitle().contains("DynamicDifficulty")) return;
 
-        if (e.getView().getTitle().equals("DynamicDifficulty - Players")) {
+        String title = e.getView().getTitle();
+        if(!title.contains("DynamicDifficulty")) return;
+
+        if (title.equals("DynamicDifficulty - Players")) {
             Player whoClicked = (Player) e.getWhoClicked();
             if(e.getCurrentItem().getType() == Material.PLAYER_HEAD) {
                 UUID uuid = UUID.fromString(e.getCurrentItem().getItemMeta().getLore().get(0));
@@ -47,7 +49,7 @@ public class InventoryListener extends BaseListener {
 
                 MAIN_MANAGER.getInventoryManager().openInventory(whoClicked, page + 1);
             }
-        } else if (e.getView().getTitle().equals("DynamicDifficulty - Individual Player")) {
+        } else if (title.equals(StaticInfo.INDIVIDUAL_PLAYER_INVENTORY)) {
             if(ITEMS_WITH_VALUES.containsKey(e.getCurrentItem().getType())) {
                 int affinityType = e.getSlot() / 9;
                 int value = ITEMS_WITH_VALUES.get(e.getCurrentItem().getType());
@@ -72,10 +74,10 @@ public class InventoryListener extends BaseListener {
                     MAIN_MANAGER.getAffinityManager().resetAffinity(uuid);
                 MAIN_MANAGER.getInventoryManager().updatePlayerInventory((Player) e.getWhoClicked(), uuid);
             }
-        } else if (e.getView().getTitle().equals(StaticInfo.DIFFICULTIES_INVENTORY)) {
+        } else if (title.equals(StaticInfo.DIFFICULTIES_INVENTORY)) {
             MAIN_MANAGER.getInventoryManager().openDifficultyInventory((Player) e.getWhoClicked(),
                     e.getCurrentItem().getItemMeta().getDisplayName());
-        } else if (e.getView().getTitle().equals(StaticInfo.DIFFICULTY_INVENTORY) && e.getSlot() == 0) {
+        } else if (title.equals(StaticInfo.DIFFICULTY_INVENTORY) && e.getSlot() == 0) {
             MAIN_MANAGER.getInventoryManager().openBaseDifficultyInventory((Player) e.getWhoClicked());
         }
         e.setCancelled(true);

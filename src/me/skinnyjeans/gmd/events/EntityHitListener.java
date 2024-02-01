@@ -97,6 +97,8 @@ public class EntityHitListener extends BaseListener {
                 if (playerPrey.getHealth() - damage <= 0)
                     if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
                             .getDifficulty(playerPrey.getUniqueId()).chanceCancelDeath) {
+
+                        // Not able to use something vanilla for Minecraft for this
                         playerPrey.spawnParticle(Particle.TOTEM, playerPrey.getLocation(), 100);
                         playerPrey.playSound(playerPrey.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
 

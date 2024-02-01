@@ -9,8 +9,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -40,7 +38,7 @@ public class DataManager {
 
         try {
             String saveType = config.getString("saving-data.type", "file").toLowerCase();
-            if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql")){
+            if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql") || saveType.equals("mariadb")){
                 DATABASE = new SQL(MAIN_MANAGER.getPlugin(), this, saveType);
             } else if(saveType.equals("mongodb")) {
                 DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);

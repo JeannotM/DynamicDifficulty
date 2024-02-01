@@ -25,9 +25,7 @@ public class EntityManager {
 
     public HashMap<EntityType, Integer> getMobs() { return MOBS; }
 
-    public boolean isEntityDisabled(Entity entity) {
-        return DISABLED_MOBS.contains(entity.getType());
-    }
+    public boolean isEntityDisabled(Entity entity) { return DISABLED_MOBS.contains(entity.getType()); }
 
     public boolean wasEntityAttacked(Entity entity) { return OVERRIDE_IGNORE.contains(entity.getEntityId()); }
 

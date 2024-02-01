@@ -168,14 +168,14 @@ public class InventoryManager {
     public ItemStack createPlayerHead(Minecrafter data) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
-        meta.setDisplayName(data.getName());
-        try { meta.setOwningPlayer(Bukkit.getOfflinePlayer(data.getUUID()));
+        meta.setDisplayName(data.name);
+        try { meta.setOwningPlayer(Bukkit.getOfflinePlayer(data.uuid));
         } catch (Exception ignored) { }
         meta.setLore(Arrays.asList(
-            data.getUUID().toString(),
-            affinity.replace("%number%", String.valueOf(data.getAffinity())),
-            minAffinity.replace("%number%", String.valueOf(data.getMinAffinity())),
-            maxAffinity.replace("%number%", String.valueOf(data.getMaxAffinity()))
+            data.uuid.toString(),
+            affinity.replace("%number%", String.valueOf(data.affinity)),
+            minAffinity.replace("%number%", String.valueOf(data.minAffinity)),
+            maxAffinity.replace("%number%", String.valueOf(data.maxAffinity))
         ));
         item.setItemMeta(meta);
         return item;

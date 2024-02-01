@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -16,6 +17,7 @@ public class DifficultyManager {
     private final HashMap<String, Difficulty> DIFFICULTY_LIST = new HashMap<>();
     private final ArrayList<String> DIFFICULTY_LIST_SORTED = new ArrayList<>();
 
+    private BukkitTask calculateTimer = null;
     private boolean exactPercentage = true;
     private DifficultyTypes DifficultyType;
 
@@ -27,8 +29,6 @@ public class DifficultyManager {
                 if(!MAIN_MANAGER.getDataManager().isWorldDisabled(world.getName()))
                     world.setDifficulty(org.bukkit.Difficulty.HARD);
             });
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 30, 20 * 120);
     }
 
     public ArrayList<Difficulty> getDifficulties() { return new ArrayList<>(DIFFICULTY_LIST.values()); }
@@ -58,7 +58,7 @@ public class DifficultyManager {
         int b = getNextDifficulty(uuid).getAffinity();
 
         if(a == b) return "100.0%";
-        return Math.round(1000.0 * Math.abs(1.0 - (100.0 / (a - b) * (MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).getAffinity() - b)) / 100.0)) / 10.0 + "%";
+        return Math.round(1000.0 * Math.abs(1.0 - (100.0 / (a - b) * (MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).affinity - b)) / 100.0)) / 10.0 + "%";
     }
 
     public Difficulty getNextDifficulty(UUID uuid) {
@@ -108,14 +108,14 @@ public class DifficultyManager {
     }
 
     public Difficulty calculateDifficulty(Minecrafter affinity) {
-        Difficulty first = calcDifficulty(affinity.getAffinity());
-        Difficulty second = DIFFICULTY_LIST.get(getNextDifficulty(affinity.getUUID()).difficultyName);
+        Difficulty first = calcDifficulty(affinity.affinity);
+        Difficulty second = DIFFICULTY_LIST.get(getNextDifficulty(affinity.uuid).difficultyName);
 
         Difficulty difficulty = new Difficulty(first.difficultyName);
 
         int a = first.affinityRequirement;
         int b = second.affinityRequirement;
-        double c = (a == b || !exactPercentage) ? 0.0 : Math.abs(1.0 - (1.0 / (a - b) * (affinity.getAffinity() - b)));
+        double c = (a == b || !exactPercentage) ? 0.0 : Math.abs(1.0 - (1.0 / (a - b) * (affinity.affinity - b)));
 
         difficulty.doubleLootChance = calculatePercentage(first.doubleLootChance, second.doubleLootChance, c);
         difficulty.hungerDrainChance = calculatePercentage(first.hungerDrainChance, second.hungerDrainChance, c);
@@ -158,8 +158,8 @@ public class DifficultyManager {
         difficulty.commandsOnJoin = first.commandsOnJoin;
 
         try {
-            if (Bukkit.getOfflinePlayer(affinity.getUUID()).isOnline())
-                Bukkit.getPlayer(affinity.getUUID()).getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+            if (Bukkit.getOfflinePlayer(affinity.uuid).isOnline())
+                Bukkit.getPlayer(affinity.uuid).getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
         } catch (Exception ignored) { }
 
         return difficulty;
@@ -179,9 +179,9 @@ public class DifficultyManager {
         DIFFICULTY_LIST.clear();
         DIFFICULTY_LIST_SORTED.clear();
 
-        String type = MAIN_MANAGER.getDataManager().getConfig().getString("toggle-settings.difficulty-type", "player");
+        String type = MAIN_MANAGER.getDataManager().getConfig().getString("toggle-settings.difficulty-type", "player").toLowerCase();
         exactPercentage = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.advanced.exact-percentage", true);
-        DifficultyType = DifficultyTypes.valueOf(type.substring(0, 1).toUpperCase() + type.substring(1));
+        DifficultyType = DifficultyTypes.valueOf(type);
 
         HashMap<Integer, String> tmpMap = new HashMap<Integer, String>();
         for(String key : MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty").getKeys(false)) {
@@ -267,5 +267,12 @@ public class DifficultyManager {
                 DIFFICULTY_LIST.get(lastKey).difficultyUntil = key;
             lastKey = thisKey;
         }
+
+        if(calculateTimer != null) { calculateTimer.cancel(); }
+
+        int updateTime = MAIN_MANAGER.getDataManager().getConfig().getInt("toggle-settings.update-time-ticks", 1200);
+        if(updateTime < 20) { updateTime = 1200; }
+
+        calculateTimer = Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 5, updateTime);
     }
 }
