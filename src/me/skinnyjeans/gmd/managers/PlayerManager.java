@@ -1,9 +1,6 @@
 package me.skinnyjeans.gmd.managers;
 
-import me.skinnyjeans.gmd.models.DifficultySettings;
-import me.skinnyjeans.gmd.models.DifficultyTypes;
-import me.skinnyjeans.gmd.models.Minecrafter;
-import me.skinnyjeans.gmd.models.RegionSettings;
+import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
@@ -78,6 +75,8 @@ public class PlayerManager {
     public int addAffinity(UUID uuid, int value) {
         if(difficultyType == DifficultyTypes.region) {
             return setAffinity(uuid, difficultySettings.calculateAffinity(Bukkit.getPlayer(uuid), -1));
+        } else if(difficultyType == DifficultyTypes.world) {
+            return setAffinity(uuid, difficultySettings.calculateAffinity(Bukkit.getPlayer(uuid), value));
         }
 
         Minecrafter player = getPlayerAffinity(uuid);
@@ -156,6 +155,8 @@ public class PlayerManager {
 
         if(difficultyType == DifficultyTypes.region) {
             difficultySettings = new RegionSettings(MAIN_MANAGER);
+        } else if (difficultyType == DifficultyTypes.world) {
+            difficultySettings = new WorldSettings(MAIN_MANAGER);
         }
     }
 }

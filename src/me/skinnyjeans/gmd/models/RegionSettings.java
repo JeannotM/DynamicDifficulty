@@ -2,14 +2,16 @@ package me.skinnyjeans.gmd.models;
 
 import me.skinnyjeans.gmd.managers.MainManager;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+
 public class RegionSettings extends DifficultySettings {
-    private double normalRadius, netherRadius, theEndRadius, x, z;
+    private final HashMap<String, Double> worldRadius = new HashMap<>();
     private boolean isReversed, isSquare;
     private int minAffinity, maxAffinity;
+    private double defaultRadius, x, z;
 
     public RegionSettings(MainManager mainManager) {
         super(mainManager);
@@ -31,16 +33,9 @@ public class RegionSettings extends DifficultySettings {
             distance = location.distance(playerLocation);
         }
 
-        World.Environment environment = playerLocation.getWorld().getEnvironment();
-
-        double ans;
-        if(environment == World.Environment.NETHER) {
-            ans = Math.min(1.0 / netherRadius * distance, 1.0);
-        } else if(environment == World.Environment.THE_END) {
-            ans = Math.min(1.0 / theEndRadius * distance, 1.0);
-        } else {
-            ans = Math.min(1.0 / normalRadius * distance, 1.0);
-        }
+        double ans = Math.min(1.0
+                / worldRadius.getOrDefault(playerLocation.getWorld().getName(), defaultRadius)
+                * distance, 1.0);
 
         if(isReversed) { ans = 1.0 - ans; }
         return (int) Math.floor(minAffinity + (maxAffinity - minAffinity) * ans);
@@ -58,8 +53,12 @@ public class RegionSettings extends DifficultySettings {
         minAffinity = config.getInt("min-affinity", 0);
         maxAffinity = config.getInt("max-affinity", 1500);
 
-        normalRadius = config.getDouble("difficulty-type.region.radius.normal", 5000);
-        netherRadius = config.getDouble("difficulty-type.region.radius.nether", 625);
-        theEndRadius = config.getDouble("difficulty-type.region.radius.theend", 1250);
+        defaultRadius = config.getDouble("difficulty-type.region.default-radius", 5000);
+        ConfigurationSection world = config.getConfigurationSection("difficulty-type.region.radius");
+
+        if(world == null) { return; }
+        for(String key : world.getKeys(false)) {
+            worldRadius.put(key.toLowerCase(), world.getDouble(key));
+        }
     }
 }

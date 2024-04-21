@@ -4,6 +4,7 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.StructureType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
@@ -58,6 +59,7 @@ public class BlockMinedListener extends BaseListener {
         ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 
         int blockMined = config.getInt("block-mined", 2);
+
         try {
             // Add items from newer updates
 //            ORE_BLOCKS.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);

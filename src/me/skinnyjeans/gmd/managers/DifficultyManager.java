@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -19,6 +20,7 @@ public class DifficultyManager {
 
     private BukkitTask calculateTimer = null;
     private boolean exactPercentage = true;
+    private boolean calculateHealth = false;
     private DifficultyTypes DifficultyType;
 
     public DifficultyManager(MainManager mainManager) {
@@ -157,10 +159,12 @@ public class DifficultyManager {
         difficulty.commandsOnSwitchFromPrev = first.commandsOnSwitchFromPrev;
         difficulty.commandsOnJoin = first.commandsOnJoin;
 
-        try {
-            if (Bukkit.getOfflinePlayer(affinity.uuid).isOnline())
-                Bukkit.getPlayer(affinity.uuid).getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
-        } catch (Exception ignored) { }
+        if (calculateHealth && Bukkit.getOfflinePlayer(affinity.uuid).isOnline()) {
+            Player player = Bukkit.getPlayer(affinity.uuid);
+            if(player != null && player.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null) {
+                player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+            }
+        }
 
         return difficulty;
     }
@@ -178,6 +182,7 @@ public class DifficultyManager {
     public void reloadConfig() {
         DIFFICULTY_LIST.clear();
         DIFFICULTY_LIST_SORTED.clear();
+        calculateHealth = false;
 
         String type = MAIN_MANAGER.getDataManager().getConfig().getString("toggle-settings.difficulty-type", "player").toLowerCase();
         exactPercentage = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.advanced.exact-percentage", true);
@@ -210,6 +215,10 @@ public class DifficultyManager {
             difficulty.chanceToHaveWeapon = config.getDouble("enchanting.weapon-chance", 5.0) / 100.0;
 
             difficulty.maximumHealth = config.getInt("maximum-health", 20);
+            if(difficulty.maximumHealth != 20 && difficulty.maximumHealth > 0) {
+                calculateHealth = true;
+            }
+
             difficulty.minimumStarvationHealth = config.getInt("minimum-health-starvation", 0);
             difficulty.keepInventory = config.getBoolean("keep-inventory", false);
             difficulty.allowPVP = config.getBoolean("allow-pvp", true);
