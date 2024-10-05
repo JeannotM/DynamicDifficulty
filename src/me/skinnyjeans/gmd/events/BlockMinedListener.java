@@ -4,7 +4,6 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.StructureType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;

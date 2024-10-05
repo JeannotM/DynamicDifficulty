@@ -62,6 +62,14 @@ public class PlayerManager {
         return true;
     }
 
+    public boolean isPlayerValidNoWorld(Entity player) {
+        if(player == null) return false;
+        if(!(player instanceof Player)) return false;
+        if(player.hasMetadata("NPC")) return false;
+        if(!playerExist(player)) addPlayer(player);
+        return true;
+    }
+
     public void unloadPlayer(UUID uuid) {
         PLAYER_LIST.remove(uuid);
     }

@@ -113,9 +113,13 @@ saving-data:
 #  password:
 #  database: dynamicdifficulty
 
-# You can disable DynamicDifficulty in certain worlds
-disabled-worlds:
-- example_name_test
+# Only include or exclude DynamicDifficulty in these worlds
+worlds:
+  # include: Enable DynamicDifficulty in these worlds
+  # exclude: Disable DynamicDifficulty in these worlds
+  type: exclude # include, exclude
+  list:
+    - example_name_test
 
 # These mobs ignore everything except the "effects-when-attacked" and "mobs-ignore-player" settings from difficulty
 disabled-mobs:

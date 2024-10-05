@@ -19,7 +19,7 @@ public class PlayerJoinListener extends BaseListener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if (MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) {
+        if (MAIN_MANAGER.getPlayerManager().isPlayerValidNoWorld(e.getPlayer())) {
             UUID uuid = e.getPlayer().getUniqueId();
             Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
             Runnable afterJoinTask = () ->

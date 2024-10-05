@@ -4,6 +4,7 @@ import me.skinnyjeans.gmd.databases.*;
 import me.skinnyjeans.gmd.models.ISaveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 public class DataManager {
@@ -77,7 +79,8 @@ public class DataManager {
         cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/" + cultureCode + ".yml");
 
         try {
-            if(!cultureFile.exists()) MAIN_MANAGER.getPlugin().saveResource("lang/" + cultureCode + ".yml", false);
+            if(!cultureFile.exists())
+                MAIN_MANAGER.getPlugin().saveResource("lang/" + cultureCode + ".yml", false);
         } catch (IllegalArgumentException ignored) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[DynamicDifficulty] " + cultureCode + ".yml can not be found, switching to en-US");
             cultureCode = "en-US";
@@ -89,6 +92,20 @@ public class DataManager {
         try {
             culture.load(cultureFile);
         } catch (Exception e) { e.printStackTrace(); }
+
+        DISABLED_WORLDS.clear();
+        List<String> disableWorldList = config.getStringList("worlds.list");
+        boolean includeWorlds = config.getString("worlds.type", "exclude").equalsIgnoreCase("include");
+
+        List<World> worlds = Bukkit.getWorlds();
+        for(World world : worlds) {
+            boolean isInList = disableWorldList.contains(world.getName());
+
+            if(isInList && !includeWorlds
+                    || !isInList && includeWorlds) {
+                DISABLED_WORLDS.add(world.getName());
+            }
+        }
     }
 
     public FileConfiguration getConfig() { return config; }

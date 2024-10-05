@@ -45,6 +45,7 @@ public class MobSpawnListener extends BaseListener {
     private boolean overrideEnchantLimit;
     private boolean changeSpawnedMobs;
     private boolean armorOnMobs;
+    private int totalArmorTypeCount;
 
     public MobSpawnListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -124,7 +125,7 @@ public class MobSpawnListener extends BaseListener {
                 equipment.setBoots(null);
 
                 if(random.nextDouble() <= difficulty.chanceToHaveArmor) {
-                    rnd = random.nextInt(ARMOR_TYPES.values().stream().mapToInt(i -> i).sum() + 1);
+                    rnd = random.nextInt(totalArmorTypeCount);
                     int count = 0;
                     for (String thisItem : ARMOR_TYPES.keySet()) {
                         if (rnd <= count) {
@@ -226,6 +227,8 @@ public class MobSpawnListener extends BaseListener {
         if(customArmorSpawnChance) {
             for(String armorType : customMobs.getConfigurationSection("armor-set-weight").getKeys(false))
                 ARMOR_TYPES.put(armorType.toUpperCase(), customMobs.getInt("armor-set-weight." + armorType));
+
+            totalArmorTypeCount = ARMOR_TYPES.values().stream().mapToInt(i -> i).sum() + 1;
 
             for(String entity : customMobs.getStringList("includes-mobs"))
                 if(EntityType.valueOf(entity) != null)
