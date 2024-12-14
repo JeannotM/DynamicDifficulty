@@ -12,12 +12,9 @@ import java.util.*;
 public class SQL implements ISaveManager {
     private final String tbName = "dynamicdifficulty";
     private final Main plugin;
-    private final String host;
-    private final String port;
-    private final String dbName;
-    private final String user;
-    private final String pwd;
-    private final String saveType;
+    private final String host, port;
+    private final String user, pwd;
+    private final String dbName, saveType;
     private Connection connection = null;
 
     public SQL(Main m, DataManager data, String sT) throws SQLException, ClassNotFoundException {

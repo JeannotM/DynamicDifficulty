@@ -32,7 +32,7 @@ public class BlockMinedListener extends BaseListener {
 
     @EventHandler
     public void onMined(BlockBreakEvent e) {
-        if(BLOCKS.size() == 0) return;
+        if(BLOCKS.isEmpty()) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
         final ItemStack tool = e.getPlayer().getInventory().getItemInMainHand();
         final boolean hasSilkTouch = tool.containsEnchantment(Enchantment.SILK_TOUCH);

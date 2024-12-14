@@ -12,8 +12,8 @@ import java.util.List;
 public class TabCompleterManager implements TabCompleter {
 
     private final MainManager MAIN_MANAGER;
-    private final HashSet<String> noNumbers = new HashSet<>(Arrays.asList("author", "me", "difficulties", "reload", "forcesave", "help", "playergui", "get", "delmax", "delmin"));
-    private final HashSet<String> allCommands = new HashSet<>(Arrays.asList(
+    private static final HashSet<String> noNumbers = new HashSet<>(Arrays.asList("author", "me", "difficulties", "reload", "forcesave", "help", "playergui", "get", "delmax", "delmin"));
+    private static final HashSet<String> allCommands = new HashSet<>(Arrays.asList(
             "set","get","add","remove","help","setmax","setmin","delmax","delmin","author","reload","forcesave","playergui","difficulties"
     ));
     private final HashSet<String> numbers = new HashSet<>();

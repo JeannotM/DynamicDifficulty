@@ -19,8 +19,9 @@ public class EntityTargetListener extends BaseListener {
     @EventHandler
     public void onPlayerSpot(EntityTargetLivingEntityEvent e) {
         if(shouldDisable) return;
+
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getTarget()))
-            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).mobsIgnoredPlayers.contains(e.getEntity().getType().toString()))
+            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).mobsIgnoredPlayers.contains(e.getEntityType().toString()))
                 if(!MAIN_MANAGER.getEntityManager().wasEntityAttacked(e.getEntity()))
                     e.setCancelled(true);
     }

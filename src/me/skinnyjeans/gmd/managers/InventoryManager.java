@@ -37,7 +37,7 @@ public class InventoryManager {
         put(Material.LIGHT_BLUE_WOOL, "+100");
     }};
 
-    private final HashMap<Integer, Material> INVENTORY_SLOTS = new HashMap<Integer, Material>(){{
+    private static final HashMap<Integer, Material> INVENTORY_SLOTS = new HashMap<Integer, Material>(){{
         put(1, Material.PINK_WOOL);
         put(2, Material.MAGENTA_WOOL);
         put(3, Material.PURPLE_WOOL);

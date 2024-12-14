@@ -30,9 +30,9 @@ public class MobSpawnListener extends BaseListener {
     private final MainManager MAIN_MANAGER;
 
     private final HashSet<EntityType> AFFECTED_MOBS = new HashSet<>();
-    private final HashSet<CreatureSpawnEvent.SpawnReason> NATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.DEFAULT, CreatureSpawnEvent.SpawnReason.NATURAL));
-    private final HashSet<CreatureSpawnEvent.SpawnReason> UNNATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.SPAWNER_EGG, CreatureSpawnEvent.SpawnReason.SPAWNER, CreatureSpawnEvent.SpawnReason.DISPENSE_EGG));
-    private final HashSet<Material> RANGED = new HashSet<>(Arrays.asList(Material.CROSSBOW, Material.BOW));
+    private static final HashSet<CreatureSpawnEvent.SpawnReason> NATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.DEFAULT, CreatureSpawnEvent.SpawnReason.NATURAL));
+    private static final HashSet<CreatureSpawnEvent.SpawnReason> UNNATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.SPAWNER_EGG, CreatureSpawnEvent.SpawnReason.SPAWNER, CreatureSpawnEvent.SpawnReason.DISPENSE_EGG));
+    private static final HashSet<Material> RANGED = new HashSet<>(Arrays.asList(Material.CROSSBOW, Material.BOW));
     private final HashMap<Material, Integer> CUSTOM_SPAWN_WEAPONS = new HashMap<>();
     private final HashMap<String, Integer> ARMOR_TYPES = new HashMap<>();
     private final HashMap<EquipmentItems, HashSet<NamespacedKey>> ENCHANTMENTS = new HashMap<>();

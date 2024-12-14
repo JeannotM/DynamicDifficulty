@@ -25,10 +25,10 @@ public class CommandManager implements CommandExecutor {
     private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
     private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
-    private final String authorMessage = "DynamicDifficulty: SkinnyJeans\nhttps://www.spigotmc.org/resources/dynamic-difficulty.92025/\n\n";
-    private final String PREFIX_NUMBER = "%number%";
-    private final String PREFIX_USER = "%user%";
-    private final String PREFIX_DIFFICULTY = "%difficulty%";
+    private static final String authorMessage = "DynamicDifficulty: SkinnyJeans\nhttps://www.spigotmc.org/resources/dynamic-difficulty.92025/\n\n";
+    private static final String PREFIX_NUMBER = "%number%";
+    private static final String PREFIX_USER = "%user%";
+    private static final String PREFIX_DIFFICULTY = "%difficulty%";
 
     private String consoleOpenPlayerGUI;
     private String noPermission;

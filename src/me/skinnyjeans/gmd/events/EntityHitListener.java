@@ -40,17 +40,21 @@ public class EntityHitListener extends BaseListener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onHit(EntityDamageByEntityEvent e) {
-        Entity hunter, prey;
+        Entity prey = e.getEntity();
+        if(allowTamedWolves && prey instanceof Wolf) {
+            AnimalTamer owner = ((Wolf) prey).getOwner();
 
-        if(allowTamedWolves && e.getEntity() instanceof Wolf) {
-            prey = (((Wolf) e.getEntity()).getOwner() == null) ? e.getEntity() : (Entity) ((Wolf) e.getEntity()).getOwner();
-        } else prey = e.getEntity();
+            if (owner != null) { prey = (Entity) owner; }
+        }
 
-        if (e.getDamager() instanceof Projectile && ((Projectile) e.getDamager()).getShooter() instanceof Entity) {
-            hunter = (Entity) ((Projectile) e.getDamager()).getShooter();
-        } else if (allowTamedWolves && e.getDamager() instanceof Wolf) {
-            hunter = (((Wolf) e.getDamager()).getOwner() == null) ? e.getDamager() : (Entity) ((Wolf) e.getDamager()).getOwner();
-        } else hunter = e.getDamager();
+        Entity hunter = e.getDamager();
+        if (hunter instanceof Projectile && ((Projectile) hunter).getShooter() instanceof Entity) {
+            hunter = (Entity) ((Projectile) hunter).getShooter();
+        } else if (allowTamedWolves && hunter instanceof Wolf) {
+            AnimalTamer owner = ((Wolf) hunter).getOwner();
+
+            if (owner != null) { hunter = (Entity) owner; }
+        }
 
         if (MAIN_MANAGER.getEntityManager().isEntityIgnored(prey) || MAIN_MANAGER.getEntityManager().isEntityIgnored(hunter)) return;
 
@@ -90,7 +94,11 @@ public class EntityHitListener extends BaseListener {
                 }
 
                 Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
-                    int removePoints = damage == 0 ? 0 : (affinityPerHeart) * (int) Math.ceil(damage / 2) + (onPlayerHit);
+                    int removePoints = damage != 0
+                            ? affinityPerHeart
+                                * (int) Math.ceil(damage / 2)
+                                + (onPlayerHit)
+                            : 0;
                     MAIN_MANAGER.getPlayerManager().addAffinity(uuid, removePoints);
                 });
 
@@ -114,10 +122,9 @@ public class EntityHitListener extends BaseListener {
                 e.setDamage(damage);
             }
         } else if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
-            double damage = e.getFinalDamage()
-                    * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).damageDoneOnMobs;
             MAIN_MANAGER.getEntityManager().entityHit(prey);
-            e.setDamage(damage);
+            e.setDamage(e.getFinalDamage()
+                    * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).damageDoneOnMobs);
         }
     }
 
