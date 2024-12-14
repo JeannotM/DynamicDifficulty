@@ -15,7 +15,6 @@ import java.util.Random;
 
 public class BlockMinedListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
     private final HashMap<Material, Integer> BLOCKS = new HashMap<Material, Integer>();
     private final static HashMap<Material, Material> ORE_BLOCKS = new HashMap<Material, Material>() {{
         put(Material.COAL_ORE, Material.COAL);

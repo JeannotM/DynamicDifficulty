@@ -10,7 +10,6 @@ import java.util.EnumSet;
 
 public class HealthRegenListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
     private final EnumSet<EntityRegainHealthEvent.RegainReason> CANCEL_REGEN = EnumSet.of(
             EntityRegainHealthEvent.RegainReason.REGEN, EntityRegainHealthEvent.RegainReason.SATIATED);
 

@@ -9,8 +9,6 @@ import java.util.UUID;
 
 public class PlayerLeaveListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     public PlayerLeaveListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }

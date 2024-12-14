@@ -11,8 +11,6 @@ import java.util.Random;
 
 public class HungerListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private boolean shouldDisable;
 
     public HungerListener(MainManager mainManager) {

@@ -10,8 +10,6 @@ import java.util.Random;
 
 public class ItemDamageListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private boolean shouldDisable;
 
     public ItemDamageListener(MainManager mainManager) {

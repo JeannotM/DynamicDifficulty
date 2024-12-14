@@ -11,8 +11,6 @@ import java.util.UUID;
 
 public class PlayerJoinListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     public PlayerJoinListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }

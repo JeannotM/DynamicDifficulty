@@ -11,8 +11,6 @@ import java.util.List;
 
 public class CommandListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private String commandNotAllowed;
     private boolean shouldDisable;
 

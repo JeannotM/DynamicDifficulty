@@ -17,6 +17,7 @@ public class EventManager {
     }
 
     public void registerEvents() {
+        LISTENERS.add(new CreeperExplodeListener(MAIN_MANAGER));
         LISTENERS.add(new BlockMinedListener(MAIN_MANAGER));
         LISTENERS.add(new CommandListener(MAIN_MANAGER));
         LISTENERS.add(new EntityDeathListener(MAIN_MANAGER));

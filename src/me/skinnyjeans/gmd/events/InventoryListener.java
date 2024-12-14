@@ -13,8 +13,7 @@ import java.util.*;
 
 public class InventoryListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-    private final HashMap<Material, Integer> ITEMS_WITH_VALUES = new HashMap<Material, Integer>(){{
+    private static final HashMap<Material, Integer> ITEMS_WITH_VALUES = new HashMap<Material, Integer>(){{
         put(Material.PINK_WOOL, -100);
         put(Material.MAGENTA_WOOL, -10);
         put(Material.PURPLE_WOOL, -1);

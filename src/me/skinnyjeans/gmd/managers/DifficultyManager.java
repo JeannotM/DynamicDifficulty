@@ -158,6 +158,7 @@ public class DifficultyManager {
         difficulty.commandsOnSwitchFromNext = first.commandsOnSwitchFromNext;
         difficulty.commandsOnSwitchFromPrev = first.commandsOnSwitchFromPrev;
         difficulty.commandsOnJoin = first.commandsOnJoin;
+        difficulty.preventEntityExplosionBlockDamage = first.preventEntityExplosionBlockDamage;
 
         if (calculateHealth && Bukkit.getOfflinePlayer(affinity.uuid).isOnline()) {
             Player player = Bukkit.getPlayer(affinity.uuid);
@@ -224,6 +225,7 @@ public class DifficultyManager {
             difficulty.allowPVP = config.getBoolean("allow-pvp", true);
             difficulty.allowHealthRegen = config.getBoolean("allow-natural-regen", true);
             difficulty.effectsWhenAttacked = config.getBoolean("effects-when-attacked", true);
+            difficulty.preventEntityExplosionBlockDamage = config.getBoolean("prevent-entity-explosion-damage", false);
 
             difficulty.prefix = ChatColor.translateAlternateColorCodes('&', config.getString("prefix", key));
 

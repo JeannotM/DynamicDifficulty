@@ -9,8 +9,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 public class EntityDamageListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private boolean shouldDisable;
 
     public EntityDamageListener(MainManager mainManager) {

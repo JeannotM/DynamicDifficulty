@@ -8,8 +8,6 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 
 public class EntityTargetListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private boolean shouldDisable;
 
     public EntityTargetListener(MainManager mainManager) {

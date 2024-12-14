@@ -27,8 +27,6 @@ import java.util.*;
 
 public class MobSpawnListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private final HashSet<EntityType> AFFECTED_MOBS = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> NATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.DEFAULT, CreatureSpawnEvent.SpawnReason.NATURAL));
     private static final HashSet<CreatureSpawnEvent.SpawnReason> UNNATURAL_SPAWN_REASONS = new HashSet<>(Arrays.asList(CreatureSpawnEvent.SpawnReason.SPAWNER_EGG, CreatureSpawnEvent.SpawnReason.SPAWNER, CreatureSpawnEvent.SpawnReason.DISPENSE_EGG));

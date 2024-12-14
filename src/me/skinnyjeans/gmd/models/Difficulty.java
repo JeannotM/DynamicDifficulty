@@ -35,6 +35,7 @@ public class Difficulty {
     public boolean keepInventory;
     public boolean allowHealthRegen;
     public boolean effectsWhenAttacked;
+    public boolean preventEntityExplosionBlockDamage;
 
     public List<String> disabledCommands = new ArrayList<>();
     public List<String> mobsIgnoredPlayers = new ArrayList<>();

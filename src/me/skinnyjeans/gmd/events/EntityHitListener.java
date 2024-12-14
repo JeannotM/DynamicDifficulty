@@ -25,8 +25,6 @@ import java.util.UUID;
 
 public class EntityHitListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private boolean calculateExtraArmorDamage;
     private boolean allowTamedWolves;
     private int affinityPerHeart;

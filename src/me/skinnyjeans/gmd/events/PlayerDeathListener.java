@@ -11,7 +11,6 @@ import java.util.EnumSet;
 
 public class PlayerDeathListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
     private static final EnumSet<EntityDamageEvent.DamageCause> COUNTS_AS_SUICIDE = EnumSet.of(EntityDamageEvent.DamageCause.FALL, EntityDamageEvent.DamageCause.SUFFOCATION, EntityDamageEvent.DamageCause.SUICIDE);
     private boolean preventAffinityLossOnSuicide;
     private int onDeath;

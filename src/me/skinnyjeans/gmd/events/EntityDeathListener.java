@@ -15,8 +15,6 @@ import java.util.UUID;
 
 public class EntityDeathListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     public EntityDeathListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
     }

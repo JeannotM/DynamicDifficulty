@@ -13,8 +13,6 @@ import java.util.HashSet;
 
 public class PotionEffectListener extends BaseListener {
 
-    private final MainManager MAIN_MANAGER;
-
     private static final HashSet<PotionEffectType> EFFECTS = new HashSet<>(Arrays.asList(PotionEffectType.WITHER,PotionEffectType.POISON,PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS,PotionEffectType.SLOW,PotionEffectType.CONFUSION,PotionEffectType.HUNGER));
     private static final HashSet<EntityPotionEffectEvent.Cause> EFFECT_CAUSES = new HashSet<>(Arrays.asList(EntityPotionEffectEvent.Cause.ATTACK, EntityPotionEffectEvent.Cause.ARROW, EntityPotionEffectEvent.Cause.POTION_SPLASH));
 

@@ -148,6 +148,7 @@ disabled-mobs:
 #   allow-pvp: <bool, Whether the player can attack or be attacked by other players>
 #   allow-natural-regen <bool, Whether health regen from 'natural occurrences' (full foodbar) should be allowed.
 #   effects-when-attacked: <bool, Whether you get poison/wither etc from mob attacks (not including splash potions), works only on normal/hard world difficulty>
+#   prevent-entity-explosion-damage: <bool, Whether Fireballs, CreeperExplosions and Wither Skulls can break blocks>
 #   prefix: <text, prefix to return if PlaceholderAPI is enabled>
 #   commands-not-allowed-on-difficulty: <list, What commands aren't allowed to be run by players on certain difficulties, spaces not recommended>
 #   extra-damage-per-armor-point: <number, how much damage reduction/increased needs to be added per armor point a player has (E.g. Diamond Chestplate has 8 armor points, 8 * 1 = 8)>
@@ -192,6 +193,7 @@ difficulty:
     keep-inventory: true
     allow-natural-regen: true
     effects-when-attacked: false
+    prevent-entity-explosion-damage: false
     prefix: '&7&l[&b&lEasy&7&l]&r'
     extra-damage-per-armor-point: 0
     extra-damage-for-certain-armor-types:
@@ -238,6 +240,7 @@ difficulty:
     keep-inventory: false
     allow-natural-regen: true
     effects-when-attacked: true
+    prevent-entity-explosion-damage: false
     prefix: '&7&l[&9&lNormal&7&l]&r'
     enchanting:
       max-enchants: 2
@@ -280,6 +283,7 @@ difficulty:
     keep-inventory: false
     allow-natural-regen: true
     effects-when-attacked: true
+    prevent-entity-explosion-damage: false
     prefix: '&7&l[&4&lHard&7&l]&r'
     commands-not-allowed-on-difficulty:
       - gotohome
