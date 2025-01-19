@@ -3,7 +3,6 @@ package me.skinnyjeans.gmd.managers;
 import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,7 +10,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class PlayerManager {
 
@@ -36,6 +38,12 @@ public class PlayerManager {
                 data.gainedThisMinute = 0;
             }
         }, 20 * 5, 20 * 60);
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
+            if (Bukkit.getOnlinePlayers().isEmpty()) { return; }
+
+            MAIN_MANAGER.getDataManager().saveData();
+        }, 20 * 5, 20 * 60 * 5);
     }
 
     public int withinServerLimits(int value) {
@@ -98,7 +106,14 @@ public class PlayerManager {
         return true;
     }
 
-    public void unloadPlayer(UUID uuid) { PLAYER_LIST.remove(uuid); }
+    public void unloadPlayer(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (PLAYER_LIST.containsKey(uuid)) {
+            NAME_TO_UUID.remove(player.getName().toLowerCase());
+            MAIN_MANAGER.getDataManager().updatePlayer(uuid);
+            PLAYER_LIST.remove(uuid);
+        }
+    }
     public HashMap<UUID, Minecrafter> getPlayerList() { return PLAYER_LIST; }
     public boolean hasPlayer(String name) { return NAME_TO_UUID.containsKey(name.toLowerCase()); }
 
@@ -128,7 +143,11 @@ public class PlayerManager {
             return UUID.nameUUIDFromBytes(biome.getBytes());
         }
 
-        return player.getUniqueId();
+        if (player != null) {
+            return player.getUniqueId();
+        }
+
+        return null;
     }
 
     public void addAffinity(Player player, int value) {
@@ -139,7 +158,7 @@ public class PlayerManager {
             return;
         }
 
-        addAffinity(player.getUniqueId(), value);
+        addAffinity(determineUuid(player), value);
     }
 
     public int addAffinity(UUID uuid, int value) {

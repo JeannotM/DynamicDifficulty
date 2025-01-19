@@ -7,7 +7,8 @@ import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.UUID;
 
 public class SQL implements ISaveManager {
     private final String tbName = "dynamicdifficulty";
@@ -96,6 +97,25 @@ public class SQL implements ISaveManager {
                 }
             } catch(SQLException e) { e.printStackTrace(); }
         });
+    }
+
+    @Override
+    public void batchSavePlayers(Collection<Minecrafter> players) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                PreparedStatement ps = connection.prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");;
+                for (Minecrafter playerData : players) {
+                    ps.setInt(1, playerData.affinity);
+                    ps.setInt(2, playerData.maxAffinity);
+                    ps.setInt(3, playerData.minAffinity);
+                    ps.setString(4, playerData.uuid.toString());
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                ps.close();
+            } catch(SQLException e) { e.printStackTrace(); }
+        });
+
     }
 
     @Override

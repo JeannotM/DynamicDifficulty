@@ -22,7 +22,6 @@ public class PlayerLeaveListener extends BaseListener {
             uuid = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
         }
         
-        MAIN_MANAGER.getDataManager().updatePlayer(uuid);
-        MAIN_MANAGER.getPlayerManager().unloadPlayer(uuid);
+        MAIN_MANAGER.getPlayerManager().unloadPlayer(e.getPlayer());
     }
 }

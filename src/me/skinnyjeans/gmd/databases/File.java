@@ -1,13 +1,14 @@
 package me.skinnyjeans.gmd.databases;
 
-import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.Main;
+import me.skinnyjeans.gmd.managers.DataManager;
 import me.skinnyjeans.gmd.models.ISaveManager;
 import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public class File implements ISaveManager {
@@ -26,7 +27,6 @@ public class File implements ISaveManager {
             } catch(Exception ignored) { }
 
         data = YamlConfiguration.loadConfiguration(dataFile);
-//        Bukkit.getLogger().warning();
         Bukkit.getConsoleSender().sendMessage("[DynamicDifficulty] " + d.getLanguageString("other.database-chosen").replace("%database%", "File"));
     }
 
@@ -39,6 +39,22 @@ public class File implements ISaveManager {
             data.set(playerData.uuid + ".max-affinity", playerData.maxAffinity);
             data.set(playerData.uuid + ".min-affinity", playerData.minAffinity);
             data.set(playerData.uuid + ".name", playerData.name);
+            try {
+                data.save(dataFile);
+            } catch (Exception ignored) { }
+        });
+    }
+
+    @Override
+    public void batchSavePlayers(Collection<Minecrafter> players) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for(Minecrafter playerData : players) {
+                data.set(playerData.uuid + ".affinity", playerData.affinity);
+                data.set(playerData.uuid + ".max-affinity", playerData.maxAffinity);
+                data.set(playerData.uuid + ".min-affinity", playerData.minAffinity);
+                data.set(playerData.uuid + ".name", playerData.name);
+            }
+
             try {
                 data.save(dataFile);
             } catch (Exception ignored) { }

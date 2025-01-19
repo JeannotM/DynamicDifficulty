@@ -53,6 +53,7 @@ command:
       15: "%label% playerGUI &7>&6 Toont alle spelers in een kist GUI"
       16: "%label% help &7>&6 Toont dit menu"
       17: "%label% info &7>&6 Toont debug info"
+      18: "%label% forceRemoval &7>&6 Herstelt leven van spelers en sluit Dynamic Difficulty"
 in-game:
   attacker-no-pvp: "Je kan %user% niet aanvallen omdat jij het al moeilijk genoeg hebt!"
   attackee-no-pvp: "Je kan %user% niet aanvallen omdat die het al moeilijk genoeg heeft!"

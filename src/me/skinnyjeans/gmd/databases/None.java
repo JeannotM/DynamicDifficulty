@@ -6,6 +6,7 @@ import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.UUID;
 
 public class None implements ISaveManager {
@@ -17,6 +18,9 @@ public class None implements ISaveManager {
 
     @Override
     public void updatePlayer(Minecrafter playerData) { return; }
+
+    @Override
+    public void batchSavePlayers(Collection<Minecrafter> players) { return; }
 
     @Override
     public void getAffinityValues(UUID uuid, findCallback callback) { callback.onQueryDone(null); }

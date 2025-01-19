@@ -16,8 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class CommandManager implements CommandExecutor {
 
@@ -67,15 +65,7 @@ public class CommandManager implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(args.length == 0 || args[0].equalsIgnoreCase("help")) return sendMessage(sender, helpMessage, true);
-
         String argument = args[0].toLowerCase();
-
-        if (argument.equals("time")) {
-            Player player = (Player)sender;
-            sender.sendMessage(player.getWorld().getTime() + "");
-            player.sendMessage(player.getWorld().getTime() + "");
-            return true;
-        }
 
         if(NO_ARG.contains(argument)) {
             if(hasPermission(sender, argument)) {
@@ -118,10 +108,12 @@ public class CommandManager implements CommandExecutor {
                 }
             } else {
                 String name = args.length > 1 ? args[1] : sender.getName();
+                if (args.length == 1 && !(sender instanceof Player)) { return sendMessage(sender, notFound, false); }
                 UUID uuid = needsUuid(sender, name);
                 if (uuid == null) { return sendMessage(sender, notFound, false); }
+                String prefix = sender.getName().equals(name) ? "self" :  "other";
 
-                if(hasPermission(sender, name, argument)) {
+                if(hasAnyPermission(sender, argument, prefix)) {
                     if(argument.equals("delmin")) {
                         Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
                         MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, -1);
@@ -179,8 +171,9 @@ public class CommandManager implements CommandExecutor {
                 String name = args[1].toLowerCase();
                 UUID uuid = needsUuid(sender, name);
                 if (uuid == null) { return sendMessage(sender, notFound, false); }
+                String prefix = sender.getName().equals(name) ? "self" :  "other";
 
-                if(hasPermission(sender, name, argument)) {
+                if(hasPermission(sender, argument, prefix)) {
                     if(argument.equals("setmin")) {
                         int setAffinity = MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, number);
                         Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
@@ -270,7 +263,9 @@ public class CommandManager implements CommandExecutor {
                 || sender.getName().equalsIgnoreCase(command)
                 || command.equals("@s")
                 || needsNumber(command) != -550055) {
-            return MAIN_MANAGER.getPlayerManager().determineUuid((Player) sender);
+            if (sender instanceof Player) {
+                return MAIN_MANAGER.getPlayerManager().determineUuid((Player) sender);
+            }
         }
         if (MAIN_MANAGER.getPlayerManager().hasPlayer(command)) {
             return MAIN_MANAGER.getPlayerManager().getPlayerAffinity(command.toLowerCase()).uuid;

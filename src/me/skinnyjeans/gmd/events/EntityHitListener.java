@@ -4,7 +4,9 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.ArmorTypes;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -68,7 +70,8 @@ public class EntityHitListener extends BaseListener {
                     e.setCancelled(true);
                 }
             } else {
-                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(playerPrey);
+                UUID uuid = MAIN_MANAGER.getPlayerManager().determineUuid(playerPrey);
+                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
                 double damage;
                 if (allowTamedWolves && e.getEntity() instanceof Wolf) {
                     damage = e.getFinalDamage()
@@ -94,12 +97,12 @@ public class EntityHitListener extends BaseListener {
                                 * (int) Math.ceil(damage / 2)
                                 + (onPlayerHit)
                             : 0;
-                    MAIN_MANAGER.getPlayerManager().addAffinity(playerPrey, removePoints);
+                    MAIN_MANAGER.getPlayerManager().addAffinity(uuid, removePoints);
                 });
 
                 if (playerPrey.getHealth() - damage <= 0)
                     if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
-                            .getDifficulty(playerPrey).chanceCancelDeath) {
+                            .getDifficulty(uuid).chanceCancelDeath) {
 
                         // Not able to use something vanilla for Minecraft for this
                         playerPrey.spawnParticle(Particle.TOTEM_OF_UNDYING, playerPrey.getLocation(), 100);
@@ -117,9 +120,10 @@ public class EntityHitListener extends BaseListener {
                 e.setDamage(damage);
             }
         } else if (MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
+            UUID uuid = MAIN_MANAGER.getPlayerManager().determineUuid((Player) hunter);
             MAIN_MANAGER.getEntityManager().entityHit(prey);
             e.setDamage(e.getFinalDamage()
-                    * MAIN_MANAGER.getDifficultyManager().getDifficulty((Player) hunter).damageDoneOnMobs);
+                    * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).damageDoneOnMobs);
         }
     }
 

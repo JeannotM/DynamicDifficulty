@@ -60,6 +60,7 @@ command:
       15: "%label% playerGUI &7>&6 Shows all players in a chest GUI"
       16: "%label% help &7>&6 Shows this menu"
       17: "%label% info &7>&6 Shows debug info"
+      18: "%label% forceRemoval &7>&6 Disables DynamicDifficulty and restores player health"
 in-game:
   attacker-no-pvp: "You cannot attack %user% because you're still having a hard time!"
   attackee-no-pvp: "You cannot attack %user% because he's already having a hard time!"

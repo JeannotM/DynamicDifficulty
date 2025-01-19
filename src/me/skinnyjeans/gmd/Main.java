@@ -1,7 +1,7 @@
 /**
  * Main handler for the Gameplay-Modulated-difficulty plugin.
  *
- * @version 1.6
+ * @version 1.9
  * @author SkinnyJeans
  */
 package me.skinnyjeans.gmd;

@@ -12,7 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class InventoryManager {
 
@@ -136,7 +139,9 @@ public class InventoryManager {
     public void openBaseDifficultyInventory(Player player) { player.openInventory(difficultyInventory); }
     public void openInventory(Player player, int page) {
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
-            Inventory inventory = baseInventory;
+            Inventory inventory = Bukkit.createInventory(null, 54, StaticInfo.PLAYERS_INVENTORY);
+            inventory.setContents(baseInventory.getContents());
+
             Minecrafter[] players = MAIN_MANAGER.getPlayerManager().getPlayerList().values().toArray(new Minecrafter[0]);
             int iterator = (page - 1) * 45;
             if(players.length - iterator <= 0) return;
@@ -144,10 +149,10 @@ public class InventoryManager {
             ItemMeta itemMeta = inventory.getItem(4).getItemMeta();
             itemMeta.setDisplayName(itemMeta.getDisplayName().replace("%number%", String.valueOf(page)));
             inventory.getItem(4).setItemMeta(itemMeta);
-            int iteratorLimit = (players.length % 45);
-
-            for(int i = 0; i < iteratorLimit; i++)
-                inventory.setItem(i + 9, createPlayerHead(players[iterator + i]));
+            for(int i = 0; i < 45; i++) {
+                Minecrafter pl =  iterator + i < players.length ? players[iterator + i] : null;
+                inventory.setItem(i + 9, pl != null ? createPlayerHead(pl) : null);
+            }
 
             Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () ->
                     player.openInventory(inventory));

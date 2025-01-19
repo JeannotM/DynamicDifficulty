@@ -1,7 +1,9 @@
 package me.skinnyjeans.gmd.managers;
 
-import me.skinnyjeans.gmd.databases.*;
+import me.skinnyjeans.gmd.databases.None;
+import me.skinnyjeans.gmd.databases.SQL;
 import me.skinnyjeans.gmd.models.ISaveManager;
+import me.skinnyjeans.gmd.models.Minecrafter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -33,8 +35,6 @@ public class DataManager {
             String saveType = config.getString("saving-data.type", "file").toLowerCase();
             if(saveType.equals("mysql") || saveType.equals("sqlite") || saveType.equals("postgresql") || saveType.equals("mariadb")){
                 DATABASE = new SQL(MAIN_MANAGER.getPlugin(), this, saveType);
-            } else if(saveType.equals("mongodb")) {
-                DATABASE = new MongoDB(MAIN_MANAGER.getPlugin(), this);
             } else if(saveType.equals("none")){
                 DATABASE = new None(this);
             } else DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
@@ -99,7 +99,8 @@ public class DataManager {
     public FileConfiguration getConfig() { return config; }
     public ConfigurationSection getLang() { return language; }
     public ConfigurationSection getCultureLang() { return culture; }
-    public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerList().get(uuid)); }
+    public void batchSave(Collection<Minecrafter> players) { DATABASE.batchSavePlayers(players); }
+    public void updatePlayer(UUID uuid) { DATABASE.updatePlayer(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid)); }
     public void getAffinityValues(UUID uuid, final ISaveManager.findCallback callback) { DATABASE.getAffinityValues(uuid, callback); }
     public void playerExists(UUID uuid, final ISaveManager.findBooleanCallback callback) { DATABASE.playerExists(uuid, callback); }
 
@@ -122,10 +123,8 @@ public class DataManager {
 
     public void saveData() {
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
-            Set<UUID> list = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
-            for (UUID uuid : list) {
-                updatePlayer(uuid);
-            }
+            Collection<Minecrafter> players = MAIN_MANAGER.getPlayerManager().getPlayerList().values();
+            batchSave(players);
         });
     }
 

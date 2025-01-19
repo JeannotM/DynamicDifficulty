@@ -3,15 +3,11 @@ package me.skinnyjeans.gmd.managers;
 import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class DifficultyManager {
@@ -25,7 +21,7 @@ public class DifficultyManager {
     private BukkitTask calculateTimer = null;
     private boolean exactPercentage = true;
     private boolean calculateHealth = false;
-    private DifficultyTypes DifficultyType;
+    private DifficultyTypes difficultyType;
 
     public DifficultyManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
@@ -46,7 +42,7 @@ public class DifficultyManager {
         return PLAYER_LIST.getOrDefault(uuid, DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(0)));
     }
 
-    public DifficultyTypes getType() { return DifficultyType; }
+    public DifficultyTypes getType() { return difficultyType; }
 
     public Difficulty calcDifficulty(int affinity) {
         for (String difficulty : DIFFICULTY_LIST_SORTED)
@@ -56,7 +52,10 @@ public class DifficultyManager {
     }
 
     public void calculateAllPlayers() {
-        MAIN_MANAGER.getPlayerManager().getPlayerList().forEach((key, value) -> calculateDifficulty(key));
+        Collection<Minecrafter> list = MAIN_MANAGER.getPlayerManager().getPlayerList().values();
+        for (Minecrafter data : list) {
+            calculateDifficulty(data);
+        }
     }
 
     public String getProgress(UUID uuid) {
@@ -159,15 +158,24 @@ public class DifficultyManager {
         difficulty.commandsOnSwitchFromPrev = first.commandsOnSwitchFromPrev;
         difficulty.commandsOnJoin = first.commandsOnJoin;
         difficulty.preventEntityExplosionBlockDamage = first.preventEntityExplosionBlockDamage;
+        PLAYER_LIST.put(data.uuid, difficulty);
 
-        if (calculateHealth && Bukkit.getOfflinePlayer(data.uuid).isOnline()) {
-            Player player = Bukkit.getPlayer(data.uuid);
-            if(player != null && player.getAttribute(Attribute.MAX_HEALTH) != null) {
-                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+        if (calculateHealth) {
+            if (Bukkit.getOfflinePlayer(data.uuid) != null && Bukkit.getOfflinePlayer(data.uuid).isOnline()) {
+                Player player = Bukkit.getPlayer(data.uuid);
+                if(player != null && player.getAttribute(Attribute.MAX_HEALTH) != null) {
+                    player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+                }
+            } else if (DifficultyTypes.biome == difficultyType || DifficultyTypes.world == difficultyType){
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    UUID playerUuid = MAIN_MANAGER.getPlayerManager().determineUuid(player);
+                    if (player != null && data.uuid.equals(playerUuid)) {
+                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+                    }
+                }
             }
         }
 
-        PLAYER_LIST.put(data.uuid, difficulty);
         return difficulty;
     }
 
@@ -188,7 +196,11 @@ public class DifficultyManager {
 
         String type = MAIN_MANAGER.getDataManager().getConfig().getString("toggle-settings.difficulty-type", "player").toLowerCase();
         exactPercentage = MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.advanced.exact-percentage", true);
-        DifficultyType = DifficultyTypes.valueOf(type);
+        try {
+            difficultyType = DifficultyTypes.valueOf(type);
+        } catch (IllegalArgumentException ignored) {
+            difficultyType = DifficultyTypes.player;
+        }
 
         HashMap<Integer, String> tmpMap = new HashMap<Integer, String>();
         for(String key : MAIN_MANAGER.getDataManager().getConfig().getConfigurationSection("difficulty").getKeys(false)) {
@@ -285,6 +297,6 @@ public class DifficultyManager {
         int updateTime = MAIN_MANAGER.getDataManager().getConfig().getInt("toggle-settings.update-time-ticks", 1200);
         if(updateTime < 20) { updateTime = 1200; }
 
-        calculateTimer = Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), this::calculateAllPlayers, 20 * 5, updateTime);
+        calculateTimer = Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () -> calculateAllPlayers(), 20 * 5, updateTime);
     }
 }

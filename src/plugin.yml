@@ -1,6 +1,6 @@
 main: me.skinnyjeans.gmd.Main
 name: DynamicDifficulty
-version: 1.8
+version: 1.9
 author: SkinnyJeans
 api-version: 1.13
 load: "POSTWORLD"
@@ -31,16 +31,16 @@ permissions:
       affinity.forceremoval: true
 
   affinity.me:
-    default: false
+    default: op
     description: Opens the difficulty settings for a player
   affinity.info:
-    default: false
+    default: op
     description: Returns some info from items in the plugin
   affinity.help:
-    default: false
+    default: op
     description: Returns all the commands of Dynamic Difficulty to the player
   affinity.get:
-    default: false
+    default: op
     description: Allows a player to look up a someones affinity
   affinity.author:
     default: false

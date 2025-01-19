@@ -1,7 +1,6 @@
 package me.skinnyjeans.gmd.models;
 
 import me.skinnyjeans.gmd.managers.MainManager;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;

@@ -23,26 +23,20 @@ public class BlockMinedListener extends BaseListener {
         put(Material.EMERALD_ORE, Material.EMERALD);
         put(Material.REDSTONE_ORE, Material.REDSTONE);
         put(Material.NETHER_QUARTZ_ORE, Material.QUARTZ);
+        put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
+        put(Material.DEEPSLATE_COAL_ORE, Material.COAL);
+        put(Material.DEEPSLATE_LAPIS_ORE, Material.LAPIS_LAZULI);
+        put(Material.DEEPSLATE_DIAMOND_ORE, Material.DIAMOND);
+        put(Material.DEEPSLATE_EMERALD_ORE, Material.EMERALD);
+        put(Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE);
+        put(Material.COPPER_ORE, Material.RAW_COPPER);
+        put(Material.DEEPSLATE_COPPER_ORE, Material.RAW_COPPER);
     }};
 
     private boolean silkTouchAllowed;
 
     public BlockMinedListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-
-        try {
-            // 1.16 20w11a
-            ORE_BLOCKS.put(Material.valueOf("NETHER_GOLD_ORE"), Material.valueOf("GOLD_NUGGET"));
-
-            // 1.17 21w10a
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_COAL_ORE"), Material.valueOf("COAL"));
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_LAPIS_ORE"), Material.valueOf("LAPIS_LAZULI"));
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_DIAMOND_ORE"), Material.valueOf("DIAMOND"));
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_EMERALD_ORE"), Material.valueOf("EMERALD"));
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_REDSTONE_ORE"), Material.valueOf("REDSTONE"));
-            ORE_BLOCKS.put(Material.valueOf("COPPER_ORE"), Material.valueOf("RAW_COPPER"));
-            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_COPPER_ORE"), Material.valueOf("RAW_COPPER"));
-        } catch (Exception ignored) { }
     }
 
     @EventHandler

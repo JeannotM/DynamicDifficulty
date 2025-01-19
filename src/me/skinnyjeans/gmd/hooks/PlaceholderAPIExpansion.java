@@ -2,6 +2,7 @@ package me.skinnyjeans.gmd.hooks;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.skinnyjeans.gmd.managers.MainManager;
+import me.skinnyjeans.gmd.managers.PlayerManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -46,12 +47,16 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
 
     public String placeholderRequest(OfflinePlayer offlinePlayer, String identifier) {
         if(offlinePlayer != null && offlinePlayer.isOnline()) {
-            if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(offlinePlayer.getUniqueId());
-            if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getNextDifficulty(offlinePlayer.getUniqueId()).prefix;
-            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(offlinePlayer.getPlayer()).prefix;
-            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).affinity);
-            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).minAffinity);
-            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).maxAffinity);
+            PlayerManager pm = MAIN_MANAGER.getPlayerManager();
+            UUID uuid = pm.determineUuid(offlinePlayer.getPlayer());
+
+            if (uuid == null) { return null; }
+            if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(uuid);
+            if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getNextDifficulty(uuid).prefix;
+            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).prefix;
+            if(identifier.equals("user_affinity")) return String.valueOf(pm.getPlayerAffinity(uuid).affinity);
+            if(identifier.equals("user_min_affinity")) return String.valueOf(pm.getPlayerAffinity(uuid).minAffinity);
+            if(identifier.equals("user_max_affinity")) return String.valueOf(pm.getPlayerAffinity(uuid).maxAffinity);
         }
         return null;
     }

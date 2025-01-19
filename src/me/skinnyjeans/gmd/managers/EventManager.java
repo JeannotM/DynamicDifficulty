@@ -31,6 +31,7 @@ public class EventManager {
         LISTENERS.add(new PlayerJoinListener(MAIN_MANAGER));
         LISTENERS.add(new PlayerLeaveListener(MAIN_MANAGER));
         LISTENERS.add(new PotionEffectListener(MAIN_MANAGER));
+        LISTENERS.add(new HealthRegenListener(MAIN_MANAGER));
         LISTENERS.add(new EntityDamageListener(MAIN_MANAGER));
 
         for(BaseListener listener : LISTENERS)

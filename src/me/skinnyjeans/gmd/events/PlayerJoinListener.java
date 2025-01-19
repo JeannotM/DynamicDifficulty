@@ -7,8 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.UUID;
-
 public class PlayerJoinListener extends BaseListener {
 
     public PlayerJoinListener(MainManager mainManager) {
