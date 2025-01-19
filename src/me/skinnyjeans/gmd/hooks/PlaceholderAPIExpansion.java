@@ -44,15 +44,14 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, String identifier) { return placeholderRequest(player, identifier); }
 
-    public String placeholderRequest(OfflinePlayer player, String identifier) {
-        if(player != null) {
-            UUID uuid = player.getUniqueId();
-            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).prefix;
-            if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(uuid);
-            if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getNextDifficulty(uuid).prefix;
-            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).affinity);
-            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).minAffinity);
-            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid).maxAffinity);
+    public String placeholderRequest(OfflinePlayer offlinePlayer, String identifier) {
+        if(offlinePlayer != null && offlinePlayer.isOnline()) {
+            if(identifier.equals("user_progress")) return MAIN_MANAGER.getDifficultyManager().getProgress(offlinePlayer.getUniqueId());
+            if(identifier.equals("user_next_difficulty")) return MAIN_MANAGER.getDifficultyManager().getNextDifficulty(offlinePlayer.getUniqueId()).prefix;
+            if(identifier.equals("user_difficulty")) return MAIN_MANAGER.getDifficultyManager().getDifficulty(offlinePlayer.getPlayer()).prefix;
+            if(identifier.equals("user_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).affinity);
+            if(identifier.equals("user_min_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).minAffinity);
+            if(identifier.equals("user_max_affinity")) return String.valueOf(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(offlinePlayer.getPlayer()).maxAffinity);
         }
         return null;
     }

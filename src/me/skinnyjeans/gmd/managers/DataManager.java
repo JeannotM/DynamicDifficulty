@@ -10,10 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class DataManager {
 
@@ -21,13 +18,7 @@ public class DataManager {
 
     private final HashSet<String> DISABLED_WORLDS = new HashSet<>();
 
-    private String cultureCode;
-    private FileConfiguration config;
-    private FileConfiguration language;
-    private FileConfiguration culture;
-    private File cultureFile;
-    private File configFile;
-    private File langFile;
+    private FileConfiguration language, config, culture;
     private ISaveManager DATABASE;
 
     public DataManager(MainManager mainManager) {
@@ -52,14 +43,11 @@ public class DataManager {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"[DynamicDifficulty] Can't connect to the database, switching to 'file' mode");
             DATABASE = new me.skinnyjeans.gmd.databases.File(MAIN_MANAGER.getPlugin(), this);
         }
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(MAIN_MANAGER.getPlugin(), () ->
-            Bukkit.getOnlinePlayers().forEach(player -> updatePlayer(player.getUniqueId())), 20*60*5, 20*60*5);
     }
 
     public void loadConfig() {
-        configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
-        langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
+        File configFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "config.yml");
+        File langFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang.yml");
         language = new YamlConfiguration();
         culture = new YamlConfiguration();
         config = new YamlConfiguration();
@@ -75,8 +63,8 @@ public class DataManager {
         File langDir = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang");
         if (! langDir.exists()) langDir.mkdir();
 
-        cultureCode = language.getString("culture", "en-US");
-        cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/" + cultureCode + ".yml");
+        String cultureCode = language.getString("culture", "en-US");
+        File cultureFile = new File(MAIN_MANAGER.getPlugin().getDataFolder(), "lang/" + cultureCode + ".yml");
 
         try {
             if(!cultureFile.exists())
@@ -133,8 +121,12 @@ public class DataManager {
     }
 
     public void saveData() {
-        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () ->
-                Bukkit.getOnlinePlayers().forEach(player -> updatePlayer(player.getUniqueId())));
+        Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
+            Set<UUID> list = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+            for (UUID uuid : list) {
+                updatePlayer(uuid);
+            }
+        });
     }
 
     public void reloadConfig() {

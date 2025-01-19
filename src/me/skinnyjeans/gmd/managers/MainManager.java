@@ -10,7 +10,6 @@ public class MainManager {
     private final TabCompleterManager TAB_COMPLETER_MANAGER;
     private final DifficultyManager DIFFICULTY_MANAGER;
     private final InventoryManager INVENTORY_MANAGER;
-    private final AffinityManager AFFINITY_MANAGER;
     private final CommandManager COMMAND_MANAGER;
     private final EntityManager ENTITY_MANAGER;
     private final PlayerManager PLAYER_MANAGER;
@@ -27,7 +26,6 @@ public class MainManager {
 
         TAB_COMPLETER_MANAGER = new TabCompleterManager(this);
         INVENTORY_MANAGER = new InventoryManager(this);
-        AFFINITY_MANAGER = new AffinityManager(this);
         COMMAND_MANAGER = new CommandManager(this);
         ENTITY_MANAGER = new EntityManager(this);
         EVENT_MANAGER = new EventManager(this);
@@ -48,7 +46,6 @@ public class MainManager {
 
         TAB_COMPLETER_MANAGER.reloadConfig();
         INVENTORY_MANAGER.reloadConfig();
-        AFFINITY_MANAGER.reloadConfig();
         COMMAND_MANAGER.reloadConfig();
         ENTITY_MANAGER.reloadConfig();
         EVENT_MANAGER.reloadConfig();
@@ -74,7 +71,6 @@ public class MainManager {
 
     public DifficultyManager getDifficultyManager() { return DIFFICULTY_MANAGER; }
     public InventoryManager getInventoryManager() { return INVENTORY_MANAGER; }
-    public AffinityManager getAffinityManager() { return AFFINITY_MANAGER; }
     public CommandManager getCommandManager() { return COMMAND_MANAGER; }
     public PlayerManager getPlayerManager() { return PLAYER_MANAGER; }
     public EntityManager getEntityManager() { return ENTITY_MANAGER; }

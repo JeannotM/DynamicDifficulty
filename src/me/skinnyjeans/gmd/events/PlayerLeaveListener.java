@@ -15,9 +15,13 @@ public class PlayerLeaveListener extends BaseListener {
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
-        if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer())) return;
+        if(!MAIN_MANAGER.getPlayerManager().isPlayerValidNoWorld(e.getPlayer())) return;
 
         UUID uuid = e.getPlayer().getUniqueId();
+        if (uuid == null) {
+            uuid = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
+        }
+        
         MAIN_MANAGER.getDataManager().updatePlayer(uuid);
         MAIN_MANAGER.getPlayerManager().unloadPlayer(uuid);
     }

@@ -4,9 +4,9 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
 import org.bukkit.Location;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 import java.util.Arrays;
@@ -20,6 +20,7 @@ public class CreeperExplodeListener extends BaseListener {
 
     public CreeperExplodeListener(MainManager mainManager) { MAIN_MANAGER = mainManager; }
 
+    @EventHandler
     public void onCreeperExplosion(EntityExplodeEvent e) {
         if(shouldDisable) return;
 
@@ -36,10 +37,8 @@ public class CreeperExplodeListener extends BaseListener {
                 }
             }
 
-            if(closestPlayer == null || !MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)) return;
-            Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer.getUniqueId());
-
-            if(difficulty.preventEntityExplosionBlockDamage) {
+            if(MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)
+                && MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer).preventEntityExplosionBlockDamage) {
                 e.blockList().clear();
             }
         }

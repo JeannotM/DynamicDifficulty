@@ -5,6 +5,8 @@ import me.skinnyjeans.gmd.models.Minecrafter;
 import me.skinnyjeans.gmd.utils.StaticInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,9 +23,9 @@ public class CommandManager implements CommandExecutor {
 
     private final MainManager MAIN_MANAGER;
 
-    private final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("difficulties", "me", "help", "reload", "author", "forcesave", "playergui"));
-    private final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
-    private final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
+    private static final HashSet<String> NO_ARG = new HashSet<>(Arrays.asList("difficulties", "me", "help", "reload", "author", "forcesave", "forceremoval", "playergui"));
+    private static final HashSet<String> ONE_ARG = new HashSet<>(Arrays.asList("delmin", "delmax", "get"));
+    private static final HashSet<String> TWO_ARGS = new HashSet<>(Arrays.asList("setmin", "setmax", "set", "remove", "add"));
 
     private static final String authorMessage = "DynamicDifficulty: SkinnyJeans\nhttps://www.spigotmc.org/resources/dynamic-difficulty.92025/\n\n";
     private static final String PREFIX_NUMBER = "%number%";
@@ -68,24 +70,46 @@ public class CommandManager implements CommandExecutor {
 
         String argument = args[0].toLowerCase();
 
+        if (argument.equals("time")) {
+            Player player = (Player)sender;
+            sender.sendMessage(player.getWorld().getTime() + "");
+            player.sendMessage(player.getWorld().getTime() + "");
+            return true;
+        }
+
         if(NO_ARG.contains(argument)) {
             if(hasPermission(sender, argument)) {
-                if(argument.equals("author")) return sendMessage(sender, author(), true);
+                if(argument.equals("author")) return sendMessage(sender, authorMessage + translatorMessage, true);
                 if(argument.equals("reload")) return sendMessage(sender, reloadPlugin(), true);
                 if(argument.equals("forcesave")) return sendMessage(sender, forceSave(), true);
                 if(argument.equals("playergui")) return openPlayerGUI(sender);
                 if(argument.equals("difficulties")) return openDifficultyGUI(sender);
                 if(argument.equals("me")) return openMyInventoryGUI(sender);
+                if(argument.equals("forceremoval")) {
+                    OfflinePlayer[] list = Bukkit.getOfflinePlayers();
+                    for (OfflinePlayer pl : list) {
+                        Player player = pl.getPlayer();
+                        if (player != null) {
+                            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+                        }
+                    }
+
+                    MAIN_MANAGER.getPlugin().onDisable();
+                    MAIN_MANAGER.getPlugin().getPluginLoader().disablePlugin(MAIN_MANAGER.getPlugin());
+                    return sendMessage(sender, "DynamicDifficulty disabled", true);
+                }
             }
-        } else if(ONE_ARG.contains(argument)) {
+        } else if (ONE_ARG.contains(argument)) {
             if(args.length > 1 && args[1].equals("@a")) {
                 if(hasAnyPermission(sender, argument, "other")) {
                     if(argument.equals("delmin")) {
-                        multipleUsers(this::removeMinAffinity);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().setMinAffinity(key, -1); }
                         return sendMessage(sender, allUserMinAffinityRemoved, true);
                     }
                     if(argument.equals("delmax")) {
-                        multipleUsers(this::removeMaxAffinity);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().setMaxAffinity(key, -1); }
                         return sendMessage(sender, allUserMaxAffinityRemoved, true);
                     }
                     if(argument.equals("get")) {
@@ -93,15 +117,35 @@ public class CommandManager implements CommandExecutor {
                     }
                 }
             } else {
-                Player affectedPlayer = needsPlayer(sender, args.length > 1 ? args[1] : "@s");
-                if(affectedPlayer == null) return sendMessage(sender, notFound, false);
+                String name = args.length > 1 ? args[1] : sender.getName();
+                UUID uuid = needsUuid(sender, name);
+                if (uuid == null) { return sendMessage(sender, notFound, false); }
 
-                if(hasPermission(sender, affectedPlayer, argument))
-                    if(argument.equals("delmin")) return sendMessage(sender, removeMinAffinity(affectedPlayer), true);
-                    if(argument.equals("delmax"))  return sendMessage(sender, removeMaxAffinity(affectedPlayer), true);
-                    if(argument.equals("get")) return sendMessage(sender, getAffinity(affectedPlayer), true);
+                if(hasPermission(sender, name, argument)) {
+                    if(argument.equals("delmin")) {
+                        Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, -1);
+                        return sendMessage(sender, minAffinityRemoved.replace(PREFIX_USER, data.name), true);
+                    }
+                    if(argument.equals("delmax")) {
+                        Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, -1);
+                        return sendMessage(sender, maxAffinityRemoved.replace(PREFIX_USER, data.name), true);
+                    }
+                    if(argument.equals("get")) {
+                        Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, data.name).replace(PREFIX_NUMBER, data.affinity + ""))
+                                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(data.uuid).prefix)
+                                        .replace(PREFIX_NUMBER, data.affinity + ""));
+
+                        if(data.maxAffinity != -1) message.append("\n").append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.maxAffinity + ""));
+                        if(data.minAffinity != -1) message.append("\n").append(userMinAffinityGet.replace(PREFIX_NUMBER, data.minAffinity + ""));
+
+                        return sendMessage(sender, message.toString(), true);
+                    }
+                }
             }
-        } else if(TWO_ARGS.contains(argument)) {
+        } else if (TWO_ARGS.contains(argument)) {
             if (args.length < 2) return sendMessage(sender, includeNumber, false);
 
             int number = needsNumber(args.length == 2 ? args[1] : args[2]);
@@ -110,58 +154,79 @@ public class CommandManager implements CommandExecutor {
             if(args[1].equals("@a")) {
                 if(hasAnyPermission(sender, argument, "other")) {
                     if (argument.equals("setmin")) {
-                        multipleUsers(this::setMinAffinity, number);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().setMinAffinity(key, number); }
                         return sendMessage(sender, allUserMinAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     } else if (argument.equals("setmax")) {
-                        multipleUsers(this::setMaxAffinity, number);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().setMaxAffinity(key, number); }
                         return sendMessage(sender, allUserMaxAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     } else if (argument.equals("set")) {
-                        multipleUsers(this::setAffinity, number);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().setAffinity(key, number); }
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     } else if (argument.equals("remove")) {
-                        multipleUsers(this::addAffinity, number * -1);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().addAffinity(key, number * -1); }
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     } else if (argument.equals("add")) {
-                        multipleUsers(this::addAffinity, number);
+                        Set<UUID> keys = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet();
+                        for (UUID key : keys) { MAIN_MANAGER.getPlayerManager().addAffinity(key, number); }
                         return sendMessage(sender, allUserAffinitySet.replace(PREFIX_NUMBER, String.valueOf(number)), true);
                     }
                 }
             } else {
-                Player affectedPlayer = needsPlayer(sender, args[1]);
-                if(affectedPlayer == null) return sendMessage(sender, notFound, false);
+                String name = args[1].toLowerCase();
+                UUID uuid = needsUuid(sender, name);
+                if (uuid == null) { return sendMessage(sender, notFound, false); }
 
-                if(hasPermission(sender, affectedPlayer, argument)) {
-                    if(argument.equals("setmin")) return sendMessage(sender, setMinAffinity(affectedPlayer, number), true);
-                    if(argument.equals("setmax")) return sendMessage(sender, setMaxAffinity(affectedPlayer, number), true);
-                    if(argument.equals("set")) return sendMessage(sender, setAffinity(affectedPlayer, number), true);
-                    if(argument.equals("remove")) return sendMessage(sender, addAffinity(affectedPlayer, number * -1), true);
-                    if(argument.equals("add")) return sendMessage(sender, addAffinity(affectedPlayer, number), true);
+                if(hasPermission(sender, name, argument)) {
+                    if(argument.equals("setmin")) {
+                        int setAffinity = MAIN_MANAGER.getPlayerManager().setMinAffinity(uuid, number);
+                        Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        return sendMessage(sender,
+                                minAffinitySet.replace(PREFIX_USER, affinity.name).replace(PREFIX_NUMBER,setAffinity + ""),
+                                true);
+                    }
+                    if(argument.equals("setmax")) {
+                        int setAffinity = MAIN_MANAGER.getPlayerManager().setMaxAffinity(uuid, number);
+                        Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        return sendMessage(sender,
+                                maxAffinitySet.replace(PREFIX_USER, affinity.name).replace(PREFIX_NUMBER,setAffinity + ""),
+                                true);
+                    }
+                    if(argument.equals("set")) {
+                        int setAffinity = MAIN_MANAGER.getPlayerManager().setAffinity(uuid, number);
+                        Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        Difficulty diff = MAIN_MANAGER.getDifficultyManager().calculateDifficulty(affinity);
+                        return sendMessage(sender,
+                                affinitySet.replace(PREFIX_USER, affinity.name).replace(PREFIX_DIFFICULTY, diff.difficultyName)
+                                        .replace(PREFIX_NUMBER,setAffinity + ""),
+                                true);
+                    }
+                    if(argument.equals("remove")) {
+                        int setAffinity = MAIN_MANAGER.getPlayerManager().addAffinity(uuid, number * -1);
+                        Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        String difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).difficultyName;
+                        return sendMessage(sender,
+                                affinitySet.replace(PREFIX_USER, affinity.name).replace(PREFIX_DIFFICULTY, difficulty)
+                                        .replace(PREFIX_NUMBER,setAffinity + ""),
+                                true);
+                    }
+                    if(argument.equals("add")) {
+                        int setAffinity = MAIN_MANAGER.getPlayerManager().addAffinity(uuid, number);
+                        Minecrafter affinity = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid);
+                        String difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).difficultyName;
+                        return sendMessage(sender,
+                                affinitySet.replace(PREFIX_USER, affinity.name).replace(PREFIX_DIFFICULTY, difficulty)
+                                        .replace(PREFIX_NUMBER,setAffinity + ""),
+                                true);
+                    }
                 }
             }
         }
+
         return sendMessage(sender, noPermission, false);
-    }
-
-    private void multipleUsers(Function<Player, String> method) {
-        for(Player player : Bukkit.getOnlinePlayers()) method.apply(player);
-    }
-
-    private void multipleUsers(BiFunction<Player, Integer, String> method, int value) {
-        for(Player player : Bukkit.getOnlinePlayers()) method.apply(player, value);
-    }
-
-    private String removeMaxAffinity(Player player) {
-        MAIN_MANAGER.getPlayerManager().setMaxAffinity(player.getUniqueId(), -1);
-        return maxAffinityRemoved.replace(PREFIX_USER, player.getName());
-    }
-
-    private String removeMinAffinity(Player player) {
-        MAIN_MANAGER.getPlayerManager().setMinAffinity(player.getUniqueId(), -1);
-        return minAffinityRemoved.replace(PREFIX_USER, player.getName());
-    }
-
-    private String author() {
-        return authorMessage + translatorMessage;
     }
 
     private boolean openDifficultyGUI(CommandSender sender) {
@@ -189,40 +254,6 @@ public class CommandManager implements CommandExecutor {
         return true;
     }
 
-    private String getAffinity(Player player) {
-        Minecrafter data = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(player.getUniqueId());
-        StringBuilder message = new StringBuilder(userAffinityGet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, data.affinity + ""))
-                .append("\n").append(userDifficultyGet.replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(data.uuid).prefix)
-                        .replace(PREFIX_NUMBER, data.affinity + ""));
-
-        if(data.maxAffinity != -1) message.append("\n").append(userMaxAffinityGet.replace(PREFIX_NUMBER, data.maxAffinity + ""));
-        if(data.minAffinity != -1) message.append("\n").append(userMinAffinityGet.replace(PREFIX_NUMBER, data.minAffinity + ""));
-
-        return message.toString();
-    }
-
-    private String setAffinity(Player player, int value) {
-        int setAffinity = MAIN_MANAGER.getPlayerManager().setAffinity(player.getUniqueId(), value);
-        MAIN_MANAGER.getDifficultyManager().calculateDifficulty(player.getUniqueId());
-        return affinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER, String.valueOf(setAffinity))
-                .replace(PREFIX_DIFFICULTY, MAIN_MANAGER.getDifficultyManager().getDifficulty(player.getUniqueId()).prefix);
-    }
-
-    private String addAffinity(Player player, int value) {
-        Minecrafter difficulty = MAIN_MANAGER.getPlayerManager().getPlayerAffinity(player.getUniqueId());
-        return setAffinity(player, difficulty.affinity + value);
-    }
-
-    private String setMaxAffinity(Player player, int value) {
-        int setAffinity = MAIN_MANAGER.getPlayerManager().setMaxAffinity(player.getUniqueId(), value);
-        return maxAffinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER,setAffinity + "");
-    }
-
-    private String setMinAffinity(Player player, int value) {
-        int setAffinity = MAIN_MANAGER.getPlayerManager().setMinAffinity(player.getUniqueId(), value);
-        return minAffinitySet.replace(PREFIX_USER, player.getName()).replace(PREFIX_NUMBER,setAffinity + "");
-    }
-
     private String forceSave() {
         MAIN_MANAGER.getDataManager().saveData();
         return dataSaved;
@@ -234,29 +265,36 @@ public class CommandManager implements CommandExecutor {
         return configReloaded;
     }
 
-    public Player needsPlayer(CommandSender sender, String command) {
-        if (command.equals("@s") || needsNumber(command) != -550055) return sender instanceof Player ? ((Player) sender).getPlayer() : null;
-        if (Bukkit.getOfflinePlayer(command) != null && Bukkit.getOfflinePlayer(command).hasPlayedBefore()) return Bukkit.getOfflinePlayer(command).getPlayer();
+    public UUID needsUuid(CommandSender sender, String command) {
+        if (command == null || command.length() <= 1
+                || sender.getName().equalsIgnoreCase(command)
+                || command.equals("@s")
+                || needsNumber(command) != -550055) {
+            return MAIN_MANAGER.getPlayerManager().determineUuid((Player) sender);
+        }
+        if (MAIN_MANAGER.getPlayerManager().hasPlayer(command)) {
+            return MAIN_MANAGER.getPlayerManager().getPlayerAffinity(command.toLowerCase()).uuid;
+        }
         if (command.equals("@r")) {
-            Player[] players = (Player[]) Bukkit.getOnlinePlayers().toArray();
-            return players[new Random().nextInt(players.length)];
+            Object[] players = MAIN_MANAGER.getPlayerManager().getPlayerList().keySet().toArray();
+            return (UUID) players[new Random().nextInt(players.length)];
         } else if (command.equals("@p")) {
             List<Entity> entities = Bukkit.selectEntities(sender, "@p");
-            if(entities == null || entities.size() == 0) return null;
-            for(Entity entity : entities) if(entity instanceof Player) return (Player) entity;
+            for(Entity entity : entities)
+                return MAIN_MANAGER.getPlayerManager().determineUuid((Player) entity);
         }
         return null;
     }
 
     public int needsNumber(String command) {
-        if (command.matches("^[0-9-]+$")) return MAIN_MANAGER.getAffinityManager().withinServerLimits(Integer.parseInt(command));
+        if (command.matches("^[0-9-]+$")) return MAIN_MANAGER.getPlayerManager().withinServerLimits(Integer.parseInt(command));
         if (DIFFICULTIES.contains(command)) return MAIN_MANAGER.getDifficultyManager().getDifficulty(command).getAffinity();
         return -550055;
     }
 
-    public boolean hasPermission(CommandSender sender, Player player, String command) {
+    public boolean hasPermission(CommandSender sender, String name, String command) {
         if(sender instanceof Player) {
-            if(sender.getName().equals(player.getName())) return hasAnyPermission(sender, command, "self");
+            if(sender.getName().equalsIgnoreCase(name)) return hasAnyPermission(sender, command, "self");
             return hasAnyPermission(sender, command, "other");
         } else return true;
     }
@@ -348,7 +386,6 @@ public class CommandManager implements CommandExecutor {
 
     public void dispatchCommandsIfOnline(UUID uuid, List<String> commands) {
         Bukkit.getScheduler().runTask(MAIN_MANAGER.getPlugin(), () ->
-            dispatchCommandsInCurrentThread(uuid, commands)
-        );
+            dispatchCommandsInCurrentThread(uuid, commands));
     }
 }

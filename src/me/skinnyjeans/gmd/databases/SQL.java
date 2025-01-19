@@ -30,7 +30,6 @@ public class SQL implements ISaveManager {
     }
 
     public boolean isConnected() { return connection != null; }
-    public Connection getConnection() { return connection; }
 
     public void connect(DataManager d) throws SQLException, ClassNotFoundException {
         String database = "";
@@ -62,7 +61,7 @@ public class SQL implements ISaveManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
+                    PreparedStatement ps = connection.prepareStatement("CREATE TABLE IF NOT EXISTS "+tbName+" "+
                             "(UUID VARCHAR(60)," +
                             "Name VARCHAR(20), " +
                             "Affinity INT DEFAULT 500, " +
@@ -83,9 +82,9 @@ public class SQL implements ISaveManager {
                 if(isConnected()) {
                     PreparedStatement ps;
                     if(r) {
-                        ps = getConnection().prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
+                        ps = connection.prepareStatement("UPDATE "+tbName+" SET Affinity=?, MaxAffinity=?, MinAffinity=? WHERE UUID=?");
                     } else {
-                        ps = getConnection().prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
+                        ps = connection.prepareStatement("INSERT INTO "+tbName+" (Affinity, MaxAffinity, MinAffinity, UUID, Name) VALUES (?, ?, ?, ?, ?)");
                         ps.setString(5, playerData.name);
                     }
                     ps.setInt(1, playerData.affinity);
@@ -102,23 +101,27 @@ public class SQL implements ISaveManager {
     @Override
     public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            Minecrafter data = new Minecrafter();
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity, Name FROM "+tbName+" WHERE UUID=?");
+                    PreparedStatement ps = connection.prepareStatement("SELECT Affinity, MaxAffinity, MinAffinity, Name FROM "+tbName+" WHERE UUID=?");
                     ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()) {
+                        Minecrafter data = new Minecrafter();
+
                         data.uuid = uuid;
                         data.name = result.getString("Name");
                         data.affinity = result.getInt("Affinity");
                         data.maxAffinity = result.getInt("MaxAffinity");
                         data.minAffinity = result.getInt("MinAffinity");
+                        callback.onQueryDone(data);
+                        ps.close();
+                        return;
                     }
                     ps.close();
                 }
             } catch(SQLException e) { e.printStackTrace(); }
-            callback.onQueryDone(data);
+            callback.onQueryDone(null);
         });
     }
 
@@ -127,7 +130,7 @@ public class SQL implements ISaveManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 if(isConnected()) {
-                    PreparedStatement ps = getConnection().prepareStatement("SELECT Name FROM "+tbName+" WHERE UUID=?");
+                    PreparedStatement ps = connection.prepareStatement("SELECT Name FROM "+tbName+" WHERE UUID=?");
                     ps.setString(1, uuid.toString());
                     ResultSet result = ps.executeQuery();
                     if(result.next()){

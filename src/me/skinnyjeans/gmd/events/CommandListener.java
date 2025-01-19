@@ -22,10 +22,8 @@ public class CommandListener extends BaseListener {
     public void beforeCommand(PlayerCommandPreprocessEvent e) {
         if(shouldDisable) return;
         Player p = e.getPlayer();
-        if(p.isOp()) return;
-        MAIN_MANAGER.getPlayerManager().isPlayerValid(p);
-
-        List<String> list = MAIN_MANAGER.getDifficultyManager().getDifficulty(p.getUniqueId()).disabledCommands;
+        if(p.isOp() || !MAIN_MANAGER.getPlayerManager().isPlayerValid(p)) return;
+        List<String> list = MAIN_MANAGER.getDifficultyManager().getDifficulty(p).disabledCommands;
         StringBuilder cmd = new StringBuilder();
         String[] args = e.getMessage().replace("/","").toLowerCase().split(" ");
         if(list.size() != 0)

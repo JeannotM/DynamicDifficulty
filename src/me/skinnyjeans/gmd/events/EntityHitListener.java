@@ -4,9 +4,7 @@ import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.ArmorTypes;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
-import org.bukkit.Bukkit;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -56,22 +54,21 @@ public class EntityHitListener extends BaseListener {
 
         if (MAIN_MANAGER.getEntityManager().isEntityIgnored(prey) || MAIN_MANAGER.getEntityManager().isEntityIgnored(hunter)) return;
 
-        if (prey instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
+        if (MAIN_MANAGER.getPlayerManager().isPlayerValid(prey)) {
             Player playerPrey = (Player) prey;
             if (playerPrey.isBlocking()) return;
 
-            if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
+            if (MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
                 HashMap<String, String> entry = new HashMap<String, String>() {{ put("%user%", playerPrey.getDisplayName()); }};
-                if (!MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).allowPVP) {
+                if (!MAIN_MANAGER.getDifficultyManager().getDifficulty((Player) hunter).allowPVP) {
                     if(notAttackOthers.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackOthers, entry));
                     e.setCancelled(true);
-                } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(prey.getUniqueId()).allowPVP) {
+                } else if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(playerPrey).allowPVP) {
                     if(notAttackPerson.length() != 0) prey.sendMessage(MAIN_MANAGER.getDataManager().replaceString(notAttackPerson, entry));
                     e.setCancelled(true);
                 }
             } else {
-                UUID uuid = prey.getUniqueId();
-                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
+                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(playerPrey);
                 double damage;
                 if (allowTamedWolves && e.getEntity() instanceof Wolf) {
                     damage = e.getFinalDamage()
@@ -97,18 +94,18 @@ public class EntityHitListener extends BaseListener {
                                 * (int) Math.ceil(damage / 2)
                                 + (onPlayerHit)
                             : 0;
-                    MAIN_MANAGER.getPlayerManager().addAffinity(uuid, removePoints);
+                    MAIN_MANAGER.getPlayerManager().addAffinity(playerPrey, removePoints);
                 });
 
                 if (playerPrey.getHealth() - damage <= 0)
                     if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager()
-                            .getDifficulty(playerPrey.getUniqueId()).chanceCancelDeath) {
+                            .getDifficulty(playerPrey).chanceCancelDeath) {
 
                         // Not able to use something vanilla for Minecraft for this
-                        playerPrey.spawnParticle(Particle.TOTEM, playerPrey.getLocation(), 100);
+                        playerPrey.spawnParticle(Particle.TOTEM_OF_UNDYING, playerPrey.getLocation(), 100);
                         playerPrey.playSound(playerPrey.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
 
-                        AttributeInstance health = playerPrey.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+                        AttributeInstance health = playerPrey.getAttribute(Attribute.MAX_HEALTH);
                         playerPrey.setHealth(Math.min(4, health == null ? 4 : health.getValue()));
                         playerPrey.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 5 * 20, 1));
                         playerPrey.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 45 * 20, 1));
@@ -119,10 +116,10 @@ public class EntityHitListener extends BaseListener {
 
                 e.setDamage(damage);
             }
-        } else if (hunter instanceof Player && MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
+        } else if (MAIN_MANAGER.getPlayerManager().isPlayerValid(hunter)) {
             MAIN_MANAGER.getEntityManager().entityHit(prey);
             e.setDamage(e.getFinalDamage()
-                    * MAIN_MANAGER.getDifficultyManager().getDifficulty(hunter.getUniqueId()).damageDoneOnMobs);
+                    * MAIN_MANAGER.getDifficultyManager().getDifficulty((Player) hunter).damageDoneOnMobs);
         }
     }
 

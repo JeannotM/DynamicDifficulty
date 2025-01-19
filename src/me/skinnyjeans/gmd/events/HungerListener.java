@@ -20,10 +20,15 @@ public class HungerListener extends BaseListener {
     @EventHandler
     public void onHungerDrain(FoodLevelChangeEvent e) {
         if(shouldDisable) return;
-        if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
-            if(((Player) e.getEntity()).getFoodLevel() > e.getFoodLevel())
-                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).hungerDrainChance)
+
+        if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity())) {
+            Player player = (Player) e.getEntity();
+            if(player.getFoodLevel() > e.getFoodLevel())
+                if(new Random().nextDouble() > MAIN_MANAGER.getDifficultyManager().getDifficulty(player)
+                        .hungerDrainChance)
                     e.setCancelled(true);
+        }
+
     }
 
     @Override

@@ -9,8 +9,8 @@ version: 1.8
 # https://github.com/JeannotM/DynamicDifficulty or https://www.spigotmc.org/resources/dynamic-difficulty.92025/
 
 # Affinity Gained or Lost When Doing Certain Things.
-points-per-minute: 3
-block-mined: 2
+points-per-minute: 2
+block-mined: 1
 player-hit: -1
 affinity-per-heart-loss: -1 # So 1.5 hearts of damage (counts as 2 hearts) amounts to (-1 * 2) = -2 affinity
 pve-kill: 2
@@ -75,7 +75,7 @@ blocks:
 toggle-settings:
   update-time-ticks: 1200 # 1200 = 60 seconds
   # More info on difficulty-type beneath the toggle-settings block
-  difficulty-type: player # Supported: player, region, world
+  difficulty-type: player # Supported: player, region, world, time
   silk-touch-allowed: false # Whether the Player Will Receive Affinity When Mining Blocks With Silk Touch
   prevent-affinity-loss-on-suicide: true # People won't lose affinity if they die by their own hands.
   loot-changes-to-spawned-mobs: false # Mobs that spawn from eggs or spawners, won't have damage, loot or other changes. Players will also NOT receive any Affinity from these mobs.
@@ -104,6 +104,25 @@ difficulty-type:
       world: 5000.0         # (1500 - 5000) * 200 = 60
       world_nether: 625.0   # (1500 - 625)  * 200 = 480
       world_the_end: 1250.0 # (1500 - 1250) * 200 = 240
+  time:
+    ignore-nether: false
+    ignore-the-end: true
+    default: 0.4  # If the world is not included in the list
+    world-scales: # 0 - 24000 time scale
+      # world
+      #  time: affinity
+      world:       # (MaxAffinity * Multiplier)
+        2000: 0.0  # (1500 * 0.0) = 0
+        14000: 0.5 # (1500 * 0.5) = 750
+        18000: 1.0 # (1500 * 1.0) = 1500
+      world_nether:
+        2000: 0.0
+        14000: 0.5
+        18000: 1.0
+      world_the_end:
+        2000: 0.0
+        14000: 0.5
+        18000: 1.0
 
 saving-data:
   type: file # Supported: none, file, mysql, sqlite, mongodb, postgresql, mariadb

@@ -3,6 +3,7 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 
@@ -19,7 +20,7 @@ public class EntityTargetListener extends BaseListener {
         if(shouldDisable) return;
 
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getTarget()))
-            if(MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getTarget().getUniqueId()).mobsIgnoredPlayers.contains(e.getEntityType().toString()))
+            if(MAIN_MANAGER.getDifficultyManager().getDifficulty((Player) e.getTarget()).mobsIgnoredPlayers.contains(e.getEntityType().toString()))
                 if(!MAIN_MANAGER.getEntityManager().wasEntityAttacked(e.getEntity()))
                     e.setCancelled(true);
     }

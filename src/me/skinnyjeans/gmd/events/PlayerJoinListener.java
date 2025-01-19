@@ -18,11 +18,10 @@ public class PlayerJoinListener extends BaseListener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         if (MAIN_MANAGER.getPlayerManager().isPlayerValidNoWorld(e.getPlayer())) {
-            UUID uuid = e.getPlayer().getUniqueId();
-            Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid);
+            Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer());
             Runnable afterJoinTask = () ->
                     MAIN_MANAGER.getCommandManager()
-                            .dispatchCommandsIfOnline(uuid, difficulty.commandsOnJoin);
+                            .dispatchCommandsIfOnline(e.getPlayer().getUniqueId(), difficulty.commandsOnJoin);
 
             Bukkit.getScheduler().runTaskLater(MAIN_MANAGER.getPlugin(), afterJoinTask, 1L);
         }

@@ -22,34 +22,33 @@ public class EntityDeathListener extends BaseListener {
     @EventHandler
     public void onKill(EntityDeathEvent e) {
         LivingEntity entity = e.getEntity();
-        if(entity.getKiller() == null) return;
         if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(entity.getKiller())) return;
         if(MAIN_MANAGER.getEntityManager().isEntityIgnored(entity)) {
             MAIN_MANAGER.getEntityManager().ignoredEntityKilled(entity);
             return;
         }
 
-        UUID uuid = entity.getKiller().getUniqueId();
+
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             if (MAIN_MANAGER.getEntityManager().hasEntityPoints(e.getEntityType()))
-                MAIN_MANAGER.getPlayerManager().addAffinity(uuid, MAIN_MANAGER.getEntityManager().getEntityPoints(e.getEntityType()));
+                MAIN_MANAGER.getPlayerManager().addAffinity(entity.getKiller(), MAIN_MANAGER.getEntityManager().getEntityPoints(e.getEntityType()));
         });
 
         boolean isPlayer = entity instanceof Player;
         if (!isPlayer && !MAIN_MANAGER.getEntityManager().isEntityDisabled(entity)) {
             if(entity.getCanPickupItems()) return;
 
-            e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).experienceMultiplier));
-            if (new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(uuid).doubleLootChance) {
-                int itemsDropped = e.getDrops().size();
-
+            e.setDroppedExp((int) (e.getDroppedExp() * MAIN_MANAGER.getDifficultyManager().getDifficulty(entity.getKiller()).experienceMultiplier));
+            if (new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(entity.getKiller()).doubleLootChance) {
                 World world = Bukkit.getWorld(entity.getWorld().getUID());
-                if (world != null)
+                if (world != null) {
+                    int itemsDropped = e.getDrops().size();
                     for (int i = 0; i < itemsDropped; i++) {
                         world.dropItemNaturally(
                                 entity.getLocation(),
                                 e.getDrops().get(i));
                     }
+                }
             }
         }
     }

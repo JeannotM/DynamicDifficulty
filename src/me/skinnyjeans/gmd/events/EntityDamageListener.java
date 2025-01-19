@@ -22,7 +22,7 @@ public class EntityDamageListener extends BaseListener {
             Player player = (Player) e.getEntity();
             if (e.getCause() == EntityDamageEvent.DamageCause.STARVATION)
                 e.setCancelled(player.getHealth() - e.getFinalDamage() < MAIN_MANAGER.getDifficultyManager()
-                        .getDifficulty(player.getUniqueId()).minimumStarvationHealth);
+                        .getDifficulty(player).minimumStarvationHealth);
         }
     }
 

@@ -27,7 +27,23 @@ public class BlockMinedListener extends BaseListener {
 
     private boolean silkTouchAllowed;
 
-    public BlockMinedListener(MainManager mainManager) { MAIN_MANAGER = mainManager; }
+    public BlockMinedListener(MainManager mainManager) {
+        MAIN_MANAGER = mainManager;
+
+        try {
+            // 1.16 20w11a
+            ORE_BLOCKS.put(Material.valueOf("NETHER_GOLD_ORE"), Material.valueOf("GOLD_NUGGET"));
+
+            // 1.17 21w10a
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_COAL_ORE"), Material.valueOf("COAL"));
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_LAPIS_ORE"), Material.valueOf("LAPIS_LAZULI"));
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_DIAMOND_ORE"), Material.valueOf("DIAMOND"));
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_EMERALD_ORE"), Material.valueOf("EMERALD"));
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_REDSTONE_ORE"), Material.valueOf("REDSTONE"));
+            ORE_BLOCKS.put(Material.valueOf("COPPER_ORE"), Material.valueOf("RAW_COPPER"));
+            ORE_BLOCKS.put(Material.valueOf("DEEPSLATE_COPPER_ORE"), Material.valueOf("RAW_COPPER"));
+        } catch (Exception ignored) { }
+    }
 
     @EventHandler
     public void onMined(BlockBreakEvent e) {
@@ -40,12 +56,12 @@ public class BlockMinedListener extends BaseListener {
         Bukkit.getScheduler().runTaskAsynchronously(MAIN_MANAGER.getPlugin(), () -> {
             if(BLOCKS.containsKey(type))
                 if(silkTouchAllowed || !hasSilkTouch)
-                    MAIN_MANAGER.getPlayerManager().addAffinity(e.getPlayer().getUniqueId(), BLOCKS.get(type));
+                    MAIN_MANAGER.getPlayerManager().addAffinity(e.getPlayer(), BLOCKS.get(type));
         });
 
         if (ORE_BLOCKS.containsKey(type) && e.getBlock().isPreferredTool(tool)) {
             if (! hasSilkTouch && new Random().nextDouble() < MAIN_MANAGER
-                    .getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).doubleLootChance)
+                    .getDifficultyManager().getDifficulty(e.getPlayer()).doubleLootChance)
                 e.getPlayer().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(ORE_BLOCKS.get(type)));
         }
     }
@@ -57,17 +73,6 @@ public class BlockMinedListener extends BaseListener {
         ConfigurationSection config = MAIN_MANAGER.getDataManager().getConfig();
 
         int blockMined = config.getInt("block-mined", 2);
-
-        try {
-            // Add items from newer updates
-//            ORE_BLOCKS.put(Material.NETHER_GOLD_ORE, Material.GOLD_NUGGET);
-//            ORE_BLOCKS.put(Material.DEEPSLATE_COAL_ORE, Material.COAL);
-//            ORE_BLOCKS.put(Material.DEEPSLATE_LAPIS_ORE, Material.LAPIS_LAZULI);
-//            ORE_BLOCKS.put(Material.DEEPSLATE_DIAMOND_ORE, Material.DIAMOND);
-//            ORE_BLOCKS.put(Material.DEEPSLATE_EMERALD_ORE, Material.EMERALD);
-//            ORE_BLOCKS.put(Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE);
-//            ORE_BLOCKS.put(Material.COPPER_ORE, Material.RAW_COPPER);
-        } catch (Exception ignored) { }
 
         for(Object key : config.getList("blocks").toArray())
             try {

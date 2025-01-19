@@ -3,23 +3,37 @@ package me.skinnyjeans.gmd.events;
 import me.skinnyjeans.gmd.managers.MainManager;
 import me.skinnyjeans.gmd.models.BaseListener;
 import me.skinnyjeans.gmd.models.Difficulty;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashSet;
 
 public class PotionEffectListener extends BaseListener {
 
-    private static final HashSet<PotionEffectType> EFFECTS = new HashSet<>(Arrays.asList(PotionEffectType.WITHER,PotionEffectType.POISON,PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS,PotionEffectType.SLOW,PotionEffectType.CONFUSION,PotionEffectType.HUNGER));
+    private final HashSet<PotionEffectType> EFFECTS = new HashSet<>(Arrays.asList(PotionEffectType.WITHER,PotionEffectType.POISON,PotionEffectType.BLINDNESS, PotionEffectType.WEAKNESS,PotionEffectType.HUNGER));
     private static final HashSet<EntityPotionEffectEvent.Cause> EFFECT_CAUSES = new HashSet<>(Arrays.asList(EntityPotionEffectEvent.Cause.ATTACK, EntityPotionEffectEvent.Cause.ARROW, EntityPotionEffectEvent.Cause.POTION_SPLASH));
 
     private boolean shouldDisable;
 
     public PotionEffectListener(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
+
+        try {
+            // Before 1.21
+            EFFECTS.add(Registry.EFFECT.get(NamespacedKey.minecraft("slow")));
+            EFFECTS.add(Registry.EFFECT.get(NamespacedKey.minecraft("confusion")));
+        } catch (Exception ignored) { }
+
+        try {
+            // New since 1.21?
+            EFFECTS.add(Registry.EFFECT.get(NamespacedKey.minecraft("slowness")));
+            EFFECTS.add(Registry.EFFECT.get(NamespacedKey.minecraft("nausea")));
+        } catch (Exception ignored) { }
     }
 
     @EventHandler
@@ -27,7 +41,7 @@ public class PotionEffectListener extends BaseListener {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
             if(EFFECT_CAUSES.contains(e.getCause()) && EFFECTS.contains(e.getModifiedType()))
-                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getEntity().getUniqueId()).effectsWhenAttacked)
+                if(!MAIN_MANAGER.getDifficultyManager().getDifficulty((Player) e.getEntity()).effectsWhenAttacked)
                     e.setCancelled(true);
     }
 

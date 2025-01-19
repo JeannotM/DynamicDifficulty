@@ -10,7 +10,7 @@ import java.util.EnumSet;
 
 public class HealthRegenListener extends BaseListener {
 
-    private final EnumSet<EntityRegainHealthEvent.RegainReason> CANCEL_REGEN = EnumSet.of(
+    private static final EnumSet<EntityRegainHealthEvent.RegainReason> CANCEL_REGEN = EnumSet.of(
             EntityRegainHealthEvent.RegainReason.REGEN, EntityRegainHealthEvent.RegainReason.SATIATED);
 
     private boolean shouldDisable;
@@ -22,6 +22,7 @@ public class HealthRegenListener extends BaseListener {
     @EventHandler
     public void onHealthRegen(EntityRegainHealthEvent e) {
         if(shouldDisable) return;
+
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getEntity()))
             if(CANCEL_REGEN.contains(e.getRegainReason()))
                 e.setCancelled(true);

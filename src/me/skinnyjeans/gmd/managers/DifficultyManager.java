@@ -3,11 +3,15 @@ package me.skinnyjeans.gmd.managers;
 import me.skinnyjeans.gmd.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class DifficultyManager {
@@ -25,12 +29,6 @@ public class DifficultyManager {
 
     public DifficultyManager(MainManager mainManager) {
         MAIN_MANAGER = mainManager;
-
-        if(MAIN_MANAGER.getDataManager().getConfig().getBoolean("toggle-settings.force-hard-difficulty", true))
-            Bukkit.getWorlds().forEach(world -> {
-                if(!MAIN_MANAGER.getDataManager().isWorldDisabled(world.getName()))
-                    world.setDifficulty(org.bukkit.Difficulty.HARD);
-            });
     }
 
     public ArrayList<Difficulty> getDifficulties() { return new ArrayList<>(DIFFICULTY_LIST.values()); }
@@ -39,7 +37,14 @@ public class DifficultyManager {
 
     public Difficulty getDifficulty(String name) { return DIFFICULTY_LIST.get(name); }
 
-    public Difficulty getDifficulty(UUID uuid) { return PLAYER_LIST.getOrDefault(uuid, DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(0))); }
+    public Difficulty getDifficulty(Player player) {
+        UUID uuid = MAIN_MANAGER.getPlayerManager().determineUuid(player);
+        return getDifficulty(uuid);
+    }
+
+    public Difficulty getDifficulty(UUID uuid) {
+        return PLAYER_LIST.getOrDefault(uuid, DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(0)));
+    }
 
     public DifficultyTypes getType() { return DifficultyType; }
 
@@ -47,7 +52,6 @@ public class DifficultyManager {
         for (String difficulty : DIFFICULTY_LIST_SORTED)
             if(affinity < DIFFICULTY_LIST.get(difficulty).difficultyUntil)
                 return DIFFICULTY_LIST.get(difficulty);
-
         return DIFFICULTY_LIST.get(DIFFICULTY_LIST_SORTED.get(0));
     }
 
@@ -71,16 +75,12 @@ public class DifficultyManager {
     }
 
     public void calculateDifficulty(UUID uuid) {
-        Difficulty oldDifficulty = getDifficulty(uuid);
-        Difficulty difficulty = calculateDifficulty(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid));
-        PLAYER_LIST.put(uuid, difficulty);
+        Difficulty oldDifficulty = PLAYER_LIST.get(uuid);
+        Difficulty newDifficulty = calculateDifficulty(MAIN_MANAGER.getPlayerManager().getPlayerAffinity(uuid));
+        PLAYER_LIST.put(uuid, newDifficulty);
 
-        handleDifficultyChange(uuid, oldDifficulty, difficulty);
-    }
-
-    private void handleDifficultyChange(UUID uuid, Difficulty oldDifficulty, Difficulty newDifficulty) {
-        if (oldDifficulty.getDifficultyName().equals(newDifficulty.getDifficultyName())) return;
-
+        if (oldDifficulty == null || newDifficulty == null
+                || oldDifficulty.getDifficultyName().equals(newDifficulty.getDifficultyName())) return;
         int oldDifficultyIndex = DIFFICULTY_LIST_SORTED.indexOf(oldDifficulty.getDifficultyName());
         int newDifficultyIndex = DIFFICULTY_LIST_SORTED.indexOf(newDifficulty.getDifficultyName());
 
@@ -109,15 +109,15 @@ public class DifficultyManager {
         MAIN_MANAGER.getCommandManager().dispatchCommandsIfOnline(uuid, allCommands);
     }
 
-    public Difficulty calculateDifficulty(Minecrafter affinity) {
-        Difficulty first = calcDifficulty(affinity.affinity);
-        Difficulty second = DIFFICULTY_LIST.get(getNextDifficulty(affinity.uuid).difficultyName);
+    public Difficulty calculateDifficulty(Minecrafter data) {
+        Difficulty first = calcDifficulty(data.affinity);
+        Difficulty second = DIFFICULTY_LIST.get(getNextDifficulty(data.uuid).difficultyName);
 
         Difficulty difficulty = new Difficulty(first.difficultyName);
 
         int a = first.affinityRequirement;
         int b = second.affinityRequirement;
-        double c = (a == b || !exactPercentage) ? 0.0 : Math.abs(1.0 - (1.0 / (a - b) * (affinity.affinity - b)));
+        double c = (a == b || !exactPercentage) ? 0.0 : Math.abs(1.0 - (1.0 / (a - b) * (data.affinity - b)));
 
         difficulty.doubleLootChance = calculatePercentage(first.doubleLootChance, second.doubleLootChance, c);
         difficulty.hungerDrainChance = calculatePercentage(first.hungerDrainChance, second.hungerDrainChance, c);
@@ -160,13 +160,14 @@ public class DifficultyManager {
         difficulty.commandsOnJoin = first.commandsOnJoin;
         difficulty.preventEntityExplosionBlockDamage = first.preventEntityExplosionBlockDamage;
 
-        if (calculateHealth && Bukkit.getOfflinePlayer(affinity.uuid).isOnline()) {
-            Player player = Bukkit.getPlayer(affinity.uuid);
-            if(player != null && player.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null) {
-                player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
+        if (calculateHealth && Bukkit.getOfflinePlayer(data.uuid).isOnline()) {
+            Player player = Bukkit.getPlayer(data.uuid);
+            if(player != null && player.getAttribute(Attribute.MAX_HEALTH) != null) {
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(difficulty.maximumHealth);
             }
         }
 
+        PLAYER_LIST.put(data.uuid, difficulty);
         return difficulty;
     }
 

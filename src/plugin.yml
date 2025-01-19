@@ -3,7 +3,8 @@ name: DynamicDifficulty
 version: 1.8
 author: SkinnyJeans
 api-version: 1.13
-prefix: "[DynamicDifficulty]"
+load: "POSTWORLD"
+prefix: "DynamicDifficulty"
 softdepend: ["PlaceholderAPI", "MythicMobs"]
 
 permissions:
@@ -27,6 +28,7 @@ permissions:
       affinity.playergui: true
       affinity.calculate: true
       affinity.difficulties: true
+      affinity.forceremoval: true
 
   affinity.me:
     default: false
@@ -75,11 +77,13 @@ permissions:
     description: allows you to change the settings of players in chest form
   affinity.calculate:
     default: op
-    description: Force calculates the affinity of all players.
+    description: Force calculates the affinity of all players
   affinity.difficulties:
     default: op
     description: allows you to see all the difficulties
-
+  affinity.forceremoval:
+    default: op
+    description: disables Dynamic Difficulty and sets all players health to their original value
 commands:
   affinity:
     aliases: [af, dd, dynamicdifficulty]

@@ -20,7 +20,8 @@ public class ItemDamageListener extends BaseListener {
     public void onItemDamage(PlayerItemDamageEvent e) {
         if(shouldDisable) return;
         if(MAIN_MANAGER.getPlayerManager().isPlayerValid(e.getPlayer()))
-            if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer().getUniqueId()).doubleDurabilityDamageChance)
+            if(new Random().nextDouble() < MAIN_MANAGER.getDifficultyManager().getDifficulty(e.getPlayer())
+                    .doubleDurabilityDamageChance)
                 e.setDamage(e.getDamage() * 2);
     }
 

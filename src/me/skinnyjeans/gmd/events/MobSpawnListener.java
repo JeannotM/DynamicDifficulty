@@ -69,8 +69,8 @@ public class MobSpawnListener extends BaseListener {
                     }
                 }
 
-                if(closestPlayer == null || !MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)) return;
-                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer.getUniqueId());
+                if(!MAIN_MANAGER.getPlayerManager().isPlayerValid(closestPlayer)) return;
+                Difficulty difficulty = MAIN_MANAGER.getDifficultyManager().getDifficulty(closestPlayer);
 
                 if (enableMythicMobs) {
                     for (MythicMobProfile mythicMobProfile : difficulty.mythicMobProfiles) {

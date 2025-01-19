@@ -48,14 +48,16 @@ public class File implements ISaveManager {
     @Override
     public void getAffinityValues(UUID uuid, findCallback callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            Minecrafter playerData = new Minecrafter(uuid);
-            if(data.isSet(String.valueOf(uuid))) {
+            if(data.isSet(String.valueOf(uuid)) && data.isSet(uuid + ".affinity")) {
+                Minecrafter playerData = new Minecrafter(uuid);
                 playerData.affinity = data.getInt(uuid + ".affinity");
                 playerData.minAffinity = data.getInt(uuid + ".min-affinity");
                 playerData.maxAffinity = data.getInt(uuid + ".max-affinity");
                 playerData.name = data.getString(uuid + ".name");
+                callback.onQueryDone(playerData);
+                return;
             }
-            callback.onQueryDone(playerData);
+            callback.onQueryDone(null);
         });
     }
 

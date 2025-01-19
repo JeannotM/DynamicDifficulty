@@ -70,7 +70,7 @@ public class InventoryListener extends BaseListener {
             } else if (e.getCurrentItem().getType() == Material.RED_WOOL) {
                 UUID uuid = UUID.fromString(getSlot(e, 4).getItemMeta().getLore().get(0));
                 if(MAIN_MANAGER.getCommandManager().hasAnyPermission(e.getWhoClicked(), "set", "other"))
-                    MAIN_MANAGER.getAffinityManager().resetAffinity(uuid);
+                    MAIN_MANAGER.getPlayerManager().resetAffinity(uuid);
                 MAIN_MANAGER.getInventoryManager().updatePlayerInventory((Player) e.getWhoClicked(), uuid);
             }
         } else if (title.equals(StaticInfo.DIFFICULTIES_INVENTORY)) {
