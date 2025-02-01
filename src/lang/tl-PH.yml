@@ -60,7 +60,6 @@ in-game:
   command-not-allowed: "Masyado kang magaling para gamitin ang command na ito!"
 other:
   database-chosen: "Matagumpay na naka-connect sa %database%"
-  update-config: "You're currently playing on an old version of the config, make sure you update it!"
   update-config: "Ikaw ay kasalukuyang gumagamit ng lumang version ng config. Siguraduhing mag update!"
 error:
   no-permission: "Wala kang permiso para gawin iyan!"
